@@ -12,19 +12,19 @@
                 <DVEParameters rate="30" logoRate="30" reverseDirection="False" flipFlop="False" effect="PushRight" fillSource="3010" keySource="3011" enableKey="True" preMultipliedKey="True" clip="50" gain="70" invertKey="False"/>
             </TransitionStyle>
             <Keys>
-                <Key index="0" type="Chroma" inputCut="3011" inputFill="1" onAir="False" masked="True" maskTop="9" maskBottom="-9" maskLeft="-11" maskRight="16">
+                <Key index="0" type="DVE" inputCut="3011" inputFill="4" onAir="True" masked="True" maskTop="9" maskBottom="-9" maskLeft="-11" maskRight="16">
                     <LumaParameters preMultiplied="False" clip="50" gain="70" inverse="False"/>
-                    <AdvancedChromaParameters foregroundLevel="3.3" backgroundLevel="60.1" keyEdge="98.1" spillSuppress="0" flareSuppress="0" brightness="0" contrast="0" saturation="108.8" red="0" green="-2.6" blue="-1.2" cursorXPosition="-4.2" cursorYPosition="3.45" cursorSize="45.55" sampledY="0.3043" sampledCb="0.6203" sampledCr="0.3978"/>
+                    <AdvancedChromaParameters foregroundLevel="3.3" backgroundLevel="60.1" keyEdge="98.1" spillSuppress="0" flareSuppress="0" brightness="0" contrast="0" saturation="108.8" red="0" green="-2.6" blue="-1.2" cursorXPosition="-4.2" cursorYPosition="3.45" cursorSize="45.37" sampledY="0.3043" sampledCb="0.6203" sampledCr="0.3978"/>
                     <PatternParameters style="DiamondIris" inverse="False" size="50" symmetry="50" softness="83" xPosition="0.5" yPosition="0.5"/>
-                    <DVEParameters maskEnabled="False" maskTop="0" maskBottom="0" maskLeft="0" maskRight="0" shadowEnabled="False" lightSourceDirection="36" lightSourceAltitude="25" borderEnabled="True" borderStyle="None" borderBevelHue="0" borderBevelSaturation="0" borderBevelLuma="0" borderWidthOut="0" borderWidthIn="0" borderSoftnessOut="0" borderSoftnessIn="0" borderBevelOpacity="100" borderBevelPosition="0" borderBevelSoftness="0"/>
-                    <FlyParameters enabled="True" xPosition="9" yPosition="-4" xSize="0.6" ySize="0.6" rotation="0" rate="30"/>
+                    <DVEParameters maskEnabled="False" maskTop="0" maskBottom="0" maskLeft="0" maskRight="0" shadowEnabled="False" lightSourceDirection="36" lightSourceAltitude="25" borderEnabled="True" borderStyle="None" borderBevelHue="0" borderBevelSaturation="0" borderBevelLuma="0" borderWidthOut="0.15" borderWidthIn="0" borderSoftnessOut="0" borderSoftnessIn="0" borderBevelOpacity="100" borderBevelPosition="0" borderBevelSoftness="0"/>
+                    <FlyParameters enabled="False" xPosition="0" yPosition="0" xSize="0.75" ySize="0.75" rotation="0" rate="30"/>
                 </Key>
             </Keys>
             <FadeToBlack rate="1" isFullyBlack="False"/>
         </MixEffectBlock>
     </MixEffectBlocks>
     <DownstreamKeys>
-        <DownstreamKey index="0" fillSource="3010" keySource="3011" rate="10" maskEnabled="False" maskTop="9" maskBottom="-9" maskLeft="-16" maskRight="16" preMultipliedKey="True" clip="50" gain="70" invert="False" onAir="False" tie="False"/>
+        <DownstreamKey index="0" fillSource="3010" keySource="3011" rate="10" maskEnabled="False" maskTop="9" maskBottom="-9" maskLeft="-16" maskRight="16" preMultipliedKey="False" clip="50" gain="70" invert="False" onAir="False" tie="False"/>
     </DownstreamKeys>
     <ColorGenerators>
         <ColorGenerator index="0" hue="0" saturation="0" luma="100"/>
@@ -35,11 +35,11 @@
     </Auxiliaries>
     <Settings abDirect="True" cameraAux="-1">
         <Inputs>
-            <Input id="1" shortName="CAM1" longName="Front" externalPortType="HDMI"/>
-            <Input id="2" shortName="CAM2" longName="Overhead" externalPortType="HDMI"/>
-            <Input id="3" shortName="CAM3" longName="Room" externalPortType="HDMI"/>
-            <Input id="4" shortName="CAM4" longName="Mac" externalPortType="HDMI"/>
-            <Input id="11001" shortName="DIR" longName="Front Direct" externalPortType="HDMI"/>
+            <Input id="1" shortName="CAM1" longName="Camera1" externalPortType="HDMI"/>
+            <Input id="2" shortName="CAM2" longName="Camera2" externalPortType="HDMI"/>
+            <Input id="3" shortName="CAM3" longName="Camera3" externalPortType="HDMI"/>
+            <Input id="4" shortName="CAM4" longName="Camera4" externalPortType="HDMI"/>
+            <Input id="11001" shortName="DIR" longName="Camera1 Direct" externalPortType="HDMI"/>
         </Inputs>
         <ButtonMapping>
             <Button index="0" externalInputIndex="0" mappedToCamera="True"/>
@@ -183,15 +183,16 @@
         </AudioInputs>
     </FairlightAudioMixer>
     <MediaPlayers>
-        <MediaPlayer index="0" sourceType="Still" sourceIndex="4"/>
+        <MediaPlayer index="0" sourceType="Still" sourceIndex="5"/>
     </MediaPlayers>
     <MediaPool>
         <Stills>
-            <Still index="0" name="index0" path="images/index0.png"/>
-            <Still index="1" name="index1" path="images/index1.png"/>
-            <Still index="2" name="index2" path="images/index2.png"/>
-            <Still index="3" name="index3" path="images/index3.png"/>
-            <Still index="4" name="index4" path="images/index4.png"/>
+            <Still index="0" name="index0" path="ATEM Media Pool/index0.png"/>
+            <Still index="1" name="index1" path="ATEM Media Pool/index1.png"/>
+            <Still index="2" name="index2" path="ATEM Media Pool/index2.png"/>
+            <Still index="3" name="index3" path="ATEM Media Pool/index3.png"/>
+            <Still index="4" name="index4" path="ATEM Media Pool/index4.png"/>
+            <Still index="5" name="index5" path="ATEM Media Pool/index5.png"/>
         </Stills>
     </MediaPool>
     <MacroPool>
@@ -277,6 +278,18 @@
             <Op id="KeyMaskBottom" mixEffectBlockIndex="0" keyIndex="0" bottom="-9"/>
             <Op id="KeyFlyEnable" mixEffectBlockIndex="0" keyIndex="0" enable="True"/>
             <Op id="KeyOnAir" mixEffectBlockIndex="0" keyIndex="0" onAir="True"/>
+        </Macro>
+        <Macro index="11" name="dontdo" description="">
+            <Op id="ProgramInput" mixEffectBlockIndex="0" input="Camera1"/>
+            <Op id="KeyOnAir" mixEffectBlockIndex="0" keyIndex="0" onAir="True"/>
+            <Op id="KeyFillInput" mixEffectBlockIndex="0" keyIndex="0" input="Camera4"/>
+            <Op id="DVEAndFlyKeyXPosition" mixEffectBlockIndex="0" keyIndex="0" xPosition="0"/>
+            <Op id="DVEAndFlyKeyYPosition" mixEffectBlockIndex="0" keyIndex="0" yPosition="0"/>
+            <Op id="DVEAndFlyKeyXSize" mixEffectBlockIndex="0" keyIndex="0" xSize="0.75"/>
+            <Op id="DVEAndFlyKeyYSize" mixEffectBlockIndex="0" keyIndex="0" ySize="0.75"/>
+            <Op id="DVEKeyBorderEnable" mixEffectBlockIndex="0" keyIndex="0" enable="True"/>
+            <Op id="DVEKeyBorderOuterWidth" mixEffectBlockIndex="0" keyIndex="0" outerWidth="0.15"/>
+            <Op id="DownstreamKeyPreMultiply" keyIndex="0" preMultiply="False"/>
         </Macro>
     </MacroPool>
     <MacroControl loop="False"/>
