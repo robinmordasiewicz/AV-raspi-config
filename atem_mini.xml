@@ -291,6 +291,7 @@
             <Op id="DVEKeyBorderEnable" mixEffectBlockIndex="0" keyIndex="0" enable="True"/>
             <Op id="DVEKeyBorderOuterWidth" mixEffectBlockIndex="0" keyIndex="0" outerWidth="0.15"/>
             <Op id="DownstreamKeyPreMultiply" keyIndex="0" preMultiply="False"/>
+            <Op id="KeyType" mixEffectBlockIndex="0" keyIndex="0" type="DVE"/>
         </Macro>
     </MacroPool>
     <MacroControl loop="False"/>
