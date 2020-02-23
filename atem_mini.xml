@@ -256,7 +256,7 @@
             <Op id="KeyOnAir" mixEffectBlockIndex="0" keyIndex="0" onAir="True"/>
         </Macro>
         <Macro index="9" name="Lower 3rd" description="">
-            <Op id="MediaPlayerSourceStillIndex" mediaPlayer="0" index="4"/>
+            <Op id="MediaPlayerSourceStillIndex" mediaPlayer="0" index="0"/>
             <Op id="MediaPlayerSourceStill" mediaPlayer="0"/>
             <Op id="DownstreamKeyRate" keyIndex="0" rate="10"/>
             <Op id="DownstreamKeyOnAir" keyIndex="0" onAir="False"/>
