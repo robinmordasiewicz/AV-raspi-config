@@ -195,8 +195,11 @@
     </MediaPool>
     <MacroPool>
         <Macro index="0" name="office" description="">
-            <Op id="MediaPlayerSourceStillIndex" mediaPlayer="0" index="3"/>
             <Op id="MediaPlayerSourceStill" mediaPlayer="0"/>
+            <Op id="ProgramInput" mixEffectBlockIndex="0" input="MediaPlayer1"/>
+            <Op id="KeyOnAir" mixEffectBlockIndex="0" keyIndex="0" onAir="True"/>
+            <Op id="MediaPlayerSourceStillIndex" mediaPlayer="0" index="3"/>
+            <Op id="KeyFillInput" mixEffectBlockIndex="0" keyIndex="0" input="Camera1"/>
         </Macro>
         <Macro index="1" name="Music Off" description="">
             <Op id="FairlightAudioMixerInputSourceMixType" input="Camera4" sourceId="18446744073709486336" mixType="Off"/>
