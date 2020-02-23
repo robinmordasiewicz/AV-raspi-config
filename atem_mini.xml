@@ -183,7 +183,7 @@
         </AudioInputs>
     </FairlightAudioMixer>
     <MediaPlayers>
-        <MediaPlayer index="0" sourceType="Still" sourceIndex="5"/>
+        <MediaPlayer index="0" sourceType="Still" sourceIndex="1"/>
     </MediaPlayers>
     <MediaPool>
         <Stills>
@@ -191,12 +191,10 @@
             <Still index="1" name="index1" path="ATEM Media Pool/index1.png"/>
             <Still index="2" name="index2" path="ATEM Media Pool/index2.png"/>
             <Still index="3" name="index3" path="ATEM Media Pool/index3.png"/>
-            <Still index="4" name="index4" path="ATEM Media Pool/index4.png"/>
-            <Still index="5" name="index5" path="ATEM Media Pool/index5.png"/>
         </Stills>
     </MediaPool>
     <MacroPool>
-        <Macro index="0" name="index0" description="">
+        <Macro index="0" name="office" description="">
             <Op id="MediaPlayerSourceStillIndex" mediaPlayer="0" index="3"/>
             <Op id="MediaPlayerSourceStill" mediaPlayer="0"/>
         </Macro>
