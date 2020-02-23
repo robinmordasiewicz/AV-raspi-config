@@ -35,11 +35,11 @@
     </Auxiliaries>
     <Settings abDirect="True" cameraAux="-1">
         <Inputs>
-            <Input id="1" shortName="CAM1" longName="Camera1" externalPortType="HDMI"/>
-            <Input id="2" shortName="CAM2" longName="Camera2" externalPortType="HDMI"/>
-            <Input id="3" shortName="CAM3" longName="Camera3" externalPortType="HDMI"/>
-            <Input id="4" shortName="CAM4" longName="Camera4" externalPortType="HDMI"/>
-            <Input id="11001" shortName="DIR" longName="Camera1 Direct" externalPortType="HDMI"/>
+            <Input id="1" shortName="CAM1" longName="CAM1" externalPortType="HDMI"/>
+            <Input id="2" shortName="CAM2" longName="CAM2" externalPortType="HDMI"/>
+            <Input id="3" shortName="CAM3" longName="CAM3" externalPortType="HDMI"/>
+            <Input id="4" shortName="CAM4" longName="CAM4" externalPortType="HDMI"/>
+            <Input id="11001" shortName="DIR" longName="CAM1 Direct" externalPortType="HDMI"/>
         </Inputs>
         <ButtonMapping>
             <Button index="0" externalInputIndex="0" mappedToCamera="True"/>
@@ -234,6 +234,8 @@
             <Op id="KeyMaskTop" mixEffectBlockIndex="0" keyIndex="0" top="9"/>
             <Op id="KeyMaskRight" mixEffectBlockIndex="0" keyIndex="0" right="16"/>
             <Op id="KeyMaskBottom" mixEffectBlockIndex="0" keyIndex="0" bottom="-9"/>
+            <Op id="KeyType" mixEffectBlockIndex="0" keyIndex="0" type="Chroma"/>
+            <Op id="KeyFillInput" mixEffectBlockIndex="0" keyIndex="0" input="Camera1"/>
             <Op id="KeyFlyEnable" mixEffectBlockIndex="0" keyIndex="0" enable="True"/>
             <Op id="KeyOnAir" mixEffectBlockIndex="0" keyIndex="0" onAir="True"/>
         </Macro>
@@ -277,8 +279,9 @@
             <Op id="KeyFlyEnable" mixEffectBlockIndex="0" keyIndex="0" enable="True"/>
             <Op id="KeyOnAir" mixEffectBlockIndex="0" keyIndex="0" onAir="True"/>
         </Macro>
-        <Macro index="11" name="dontdo" description="">
+        <Macro index="11" name="bad" description="">
             <Op id="ProgramInput" mixEffectBlockIndex="0" input="Camera1"/>
+            <Op id="KeyFlyEnable" mixEffectBlockIndex="0" keyIndex="0" enable="False"/>
             <Op id="KeyOnAir" mixEffectBlockIndex="0" keyIndex="0" onAir="True"/>
             <Op id="KeyFillInput" mixEffectBlockIndex="0" keyIndex="0" input="Camera4"/>
             <Op id="DVEAndFlyKeyXPosition" mixEffectBlockIndex="0" keyIndex="0" xPosition="0"/>
