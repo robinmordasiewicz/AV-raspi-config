@@ -1,4 +1,4 @@
-# Blackmagic ATEM Mini Config
-This is an example repo for an atem mini configuration
+# Video Switching configuration files
+This is an example repo for an atem mini and bitfocus.io companion config for Streamdeck XL
 <br>
 I barely know what I'm doing, but watch out here I come.
