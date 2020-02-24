@@ -195,6 +195,7 @@
             <Still index="5" name="index5" path="ATEM Media Pool/index5.png"/>
             <Still index="6" name="index6" path="ATEM Media Pool/index6.png"/>
             <Still index="7" name="index7" path="ATEM Media Pool/index7.png"/>
+            <Still index="8" name="index8" path="ATEM Media Pool/index8.png"/>
         </Stills>
     </MediaPool>
     <MacroPool>
@@ -221,6 +222,36 @@
         </Macro>
         <Macro index="5" name="livemic" description="">
             <Op id="FairlightAudioMixerInputSourceMixType" input="Camera1" sourceId="18446744073709486336" mixType="On"/>
+            <Op id="FairlightAudioMixerInputSourceInputGain" input="Camera1" sourceId="18446744073709486336" gain="-0.0100098"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandRange" input="Camera1" sourceId="18446744073709486336" band="2" range="Low"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandRange" input="Camera1" sourceId="18446744073709486336" band="3" range="MidLow"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandRange" input="Camera1" sourceId="18446744073709486336" band="4" range="MidLow"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandGain" input="Camera1" sourceId="18446744073709486336" band="0" gain="-0.16000"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandShape" input="Camera1" sourceId="18446744073709486336" band="0" shape="HighPass"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandFrequency" input="Camera1" sourceId="18446744073709486336" band="0" frequency="46"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandShape" input="Camera1" sourceId="18446744073709486336" band="1" shape="BandPass"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandRange" input="Camera1" sourceId="18446744073709486336" band="1" range="Low"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandFrequency" input="Camera1" sourceId="18446744073709486336" band="1" frequency="93"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandGain" input="Camera1" sourceId="18446744073709486336" band="1" gain="-9.1000"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandQFactor" input="Camera1" sourceId="18446744073709486336" band="1" qFactor="10"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandFrequency" input="Camera1" sourceId="18446744073709486336" band="2" frequency="148"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandShape" input="Camera1" sourceId="18446744073709486336" band="2" shape="BandPass"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandQFactor" input="Camera1" sourceId="18446744073709486336" band="2" qFactor="10"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandGain" input="Camera1" sourceId="18446744073709486336" band="2" gain="-9.0000"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandShape" input="Camera1" sourceId="18446744073709486336" band="3" shape="BandPass"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandFrequency" input="Camera1" sourceId="18446744073709486336" band="3" frequency="215"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandQFactor" input="Camera1" sourceId="18446744073709486336" band="3" qFactor="10"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandGain" input="Camera1" sourceId="18446744073709486336" band="3" gain="-9.1000"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandShape" input="Camera1" sourceId="18446744073709486336" band="4" shape="BandPass"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandFrequency" input="Camera1" sourceId="18446744073709486336" band="4" frequency="415"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandGain" input="Camera1" sourceId="18446744073709486336" band="4" gain="-9.0000"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandQFactor" input="Camera1" sourceId="18446744073709486336" band="4" qFactor="10.3"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandShape" input="Camera1" sourceId="18446744073709486336" band="5" shape="HighShelf"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandFrequency" input="Camera1" sourceId="18446744073709486336" band="5" frequency="1759"/>
+            <Op id="FairlightAudioMixerInputSourceEqualiserBandGain" input="Camera1" sourceId="18446744073709486336" band="5" gain="3"/>
+            <Op id="FairlightAudioMixerInputSourceMixType" input="Camera1" sourceId="18446744073709486336" mixType="On"/>
+            <Op id="FairlightAudioMixerInputSourceFaderGain" input="Camera1" sourceId="18446744073709486336" gain="0.00"/>
+            <Op id="FairlightAudioMixerInputSourcePan" input="Camera1" sourceId="18446744073709486336" pan="0.00"/>
         </Macro>
         <Macro index="6" name="keyoff" description="">
             <Op id="KeyOnAir" mixEffectBlockIndex="0" keyIndex="0" onAir="False"/>
@@ -390,6 +421,17 @@
             <Op id="ProgramInput" mixEffectBlockIndex="0" input="Camera4"/>
             <Op id="DownstreamKeyOnAir" keyIndex="0" onAir="True"/>
             <Op id="MediaPlayerSourceStillIndex" mediaPlayer="0" index="7"/>
+            <Op id="MediaPlayerSourceStill" mediaPlayer="0"/>
+            <Op id="FairlightAudioMixerInputSourceMixType" input="Camera4" sourceId="18446744073709486336" mixType="Off"/>
+        </Macro>
+        <Macro index="18" name="wordmoney" description="">
+            <Op id="DownstreamKeyFillInput" keyIndex="0" input="MediaPlayer1"/>
+            <Op id="DownstreamKeyCutInput" keyIndex="0" input="MediaPlayer1Key"/>
+            <Op id="KeyOnAir" mixEffectBlockIndex="0" keyIndex="0" onAir="True"/>
+            <Op id="DownstreamKeyPreMultiply" keyIndex="0" preMultiply="True"/>
+            <Op id="ProgramInput" mixEffectBlockIndex="0" input="Camera4"/>
+            <Op id="DownstreamKeyOnAir" keyIndex="0" onAir="True"/>
+            <Op id="MediaPlayerSourceStillIndex" mediaPlayer="0" index="8"/>
             <Op id="MediaPlayerSourceStill" mediaPlayer="0"/>
             <Op id="FairlightAudioMixerInputSourceMixType" input="Camera4" sourceId="18446744073709486336" mixType="Off"/>
         </Macro>
