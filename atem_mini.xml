@@ -350,6 +350,7 @@
             <Op id="DownstreamKeyAuto" keyIndex="0"/>
         </Macro>
         <Macro index="15" name="ana" description="">
+            <Op id="DownstreamKeyOnAir" keyIndex="0" onAir="False"/>
             <Op id="FairlightAudioMixerInputSourceMixType" input="Camera4" sourceId="18446744073709486336" mixType="On"/>
             <Op id="FairlightAudioMixerInputSourceFaderGain" input="Camera4" sourceId="18446744073709486336" gain="-6.0000"/>
             <Op id="ProgramInput" mixEffectBlockIndex="0" input="Camera4"/>
