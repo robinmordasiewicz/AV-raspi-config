@@ -192,6 +192,7 @@
             <Still index="2" name="index2" path="ATEM Media Pool/index2.png"/>
             <Still index="3" name="index3" path="ATEM Media Pool/index3.png"/>
             <Still index="4" name="index4" path="ATEM Media Pool/index4.png"/>
+            <Still index="5" name="index5" path="ATEM Media Pool/index5.png"/>
         </Stills>
     </MediaPool>
     <MacroPool>
@@ -221,6 +222,7 @@
         </Macro>
         <Macro index="6" name="keyoff" description="">
             <Op id="KeyOnAir" mixEffectBlockIndex="0" keyIndex="0" onAir="False"/>
+            <Op id="DownstreamKeyOnAir" keyIndex="0" onAir="False"/>
         </Macro>
         <Macro index="7" name="S-Left" description="">
             <Op id="AdvancedChromaKeyForegroundLevel" mixEffectBlockIndex="0" keyIndex="0" foregroundLevel="0.0330048"/>
@@ -336,11 +338,43 @@
             <Op id="KeyType" mixEffectBlockIndex="0" keyIndex="0" type="DVE"/>
         </Macro>
         <Macro index="14" name="logo" description="">
-            <Op id="MediaPlayerSourceStill" mediaPlayer="0"/>
-            <Op id="ProgramInput" mixEffectBlockIndex="0" input="MediaPlayer1"/>
-            <Op id="KeyOnAir" mixEffectBlockIndex="0" keyIndex="0" onAir="True"/>
             <Op id="MediaPlayerSourceStillIndex" mediaPlayer="0" index="4"/>
+            <Op id="MediaPlayerSourceStill" mediaPlayer="0"/>
+            <Op id="DownstreamKeyRate" keyIndex="0" rate="10"/>
+            <Op id="DownstreamKeyOnAir" keyIndex="0" onAir="False"/>
+            <Op id="MacroSleep" frames="1"/>
+            <Op id="DownstreamKeyAuto" keyIndex="0"/>
+            <Op id="MacroSleep" frames="240"/>
+            <Op id="DownstreamKeyAuto" keyIndex="0"/>
+        </Macro>
+        <Macro index="15" name="ana" description="">
+            <Op id="FairlightAudioMixerInputSourceMixType" input="Camera4" sourceId="18446744073709486336" mixType="On"/>
+            <Op id="FairlightAudioMixerInputSourceFaderGain" input="Camera4" sourceId="18446744073709486336" gain="-6.0000"/>
+            <Op id="ProgramInput" mixEffectBlockIndex="0" input="Camera4"/>
+            <Op id="KeyOnAir" mixEffectBlockIndex="0" keyIndex="0" onAir="True"/>
+            <Op id="AdvancedChromaKeySamplingModeEnabled" mixEffectBlockIndex="0" keyIndex="0" enabled="True"/>
+            <Op id="AdvancedChromaKeyPreviewEnabled" mixEffectBlockIndex="0" keyIndex="0" enabled="True"/>
+            <Op id="DVEAndFlyKeyXSize" mixEffectBlockIndex="0" keyIndex="0" xSize="1"/>
+            <Op id="DVEAndFlyKeyYSize" mixEffectBlockIndex="0" keyIndex="0" ySize="1"/>
+            <Op id="DVEAndFlyKeyXPosition" mixEffectBlockIndex="0" keyIndex="0" xPosition="8"/>
+            <Op id="DVEAndFlyKeyYPosition" mixEffectBlockIndex="0" keyIndex="0" yPosition="0"/>
+            <Op id="KeyType" mixEffectBlockIndex="0" keyIndex="0" type="Chroma"/>
             <Op id="KeyFillInput" mixEffectBlockIndex="0" keyIndex="0" input="Camera1"/>
+            <Op id="KeyMaskEnable" mixEffectBlockIndex="0" keyIndex="0" enable="True"/>
+            <Op id="KeyMaskLeft" mixEffectBlockIndex="0" keyIndex="0" left="-11"/>
+            <Op id="KeyMaskTop" mixEffectBlockIndex="0" keyIndex="0" top="9"/>
+            <Op id="KeyMaskRight" mixEffectBlockIndex="0" keyIndex="0" right="16"/>
+            <Op id="KeyMaskBottom" mixEffectBlockIndex="0" keyIndex="0" bottom="-9"/>
+            <Op id="KeyFlyEnable" mixEffectBlockIndex="0" keyIndex="0" enable="True"/>
+            <Op id="KeyOnAir" mixEffectBlockIndex="0" keyIndex="0" onAir="True"/>
+        </Macro>
+        <Macro index="16" name="digitaltrans" description="">
+            <Op id="KeyOnAir" mixEffectBlockIndex="0" keyIndex="0" onAir="True"/>
+            <Op id="ProgramInput" mixEffectBlockIndex="0" input="Camera4"/>
+            <Op id="DownstreamKeyOnAir" keyIndex="0" onAir="True"/>
+            <Op id="MediaPlayerSourceStillIndex" mediaPlayer="0" index="5"/>
+            <Op id="MediaPlayerSourceStill" mediaPlayer="0"/>
+            <Op id="FairlightAudioMixerInputSourceMixType" input="Camera4" sourceId="18446744073709486336" mixType="Off"/>
         </Macro>
     </MacroPool>
     <MacroControl loop="False"/>
