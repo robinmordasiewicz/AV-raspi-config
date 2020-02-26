@@ -196,6 +196,11 @@
             <Still index="6" name="index6" path="ATEM Media Pool/index6.png"/>
             <Still index="7" name="index7" path="ATEM Media Pool/index7.png"/>
             <Still index="8" name="index8" path="ATEM Media Pool/index8.png"/>
+            <Still index="9" name="index9" path="ATEM Media Pool/index9.png"/>
+            <Still index="10" name="index10" path="ATEM Media Pool/index10.png"/>
+            <Still index="11" name="index11" path="ATEM Media Pool/index11.png"/>
+            <Still index="12" name="index12" path="ATEM Media Pool/index12.png"/>
+            <Still index="13" name="index13" path="ATEM Media Pool/index13.png"/>
         </Stills>
     </MediaPool>
     <MacroPool>
@@ -385,7 +390,6 @@
             <Op id="FairlightAudioMixerInputSourceMixType" input="Camera4" sourceId="18446744073709486336" mixType="On"/>
             <Op id="FairlightAudioMixerInputSourceFaderGain" input="Camera4" sourceId="18446744073709486336" gain="-6.0000"/>
             <Op id="ProgramInput" mixEffectBlockIndex="0" input="Camera4"/>
-            <Op id="KeyOnAir" mixEffectBlockIndex="0" keyIndex="0" onAir="True"/>
             <Op id="AdvancedChromaKeySamplingModeEnabled" mixEffectBlockIndex="0" keyIndex="0" enabled="True"/>
             <Op id="AdvancedChromaKeyPreviewEnabled" mixEffectBlockIndex="0" keyIndex="0" enabled="True"/>
             <Op id="DVEAndFlyKeyXSize" mixEffectBlockIndex="0" keyIndex="0" xSize="1"/>
@@ -412,6 +416,20 @@
             <Op id="MediaPlayerSourceStillIndex" mediaPlayer="0" index="6"/>
             <Op id="MediaPlayerSourceStill" mediaPlayer="0"/>
             <Op id="FairlightAudioMixerInputSourceMixType" input="Camera4" sourceId="18446744073709486336" mixType="Off"/>
+            <Op id="AdvancedChromaKeySamplingModeEnabled" mixEffectBlockIndex="0" keyIndex="0" enabled="True"/>
+            <Op id="AdvancedChromaKeyPreviewEnabled" mixEffectBlockIndex="0" keyIndex="0" enabled="True"/>
+            <Op id="DVEAndFlyKeyXSize" mixEffectBlockIndex="0" keyIndex="0" xSize="1"/>
+            <Op id="DVEAndFlyKeyYSize" mixEffectBlockIndex="0" keyIndex="0" ySize="1"/>
+            <Op id="DVEAndFlyKeyXPosition" mixEffectBlockIndex="0" keyIndex="0" xPosition="8"/>
+            <Op id="DVEAndFlyKeyYPosition" mixEffectBlockIndex="0" keyIndex="0" yPosition="0"/>
+            <Op id="KeyType" mixEffectBlockIndex="0" keyIndex="0" type="Chroma"/>
+            <Op id="KeyFillInput" mixEffectBlockIndex="0" keyIndex="0" input="Camera1"/>
+            <Op id="KeyMaskEnable" mixEffectBlockIndex="0" keyIndex="0" enable="True"/>
+            <Op id="KeyMaskLeft" mixEffectBlockIndex="0" keyIndex="0" left="-11"/>
+            <Op id="KeyMaskTop" mixEffectBlockIndex="0" keyIndex="0" top="9"/>
+            <Op id="KeyMaskRight" mixEffectBlockIndex="0" keyIndex="0" right="16"/>
+            <Op id="KeyMaskBottom" mixEffectBlockIndex="0" keyIndex="0" bottom="-9"/>
+            <Op id="KeyFlyEnable" mixEffectBlockIndex="0" keyIndex="0" enable="True"/>
         </Macro>
         <Macro index="17" name="custfacing" description="">
             <Op id="DownstreamKeyFillInput" keyIndex="0" input="MediaPlayer1"/>
@@ -434,6 +452,75 @@
             <Op id="MediaPlayerSourceStillIndex" mediaPlayer="0" index="8"/>
             <Op id="MediaPlayerSourceStill" mediaPlayer="0"/>
             <Op id="FairlightAudioMixerInputSourceMixType" input="Camera4" sourceId="18446744073709486336" mixType="Off"/>
+        </Macro>
+        <Macro index="19" name="rulethirds" description="">
+            <Op id="ProgramInput" mixEffectBlockIndex="0" input="Camera1"/>
+            <Op id="KeyOnAir" mixEffectBlockIndex="0" keyIndex="0" onAir="False"/>
+            <Op id="MediaPlayerSourceStillIndex" mediaPlayer="0" index="9"/>
+            <Op id="MediaPlayerSourceStill" mediaPlayer="0"/>
+            <Op id="DownstreamKeyFillInput" keyIndex="0" input="MediaPlayer1"/>
+            <Op id="DownstreamKeyCutInput" keyIndex="0" input="MediaPlayer1Key"/>
+            <Op id="DownstreamKeyOnAir" keyIndex="0" onAir="True"/>
+            <Op id="DownstreamKeyPreMultiply" keyIndex="0" preMultiply="True"/>
+            <Op id="FairlightAudioMixerInputSourceMixType" input="Camera4" sourceId="18446744073709486336" mixType="Off"/>
+        </Macro>
+        <Macro index="20" name="levelcam" description="">
+            <Op id="DownstreamKeyFillInput" keyIndex="0" input="MediaPlayer1"/>
+            <Op id="DownstreamKeyCutInput" keyIndex="0" input="MediaPlayer1Key"/>
+            <Op id="KeyOnAir" mixEffectBlockIndex="0" keyIndex="0" onAir="True"/>
+            <Op id="DownstreamKeyPreMultiply" keyIndex="0" preMultiply="True"/>
+            <Op id="ProgramInput" mixEffectBlockIndex="0" input="Camera4"/>
+            <Op id="DownstreamKeyOnAir" keyIndex="0" onAir="True"/>
+            <Op id="MediaPlayerSourceStillIndex" mediaPlayer="0" index="10"/>
+            <Op id="MediaPlayerSourceStill" mediaPlayer="0"/>
+            <Op id="FairlightAudioMixerInputSourceMixType" input="Camera4" sourceId="18446744073709486336" mixType="Off"/>
+        </Macro>
+        <Macro index="21" name="lovesight" description="">
+            <Op id="DownstreamKeyFillInput" keyIndex="0" input="MediaPlayer1"/>
+            <Op id="DownstreamKeyCutInput" keyIndex="0" input="MediaPlayer1Key"/>
+            <Op id="KeyOnAir" mixEffectBlockIndex="0" keyIndex="0" onAir="True"/>
+            <Op id="DownstreamKeyPreMultiply" keyIndex="0" preMultiply="True"/>
+            <Op id="ProgramInput" mixEffectBlockIndex="0" input="Camera4"/>
+            <Op id="DownstreamKeyOnAir" keyIndex="0" onAir="True"/>
+            <Op id="MediaPlayerSourceStillIndex" mediaPlayer="0" index="11"/>
+            <Op id="MediaPlayerSourceStill" mediaPlayer="0"/>
+            <Op id="FairlightAudioMixerInputSourceMixType" input="Camera4" sourceId="18446744073709486336" mixType="Off"/>
+        </Macro>
+        <Macro index="22" name="prsplghtfrm" description="">
+            <Op id="DownstreamKeyFillInput" keyIndex="0" input="MediaPlayer1"/>
+            <Op id="DownstreamKeyCutInput" keyIndex="0" input="MediaPlayer1Key"/>
+            <Op id="KeyOnAir" mixEffectBlockIndex="0" keyIndex="0" onAir="True"/>
+            <Op id="DownstreamKeyPreMultiply" keyIndex="0" preMultiply="True"/>
+            <Op id="ProgramInput" mixEffectBlockIndex="0" input="Camera4"/>
+            <Op id="DownstreamKeyOnAir" keyIndex="0" onAir="True"/>
+            <Op id="MediaPlayerSourceStillIndex" mediaPlayer="0" index="12"/>
+            <Op id="MediaPlayerSourceStill" mediaPlayer="0"/>
+            <Op id="FairlightAudioMixerInputSourceMixType" input="Camera4" sourceId="18446744073709486336" mixType="Off"/>
+        </Macro>
+        <Macro index="23" name="batcave" description="">
+            <Op id="DownstreamKeyFillInput" keyIndex="0" input="MediaPlayer1"/>
+            <Op id="DownstreamKeyCutInput" keyIndex="0" input="MediaPlayer1Key"/>
+            <Op id="KeyOnAir" mixEffectBlockIndex="0" keyIndex="0" onAir="True"/>
+            <Op id="DownstreamKeyPreMultiply" keyIndex="0" preMultiply="True"/>
+            <Op id="ProgramInput" mixEffectBlockIndex="0" input="Camera4"/>
+            <Op id="DownstreamKeyOnAir" keyIndex="0" onAir="True"/>
+            <Op id="MediaPlayerSourceStillIndex" mediaPlayer="0" index="13"/>
+            <Op id="MediaPlayerSourceStill" mediaPlayer="0"/>
+            <Op id="FairlightAudioMixerInputSourceMixType" input="Camera4" sourceId="18446744073709486336" mixType="Off"/>
+        </Macro>
+        <Macro index="24" name="reptileON" description="">
+            <Op id="AdvancedChromaKeyForegroundContrast" mixEffectBlockIndex="0" keyIndex="0" foregroundContrast="0.0379944"/>
+            <Op id="AdvancedChromaKeyForegroundBrightness" mixEffectBlockIndex="0" keyIndex="0" foregroundBrightness="0.0119934"/>
+            <Op id="AdvancedChromaKeyForegroundBlue" mixEffectBlockIndex="0" keyIndex="0" foregroundBlue="0.380005"/>
+            <Op id="AdvancedChromaKeyForegroundRed" mixEffectBlockIndex="0" keyIndex="0" foregroundRed="-0.684006"/>
+            <Op id="AdvancedChromaKeyForegroundGreen" mixEffectBlockIndex="0" keyIndex="0" foregroundGreen="-0.0640106"/>
+        </Macro>
+        <Macro index="25" name="reptileOFF" description="">
+            <Op id="AdvancedChromaKeyForegroundContrast" mixEffectBlockIndex="0" keyIndex="0" foregroundContrast="0."/>
+            <Op id="AdvancedChromaKeyForegroundBrightness" mixEffectBlockIndex="0" keyIndex="0" foregroundBrightness="0."/>
+            <Op id="AdvancedChromaKeyForegroundBlue" mixEffectBlockIndex="0" keyIndex="0" foregroundBlue="0.0"/>
+            <Op id="AdvancedChromaKeyForegroundRed" mixEffectBlockIndex="0" keyIndex="0" foregroundRed="0.0"/>
+            <Op id="AdvancedChromaKeyForegroundGreen" mixEffectBlockIndex="0" keyIndex="0" foregroundGreen="0.0"/>
         </Macro>
     </MacroPool>
     <MacroControl loop="False"/>
