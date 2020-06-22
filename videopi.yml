@@ -1,0 +1,364 @@
+---
+- name: "Raspberry PI4 Video Mixer Automation"
+  hosts: localhost
+  become: true
+  connection: local
+  gather_facts: true
+
+  vars_prompt:
+
+    - name: HOSTNAME
+      prompt: "Hostname: "
+      private: no
+      default: "{{ lookup('pipe','raspi-config nonint get_hostname') }}"
+
+    - name: TIMEZONE
+      prompt: "Timezone: "
+      private: no
+      default: "{{ lookup('file', '/etc/timezone') }}"
+
+    - name: LOCALE
+      prompt: "LANG: "
+      private: no
+      default: "{{ lookup('env','LANG') }}"
+
+    - name: ATEMIP
+      prompt: "Atem mini IP: "
+      private: no
+      default: "{{ lookup('pipe','grep atem /etc/hosts | expand -t 1 | cut -f 1 -d \" \"') | default('192.168.2.240', true)  }}"
+
+ 
+  vars:
+    REBOOT: False
+    UPDATE: False
+    MEMSPLIT: "256"
+    XKBLAYOUT: "us"
+    NETNAMES: False
+    BLUETOOTH: present # present or absent
+    WIFI: present # present or absent
+    WIFI_COUNTRY: "US"
+    BOOTSPLASH: False
+    OVERCLOCK: False
+    HDMI_GROUP: 1
+    HDMI_MOD: 34
+    AUDIO_OUT: "1"
+    GLDRIVER: False
+    raspiconfig:
+      ssh: 0
+      vnc: 1
+      i2c: 1
+      serial: 1
+      onewire: 1
+      rgpio: 1
+      spi: 1
+      boot_wait: 1
+      overscan: 1
+      camera: 1
+      pixdub: 1
+      blanking: 1
+
+  tasks:
+    - name: Update apt-get repo and cache
+      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+    - name: Upgrade apt packages
+      apt: upgrade=dist force_apt_get=yes
+
+    - name: Installing Firmware packages
+      apt:
+        install_recommends: yes
+        pkg:
+        - rpi-eeprom
+        - rpi-eeprom-images
+
+    - name: raspi-config
+      command: "raspi-config nonint do_{{ item.key }} {{ item.value }}"
+      when: "item.value != lookup('pipe','sudo raspi-config nonint get_{{item.key}}')"
+      with_dict: "{{ raspiconfig }}"
+
+    - name: Update raspi-config itself
+      become: true
+      apt: name=raspi-config update_cache=yes state=present cache_valid_time=3600
+      when: UPDATE == True
+
+    - name: Change hostname
+      command: "raspi-config nonint do_hostname {{ HOSTNAME }}"
+      when: lookup('pipe','raspi-config nonint get_hostname') != HOSTNAME
+
+    - name: Set Boot behaviour
+      command: "raspi-config nonint do_boot_behaviour B1"
+      when: ( lookup('pipe','raspi-config nonint get_boot_cli') != "0" ) or
+            ( lookup('pipe','raspi-config nonint get_autologin') != "1" )
+    - name: Change locale
+      command: "raspi-config nonint do_change_locale {{ LOCALE }}"
+      when: lookup('env','LANG') != LOCALE
+
+    - name: Change timezone
+      command: "raspi-config nonint do_change_timezone {{ TIMEZONE }}"
+      when: lookup('file', '/etc/timezone') != TIMEZONE
+  
+    - name: ATEM mini /etc/hosts
+      lineinfile:
+        dest: /etc/hosts
+        regexp: '^(?:[0-9]{1,3}\.){3}[0-9]{1,3}.*atem$'
+        line: "{{ ATEMIP }}\tatem"
+        state: present
+
+    - name: Put ATEM IP in companion config
+      replace:
+        path: /home/pi/videopi_full-config.companionconfig
+        regexp: '"bmd-atem","product":"ATEM","label":"atem","_configIdx":0,"host":"(?:[0-9]{1,3}\.){3}[0-9]{1,3}"'
+        replace: '"bmd-atem","product":"ATEM","label":"atem","_configIdx":0,"host":"{{ ATEMIP }}"'
+
+    - name: Set GPU memory split
+      command: "raspi-config nonint do_memory_split {{ MEMSPLIT }}"
+      when: lookup('pipe','raspi-config nonint get_config_var gpu_mem /boot/config.txt') != MEMSPLIT
+    - name: Set audio out
+      command: "raspi-config nonint do_audio {{ AUDIO_OUT }}"
+
+    - name: Disable 4K 60fps
+      command: "raspi-config nonint do_pi4video V3"
+      when: lookup('pipe','raspi-config nonint get_pi4video') != "0"
+
+    - name: Set HDMI group mode
+      command: "raspi-config nonint do_resolution {{ HDMI_GROUP }} {{ HDMI_MOD }}"
+      when: ( lookup('pipe','raspi-config nonint get_config_var hdmi_group /boot/config.txt') != "1" ) or
+            ( lookup('pipe','raspi-config nonint get_config_var hdmi_mode /boot/config.txt') != "34" )
+
+    - name: Force HDMI mode
+      lineinfile:
+        path: /boot/config.txt
+        line: 'hdmi_drive=2'
+        regexp: "^#?hdmi_drive=."
+        insertafter: "# DMT (computer monitor) modes"
+        state: present
+      when: lookup('pipe','raspi-config nonint get_config_var hdmi_drive /boot/config.txt') != "2"
+
+    - name: Real Clock CPU
+      lineinfile:
+        path: /boot/config.txt
+        insertafter: '^#[all]'
+        line: 'nohz=off'
+        state: present
+
+    - name: WIFI
+      lineinfile:
+        path: /boot/config.txt
+        insertafter: '^#[all]'
+        line: 'dtoverlay=disable-wifi'
+        regexp: "^#?dtoverlay=disable-wifi"
+        state: present
+        
+    - name: Bluetooth
+      lineinfile:
+        path: /boot/config.txt
+        insertafter: '^#[all]'
+        line: 'dtoverlay=pi3-disable-bt'
+        regexp: "^#?dtoverlay=pi3-disable-bt"
+        state: present
+
+    - name: Disable console messages
+      lineinfile:
+        path: /etc/rc.local
+        insertbefore: '^exit 0'
+        line: 'dmesg --console-off'
+        regexp: "^#?dmesg.--console-off$"
+        state: present
+
+    - name: Blank Console
+      lineinfile:
+        path: /etc/rc.local
+        insertbefore: '^exit 0'
+        line: '/usr/local/bin/clear-tty.sh &'
+        regexp: "^#?\/usr\/local\/bin\/clear-tty.sh.&$"
+        state: present
+
+    - name: Blank Console script
+      copy:
+        dest: /usr/local/bin/clear-tty.sh
+        create: yes
+        group: root
+        owner: root
+        mode: '0755'
+        content: |
+          #!/bin/bash
+          #
+
+          sleep 10
+          /usr/bin/clear > /dev/tty1
+          exit 0
+          
+    - name: pi to sudo group
+      user:
+        name: pi
+        groups: sudo
+        append: yes
+
+    # NOTE: Fully quoted because of the ': ' on the line. See the Gotchas in the YAML docs.
+    - name: Passwordless sudo for pi user
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: '^%sudo.+ALL=.+$'
+        line: '%sudo  ALL=(ALL:ALL) NOPASSWD: ALL'
+        validate: /usr/sbin/visudo -cf %s
+
+    - name: CPU opts
+      apt:
+        pkg:
+        - cpufrequtils
+
+    - name: CPU performance
+      lineinfile:
+        path: /etc/default/cpufrequtils
+        create: yes
+        state: present
+        line: 'GOVERNOR="performance"'
+
+    - name: Reload CPU freq
+      command: systemctl restart cpufrequtils
+      
+
+    - name: Companion Dependencies
+      apt:
+        install_recommends: yes
+        pkg:
+        - libgusb-dev
+        - nodejs
+        - git
+        - build-essential
+        - cmake
+        - libudev-dev
+        - libusb-1.0-0-dev
+
+    - name: Companion USB Dependencies
+      copy:
+        dest: /etc/udev/rules.d/50-companion.rules
+        group: root
+        owner: root
+        mode: '0644'
+        content: |
+          SUBSYSTEM=="input", GROUP="input", MODE="0666"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0060", MODE:="666", GROUP="plugdev"
+          KERNEL=="hidraw", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0060", MODE:="666", GROUP="plugdev"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="1f40", MODE:="666", GROUP="plugdev"
+          KERNEL=="hidraw", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="1f40", MODE:="666", GROUP="plugdev"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0063", MODE:="666", GROUP="plugdev"
+          KERNEL=="hidraw", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0063", MODE:="666", GROUP="plugdev"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006c", MODE:="666", GROUP="plugdev"
+          KERNEL=="hidraw", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006c", MODE:="666", GROUP="plugdev"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006d", MODE:="666", GROUP="plugdev"
+          KERNEL=="hidraw", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006d", MODE:="666", GROUP="plugdev"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="1f41", MODE:="666", GROUP="plugdev"
+          KERNEL=="hidraw", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="1f41", MODE:="666", GROUP="plugdev"
+
+    - name: Reload USB rules
+      command: udevadm control --reload-rules
+      
+
+    - name: Update npm
+      command: npm install n -g
+
+    - name: Update node
+      command: n 8.17.0
+
+    - name: Install yarn
+      command: npm install yarn -g
+
+    - name: clone companion repo
+      git:
+         repo: https://github.com/bitfocus/companion.git
+         dest: /usr/local/src/companion
+         force: yes
+
+    - name: Update companion modules - takes time....
+      command:
+        cmd: yarn update
+        chdir: /usr/local/src/companion 
+      environment:
+        PATH: $HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:{{ ansible_env.PATH }}
+
+    - name: Build writefile
+      command: chdir=/usr/local/src/companion /usr/local/src/companion/tools/build_writefile.sh
+      environment:
+        PATH: $HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:{{ ansible_env.PATH }}
+
+
+    - name: Companion USB Dependencies
+      copy:
+        dest: /etc/udev/rules.d/50-companion.rules
+        group: root
+        owner: root
+        mode: '0644'
+        content: |
+          [Unit]
+          Description=Bitfocus Companion (v2.0.0)
+          After=network-online.target
+          Wants=network-online.target
+
+          [Service]
+          Type=simple
+          WorkingDirectory=/usr/local/src/companion
+          ExecStart=/usr/local/src/companion/headless.js eth0
+          Restart=on-failure
+          KillSignal=SIGINT
+          TimeoutStopSec=60
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: "Ansible Create directory if not exists"
+      file:
+       path: /usr/local/src/companion/undefined/companion/
+       state: directory
+       mode: 0755
+       group: root
+       owner: root
+
+
+    - name: Create a symbolic link
+      file:
+        src: /home/pi/videopi_full-config.companionconfig
+        dest: /usr/local/src/companion/undefined/companion/db
+        force: yes
+        owner: root
+        group: root
+        state: link
+
+    - name: Start Companion
+      systemd:
+        name: companion.service
+        state: restarted
+        enabled: yes
+
+    - name: Apple Filesharing
+      apt:
+        install_recommends: yes
+        pkg:
+        - netatalk
+
+    - name: Configure Netatalk Homes
+      lineinfile:
+        path: /etc/netatalk/afp.conf
+        state: present
+        regexp: '^; \[Homes\]$'
+        line: '[Homes]'
+
+    - name: Configure Netatalk /home
+      lineinfile:
+        path: /etc/netatalk/afp.conf
+        state: present
+        regexp: '^;.basedir.regex.=.\/xxxx$'
+        line: 'basedir regex = /home'
+
+    - name: Start Netatalk Services
+      systemd:
+        name: netatalk
+        enabled: yes
+        state: started
+
+    - name: Convenient Tools
+      apt:
+        install_recommends: yes
+        pkg:
+        - vim
