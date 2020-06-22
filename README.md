@@ -3,4 +3,5 @@ This is an example repo for an atem mini and bitfocus.io companion config for St
 <br>
 I barely know what I'm doing, but watch out here I come.
 
-wget -N https://github.com/robinhoodis/video_switcher/raw/master/videopi.yml && ansible-playbook videopi.yml
+wget -N https://github.com/robinhoodis/video_switcher/raw/master/videopi.yml
+ansible-playbook videopi.yml
