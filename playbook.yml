@@ -1,0 +1,1389 @@
+---
+- name: "Raspberry PI4 Video Mixer Automation"
+  hosts: localhost
+  become: true
+  connection: local
+  gather_facts: true
+
+  vars_prompt:
+
+    - name: HOSTNAME
+      prompt: "Hostname: "
+      private: no
+      default: "{{ lookup('pipe','raspi-config nonint get_hostname') }}"
+
+    - name: TIMEZONE
+      prompt: "Timezone: "
+      private: no
+      default: "{{ lookup('file', '/etc/timezone') }}"
+
+    - name: LOCALE
+      prompt: "LANG: "
+      private: no
+      default: "{{ lookup('env','LANG') }}"
+
+    - name: ATEMIP
+      prompt: "Atem mini IP: "
+      private: no
+      default: "{{ lookup('pipe','grep atem /etc/hosts | expand -t 1 | cut -f 1 -d \" \"') | default('192.168.2.240', true)  }}"
+
+  vars:
+    REBOOT: False
+    UPDATE: False
+    MEMSPLIT: "256"
+    XKBLAYOUT: "us"
+    NETNAMES: False
+    BLUETOOTH: present # present or absent
+    WIFI: present # present or absent
+    WIFI_COUNTRY: "US"
+    BOOTSPLASH: False
+    OVERCLOCK: False
+    HDMI_GROUP: 1
+    HDMI_MOD: 34
+    GLDRIVER: False
+    raspiconfig:
+      ssh: 0
+      vnc: 1
+      i2c: 1
+      serial: 1
+      onewire: 1
+      rgpio: 1
+      spi: 1
+      boot_wait: 1
+      overscan: 1
+      camera: 1
+      pixdub: 1
+      blanking: 1
+
+  tasks:
+    - name: Update apt-get repo and cache
+      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+      tags:
+         - update
+
+    - name: Upgrade apt packages
+      apt: upgrade=dist force_apt_get=yes
+      tags:
+         - update
+
+    - name: Installing Firmware packages
+      apt:
+        install_recommends: yes
+        pkg:
+        - rpi-eeprom
+        - rpi-eeprom-images
+      tags:
+         - update
+
+    - name: Update raspi-config itself
+      become: true
+      apt: name=raspi-config update_cache=yes state=present cache_valid_time=3600
+      when: UPDATE == True
+      tags:
+         - update
+
+    - name: raspi-config
+      command: "raspi-config nonint do_{{ item.key }} {{ item.value }}"
+      when: "item.value != lookup('pipe','sudo raspi-config nonint get_{{item.key}}')"
+      with_dict: "{{ raspiconfig }}"
+      tags:
+        - raspi-config
+
+    - name: Required Software
+      apt:
+        pkg:
+        - git
+
+##Get some basic info
+#    - name: Get Raspberry Pi type
+#      command: "raspi-config nonint get_pi_type"
+#      register: pi_type
+#      changed_when: False
+#
+#    - name: Show pi version
+#      debug:
+#        msg: "Pi version: {{ pi_type.stdout }}"
+
+    - name: Change hostname
+      command: "raspi-config nonint do_hostname {{ HOSTNAME }}"
+      when: lookup('pipe','raspi-config nonint get_hostname') != HOSTNAME
+      tags:
+         - raspi-config
+
+    #N2 Wi-fi
+    #- name: Set WiFi credentials
+      #command: "raspi-config nonint do_wifi_ssid_passphrase {{ SSID }} {{ PASSPHRASE }}"
+    
+#    #N3 Network interface names
+#    - name: Get network names status
+#      command: "raspi-config nonint get_net_names"
+#      register: pi_netnames
+#      changed_when: False
+
+#    - name: Print current network names status
+#      debug:
+#        msg: "Current network names status: {{ pi_netnames.stdout }}"
+
+#    - name: Enable network names
+#      command: "raspi-config nonint do_net_names 0"
+#      when: (NETNAMES == True) and (pi_netnames.stdout != '0')
+
+#    - name: Disable network names
+#      command: "raspi-config nonint do_net_names 1"
+#      when: (NETNAMES == True) and (pi_netnames.stdout != '1')
+
+#3 Boot Options
+
+    - name: Set Boot behaviour
+      command: "raspi-config nonint do_boot_behaviour B1"
+      when: ( lookup('pipe','raspi-config nonint get_boot_cli') != "0" ) or
+            ( lookup('pipe','raspi-config nonint get_autologin') != "1" )
+      tags:
+         - raspi-config
+
+#    #B3 Splash Screen
+#    - name: Get splash status
+#      command: "raspi-config nonint get_boot_splash"
+#      register: boot_splash
+#      changed_when: False
+
+#    - name: Print boot splash status
+#      debug: 
+#        msg: "Boot splash status is: {{ boot_splash.stdout }}"
+
+      #- name: Set boot splash
+      #command: "raspi-config nonint do_boot_splash {{ BOOTSPLASH }}"
+
+    - name: Change locale
+      command: "raspi-config nonint do_change_locale {{ LOCALE }}"
+      when: lookup('env','LANG') != LOCALE
+      tags:
+         - raspi-config
+
+    - name: Change timezone
+      command: "raspi-config nonint do_change_timezone {{ TIMEZONE }}"
+      when: lookup('file', '/etc/timezone') != TIMEZONE
+      tags:
+         - raspi-config
+
+#    #I3 Change Keyboard Layout
+#    - name: Change keyboard layout
+#      command: "raspi-config nonint do_configure_keyboard {{ XKBLAYOUT }}"
+
+#    #I4 Change Wi-fi Country
+#    - name: Get WiFi country
+#      command: "raspi-config nonint get_wifi_country"
+#      register: wifi_country
+#      changed_when: False
+#      ignore_errors: True #to avoid error when WiFi is not present
+#
+#    - name: Print current WiFi country
+#      debug: 
+#        msg: "Wifi country is: {{ wifi_country.stdout }}" 
+#
+#    #- name: Set WiFi country
+#    #command: "raspi-config nonint do_wifi_country {{ WIFI_COUNTRY }}"
+
+#6 Overclock
+
+#    #Overclock
+#    - name: Get overclock
+#      command: "raspi-config nonint get_config_var arm_freq /boot/config.txt"
+#      register: pi_overclock
+#      changed_when: False
+#
+#    - name: Print overclock
+#      debug: 
+#        msg: "Overclock is: {{ pi_overclock.stdout }}"
+#
+#      #- name: Set overclock
+#      #command: "raspi-config nonint do_overclock {{ OVERCLOCK }}"
+
+#    #A1 Expand Filesystem
+#    - name: Check if FS is expandable
+#      command: "raspi-config nonint get_can_expand"
+#      register: fs_filled
+#      changed_when: False
+
+#    - name: Print if FS is expandable or not
+#      debug:
+#        msg: "Filesystem is expandable! [{{ fs_filled.stdout }}]"
+#      when: fs_filled.stdout == '0'
+
+#    - name: Expand Filesystem
+#      command: "raspi-config nonint do_expand_rootfs"
+
+    - name: Set GPU memory split
+      command: "raspi-config nonint do_memory_split {{ MEMSPLIT }}"
+      when: lookup('pipe','raspi-config nonint get_config_var gpu_mem /boot/config.txt') != MEMSPLIT
+      tags:
+         - raspi-config
+
+#    ### 0 Auto, 1 Force 3.5mm, 2 Force hdmi
+    - name: Set audio out
+      command: "raspi-config nonint do_audio 1"
+      tags:
+         - raspi-config
+
+    - name: Disable 4K 60fps
+      command: "raspi-config nonint do_pi4video V3"
+      when: lookup('pipe','raspi-config nonint get_pi4video') != "0"
+      tags:
+         - raspi-config
+
+    - name: Set HDMI group mode
+      command: "raspi-config nonint do_resolution {{ HDMI_GROUP }} {{ HDMI_MOD }}"
+      when: ( lookup('pipe','raspi-config nonint get_config_var hdmi_group /boot/config.txt') != "1" ) or
+            ( lookup('pipe','raspi-config nonint get_config_var hdmi_mode /boot/config.txt') != "34" )
+      tags:
+         - raspi-config
+
+    - name: Enable HDMI audio
+      lineinfile:
+        path: /boot/config.txt
+        line: 'hdmi_drive=2'
+        regexp: "^#?hdmi_drive=."
+        insertafter: "# DMT (computer monitor) modes"
+        state: present
+      when: lookup('pipe','raspi-config nonint get_config_var hdmi_drive /boot/config.txt') != "2"
+      tags:
+         - raspi-config
+
+    - name: Real Clock CPU
+      lineinfile:
+        path: /boot/config.txt
+        insertafter: '^#[all]'
+        line: 'nohz=off'
+        state: present
+      tags:
+         - raspi-config
+
+    - name: WIFI
+      lineinfile:
+        path: /boot/config.txt
+        insertafter: '^#[all]'
+        line: 'dtoverlay=disable-wifi'
+        regexp: "^#?dtoverlay=disable-wifi"
+        state: present
+      tags:
+         - raspi-config
+
+    - name: Bluetooth
+      lineinfile:
+        path: /boot/config.txt
+        insertafter: '^#[all]'
+        line: 'dtoverlay=pi3-disable-bt'
+        regexp: "^#?dtoverlay=pi3-disable-bt"
+        state: present
+      tags:
+         - raspi-config
+
+    #A7 GL Driver
+    #- name: Set OpenGL desktop driver
+    #command: "raspi-config nonint do_gldriver {{ GLDRIVER }}"
+
+    - name: CPU opts
+      apt:
+        pkg:
+        - cpufrequtils
+
+    - name: CPU performance
+      lineinfile:
+        path: /etc/default/cpufrequtils
+        create: yes
+        state: present
+        line: 'GOVERNOR="performance"'
+
+    - name: Reload CPU freq
+      command: systemctl restart cpufrequtils
+
+    - name: Disable console messages
+      lineinfile:
+        path: /etc/rc.local
+        insertbefore: '^exit 0'
+        line: 'dmesg --console-off'
+        regexp: "^#?dmesg.--console-off$"
+        state: present
+
+    - name: Blank Console
+      lineinfile:
+        path: /etc/rc.local
+        insertbefore: '^exit 0'
+        line: '/usr/local/bin/clear-tty.sh &'
+        regexp: "^#?\/usr\/local\/bin\/clear-tty.sh.&$"
+        state: present
+
+    - name: Blank Console script
+      copy:
+        dest: /usr/local/bin/clear-tty.sh
+        create: yes
+        group: root
+        owner: root
+        mode: '0755'
+        content: |
+          #!/bin/bash
+          #
+
+          sleep 10
+          /usr/bin/clear > /dev/tty1
+          exit 0
+
+    - name: pi to sudo group
+      user:
+        name: pi
+        groups: sudo
+        append: yes
+
+    # NOTE: Fully quoted because of the ': ' on the line. See the Gotchas in the YAML docs.
+    - name: Passwordless sudo for pi user
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: '^%sudo.+ALL=.+$'
+        line: '%sudo  ALL=(ALL:ALL) NOPASSWD: ALL'
+        validate: /usr/sbin/visudo -cf %s
+
+    - name: OMXD
+      apt:
+        pkg:
+          - omxplayer
+      tags:
+        - omx
+
+    - name: OMXD git
+      git:
+        repo: https://github.com/subogero/omxd.git
+        dest: /usr/local/src/omxd
+        force: yes
+      tags:
+        - omx
+
+    - name: OMXD compile
+      make:
+        chdir: /usr/local/src/omxd
+      tags:
+        - omx
+
+    - name: OMXD install
+      make:
+        chdir: /usr/local/src/omxd
+        target: install
+      tags:
+        - omx
+
+    - name: OMXD start
+      make:
+        chdir: /usr/local/src/omxd
+        target: start
+      tags:
+        - omx
+
+    - name: ATEM mini /etc/hosts
+      lineinfile:
+        dest: /etc/hosts
+        regexp: '^(?:[0-9]{1,3}\.){3}[0-9]{1,3}.*atem$'
+        line: "{{ ATEMIP }}\tatem"
+        state: present
+      tags:
+         - companion
+
+    - name: Download companion config
+      get_url:
+        url: https://github.com/robinhoodis/video_switcher/raw/master/videopi_full-config.companionconfig
+        dest: /home/pi/videopi_full-config.companionconfig
+        group: pi
+        owner: pi
+        mode: 0644
+      tags:
+         - companion
+
+    - name: Put ATEM IP in companion config
+      replace:
+        path: /home/pi/videopi_full-config.companionconfig
+        regexp: '"bmd-atem","product":"ATEM","label":"atem","_configIdx":0,"host":"(?:[0-9]{1,3}\.){3}[0-9]{1,3}"'
+        replace: '"bmd-atem","product":"ATEM","label":"atem","_configIdx":0,"host":"{{ ATEMIP }}"'
+
+    - name: Companion Dependencies
+      apt:
+        install_recommends: yes
+        pkg:
+        - libgusb-dev
+        - nodejs
+        - git
+        - build-essential
+        - cmake
+        - libudev-dev
+        - libusb-1.0-0-dev
+      tags:
+         - companion
+
+    - name: Companion USB Dependencies
+      copy:
+        dest: /etc/udev/rules.d/50-companion.rules
+        group: root
+        owner: root
+        mode: '0644'
+        content: |
+          SUBSYSTEM=="input", GROUP="input", MODE="0666"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0060", MODE:="666", GROUP="plugdev"
+          KERNEL=="hidraw", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0060", MODE:="666", GROUP="plugdev"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="1f40", MODE:="666", GROUP="plugdev"
+          KERNEL=="hidraw", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="1f40", MODE:="666", GROUP="plugdev"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0063", MODE:="666", GROUP="plugdev"
+          KERNEL=="hidraw", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0063", MODE:="666", GROUP="plugdev"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006c", MODE:="666", GROUP="plugdev"
+          KERNEL=="hidraw", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006c", MODE:="666", GROUP="plugdev"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006d", MODE:="666", GROUP="plugdev"
+          KERNEL=="hidraw", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006d", MODE:="666", GROUP="plugdev"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="1f41", MODE:="666", GROUP="plugdev"
+          KERNEL=="hidraw", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="1f41", MODE:="666", GROUP="plugdev"
+      tags:
+         - companion
+
+    - name: Reload USB rules
+      command: udevadm control --reload-rules
+      tags:
+         - companion
+
+    - name: Update npm
+      command: npm install n -g
+      tags:
+         - companion
+
+    - name: Update node
+      command: n 8.17.0
+      tags:
+         - companion
+
+    - name: Install yarn
+      command: npm install yarn -g
+      tags:
+         - companion
+
+    - name: clone companion repo
+      git:
+         repo: https://github.com/bitfocus/companion.git
+         dest: /usr/local/src/companion
+         force: yes
+      tags:
+         - companion
+
+    - name: Update companion modules - takes time....
+      command:
+        cmd: yarn update
+        chdir: /usr/local/src/companion 
+      environment:
+        PATH: $HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:{{ ansible_env.PATH }}
+      tags:
+         - companion
+
+    - name: Build writefile
+      command: chdir=/usr/local/src/companion /usr/local/src/companion/tools/build_writefile.sh
+      environment:
+        PATH: $HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:{{ ansible_env.PATH }}
+      tags:
+         - companion
+
+    - name: Companion USB Dependencies
+      copy:
+        dest: /etc/udev/rules.d/50-companion.rules
+        group: root
+        owner: root
+        mode: '0644'
+        content: |
+          [Unit]
+          Description=Bitfocus Companion (v2.0.0)
+          After=network-online.target
+          Wants=network-online.target
+
+          [Service]
+          Type=simple
+          WorkingDirectory=/usr/local/src/companion
+          ExecStart=/usr/local/src/companion/headless.js eth0
+          Restart=on-failure
+          KillSignal=SIGINT
+          TimeoutStopSec=60
+
+          [Install]
+          WantedBy=multi-user.target
+      tags:
+         - companion
+
+    - name: Companion config directory
+      file:
+       path: /usr/local/src/companion/undefined/companion/
+       state: directory
+       mode: 0755
+       group: root
+       owner: root
+      tags:
+         - companion
+
+    - name: Create a symbolic link
+      file:
+        src: /home/pi/videopi_full-config.companionconfig
+        dest: /usr/local/src/companion/undefined/companion/db
+        force: yes
+        owner: root
+        group: root
+        state: link
+      tags:
+         - companion
+
+    - name: Start Companion
+      systemd:
+        name: companion.service
+        state: restarted
+        enabled: yes
+      tags:
+         - companion
+
+    - name: Music Player
+      apt:
+        install_recommends: yes
+        pkg:
+          - mpd
+          - mpc
+      tags:
+        - music
+
+    - name: Configure MPD network
+      lineinfile:
+        path: /etc/mpd.conf
+        state: present
+        regexp: '^#?bind_to_address\s+\"(any|localhost)\"$'
+        line: 'bind_to_address "any"'
+      tags:
+        - music
+
+    - name: Configure MPD socket
+      lineinfile:
+        path: /etc/mpd.conf
+        state: present
+        regexp: '^#?bind_to_address\s+"/run/mpd/socket"$'
+        line: 'bind_to_address "/run/mpd/socket"'
+      tags:
+        - music
+
+    - name: Configure MPD 3.5mm output
+      lineinfile:
+        path: /etc/mpd.conf
+        state: present
+        regexp: '^#?\s+device\s+"hw:[0-1],0"\s+#\soptional$'
+        line: '    device      "hw:1,0" # optional'
+      tags:
+        - music
+
+#    - name: Softare volume out 3.5mm output
+#      lineinfile:
+#        backrefs: yes
+#        path: /etc/mpd.conf
+#        state: present
+#        regexp: '^#?mixer_type\s+"(hardware|software)"\s+#\s+optional$'
+#        line: '    mixer_type      "software" # optional'
+#      tags:
+#        - music
+
+    - name: Configure Music Folder
+      lineinfile:
+        path: /etc/mpd.conf
+        state: present
+        regexp: '^#?music_directory.+".+"$'
+        line: 'music_directory "/home/pi/Music"'
+      tags:
+        - music
+
+    - name: Auto Start Music
+      lineinfile:
+        path: /etc/mpd.conf
+        state: present
+        regexp: '^#?restore_paused.+\"(yes|no)\"$'
+        line: 'restore_paused "yes"'
+      tags:
+        - music
+
+    - name: Configure Playlist Folder
+      lineinfile:
+        path: /etc/mpd.conf
+        state: present
+        regexp: '^#?playlist_directory.+".+"$'
+        line: 'playlist_directory "/home/pi/Music"'
+      tags:
+        - music
+
+    - name: Configure Playlist autoupdate
+      lineinfile:
+        path: /etc/mpd.conf
+        state: present
+        regexp: '^#?auto_update\s+"yes"$'
+        line: 'auto_update "yes"'
+      tags:
+        - music
+
+    - name: Start Music Player
+      systemd:
+        name: mpd
+        enabled: yes
+        state: started
+      tags:
+         - music
+
+    - name: Filesharing
+      apt:
+        install_recommends: yes
+        pkg:
+        - netatalk
+        - samba
+        - samba-common-bin
+      tags:
+         - filesharing
+
+    - name: Configure Netatalk Homes
+      lineinfile:
+        path: /etc/netatalk/afp.conf
+        state: present
+        regexp: '^; \[Homes\]$'
+        line: '[Homes]'
+      tags:
+         - filesharing
+
+    - name: Configure Netatalk /home
+      lineinfile:
+        path: /etc/netatalk/afp.conf
+        state: present
+        regexp: '^;.basedir.regex.=.\/xxxx$'
+        line: 'basedir regex = /home'
+      tags:
+         - filesharing
+
+    - name: Start Mac Filesharing
+      systemd:
+        name: netatalk
+        enabled: yes
+        state: started
+      tags:
+         - filesharing
+
+    - name: Start Windows Filesharing
+      systemd:
+        name: smbd
+        enabled: yes
+        state: started
+      tags:
+         - filesharing
+
+    - name: Non Free REPO addition
+      apt_repository:
+        repo: deb http://www.deb-multimedia.org buster main non-free
+        state: present
+      tags:
+        - ffmpeg
+
+    - name: Non Free REPO addition
+      command: "apt-get update -oAcquire::AllowInsecureRepositories=true"
+      tags:
+        - ffmpeg
+
+    - name: Non Free REPO addition
+      command: "apt-get -y --allow-unauthenticated install deb-multimedia-keyring"
+      tags:
+        - ffmpeg
+
+    - name: Non Free REPO addition
+      command: "apt-get -y --allow-unauthenticated upgrade"
+      tags:
+        - ffmpeg
+
+    - name: Install non free stuff
+      apt:
+        pkg:
+          - libzimg2
+          - libzimg-dev
+          - libvidstab1.1
+          - libvidstab-dev
+          - libopenh264-5
+          - libopenh264-dev
+          - libkvazaar-dev
+          - libkvazaar4
+          - libfdk-aac2
+          - libfdk-aac-dev
+      tags:
+        - ffmpeg
+
+    - name: FFmpeg
+      apt:
+        install_recommends: yes
+        pkg:
+        - autoconf 
+        - automake
+        - build-essential
+        - cmake
+        - doxygen
+        - git
+        - graphviz
+        - imagemagick
+        - pkg-config
+        - texinfo
+        - libasound2-dev
+        - libass-dev
+        - libavcodec-dev
+        - libavdevice-dev
+        - libavfilter-dev
+        - libavformat-dev
+        - libavutil-dev
+        - libfreetype6-dev
+        - libgmp-dev
+        - libmp3lame-dev
+        - libopencore-amrnb-dev
+        - libopencore-amrwb-dev
+        - libopus-dev
+        - librtmp-dev
+        - libsdl2-dev
+        - libsdl2-image-dev
+        - libsdl2-mixer-dev
+        - libsdl2-net-dev
+        - libsdl2-ttf-dev
+        - libsnappy-dev
+        - libsoxr-dev
+        - libssh-dev
+        - libssl-dev
+        - libtool
+        - libv4l-dev
+        - libva-dev
+        - libvdpau-dev
+        - libvo-amrwbenc-dev
+        - libvorbis-dev
+        - libwebp-dev
+        - libx264-dev
+        - libx265-dev
+        - libnuma-dev
+        - libxcb-shape0-dev
+        - libxcb-shm0-dev
+        - libxcb-xfixes0-dev
+        - libxcb1-dev
+        - libxml2-dev
+        - lzma-dev
+        - meson
+        - nasm
+        - pkg-config
+        - python3-dev
+        - python3-pip
+        - texinfo
+        - wget
+        - yasm
+        - zlib1g-dev
+        - libdrm-dev
+        - libvpx-dev
+        - libssl1.0-dev
+        - autoconf
+        - automake
+        - frei0r-plugins-dev
+        - ladspa-sdk
+        - libavc1394-dev
+        - libavresample-dev
+        - libbluray-dev
+        - libbs2b-dev
+        - libslang2-dev
+        - libcaca-dev
+        - libcdio-dev
+        - libcelt-dev
+        - libcelt0-0
+        - libchromaprint-dev
+        - flite1-dev
+        - libfontconfig1-dev
+        - libfrei0r-ocaml-dev
+        - ledit
+        - libfindlib-ocaml
+        - libfindlib-ocaml-dev
+        - libfrei0r-ocaml
+        - ocaml-base-nox
+        - ocaml-compiler-libs
+        - ocaml-findlib
+        - ocaml-interp
+        - ocaml-nox
+        - camlp4
+        - ocaml-doc
+        - tuareg-mode
+        - ocaml-mode
+        - libfribidi-dev
+        - libgme-dev
+        - libgsm1-dev
+        - libiec61883-dev
+        - libraw1394-tools
+        - libraw1394-doc
+        - libjack-dev
+        - jackd1
+        - libzita-alsa-pcmi0
+        - libzita-resampler1
+        - jack-tools
+        - meterbridge
+        - qjackctl
+        - libladspa-ocaml-dev
+        - libladspa-ocaml
+        - libmodplug-dev
+        - gdal-data
+        - gfortran
+        - gfortran-8
+        - libgfortran-8-dev
+        - libaec0
+        - libarmadillo9
+        - libarpack2
+        - libcaf-openmpi-3
+        - libcharls2
+        - libcoarrays-dev
+        - libcoarrays-openmpi-dev
+        - libdap25
+        - libdapclient6v5
+        - libdapserver7v5
+        - libdc1394-22-dev
+        - libepsilon1
+        - libevent-core-2.1-6
+        - libevent-pthreads-2.1-6
+        - libexif-dev
+        - libexif-doc
+        - libfreexl1
+        - libfyba0
+        - libgdal20
+        - libgdcm2-dev
+        - libgdcm2.8
+        - libgeos-3.7.1
+        - libgeos-c1v5
+        - libgeotiff2
+        - libgl2ps1.4
+        - libgphoto2-dev
+        - libhdf4-0-alt
+        - libhdf5-103
+        - libhdf5-openmpi-103
+        - libhdf5-dev
+        - libhwloc-dev
+        - libhwloc-plugins
+        - libhwloc5
+        - libibverbs-dev
+        - libilmbase-dev
+        - libjbig-dev
+        - libjpeg-dev
+        - libjpeg62-turbo-dev
+        - libkmlbase1
+        - libkmlconvenience1
+        - libkmldom1
+        - libkmlengine1
+        - libkmlregionator1
+        - libkmlxsd1
+        - liblept5
+        - libopenjpeg-dev
+        - libopenjpeg5
+        - libopenmpt-dev
+        - libmpg123-dev
+        - libpulse-dev
+        - gir1.2-rsvg-2.0
+        - libcairo-script-interpreter2
+        - libcairo2-dev
+        - libgdk-pixbuf2.0-bin
+        - libgdk-pixbuf2.0-dev
+        - liblzo2-2
+        - libpixman-1-dev
+        - librsvg2-dev
+        - librubberband-dev
+        - libshine-dev
+        - libsmbclient-dev
+        - libspeex-dev
+        - libssh-dev
+        - libssh-4
+        - libssl-dev
+        - libtesseract-dev
+        - libleptonica-dev
+        - libtheora-dev
+        - libtwolame-dev
+        - libvidstab-dev
+        - libwavpack-dev
+        - libxvidcore-dev
+        - libzmq-dev
+        - libzmq1
+        - libzvbi-dev
+        - libopenal-dev
+        - sphinxsearch
+        - liblilv-dev
+        - libserd-dev
+        - libsord-dev
+        - libsratom-dev
+        - lv2-dev
+        - libcodec2-dev
+        - liblensfun-data-v1
+        - liblensfun-dev
+        - liblensfun1
+        - libmysofa-dev
+        - libmysofa0
+        - nv-codec-headers
+        - libopenjp2-7-dev
+        - librabbitmq4
+        - libssl-dev
+        - cargo
+        - libgit2-27
+        - libhttp-parser2.8
+        - libllvm7
+        - libmbedcrypto3
+        - libmbedtls12
+        - libmbedx509-0
+        - libstd-rust-1.34
+        - libstd-rust-dev
+        - rust-gdb
+        - rustc
+        - libssh-dev
+        - ocl-icd-opencl-dev
+        - ocl-icd-dev
+        - opencl-headers
+        - clinfo
+        - libraspberrypi-dev
+        - clang
+        - clang-format
+        - clang-tidy
+        - libgcrypt20
+        - libgcrypt20-dev
+        - libgpg-error-dev
+        - cdparanoia
+        - libcdparanoia-dev
+        - libcdio-cdda2
+        - libcdio-paranoia-dev
+        - libcdio-paranoia2
+        - libcdio-dev
+        - libcdio18
+        - libvulkan-dev
+        - libvulkan1
+        - vulkan-tools
+        - vulkan-utils
+        - vulkan-validationlayers-dev
+        - libjpeg-dev
+        - libtiff5-dev
+        - libjasper-dev
+        - libpng-dev
+        - libjasper1
+        - libswscale-dev
+        - libgtk2.0-0
+        - libgtk2.0-dev
+        - libgtk-3-dev
+        - libatlas-base-dev
+        - libqtgui4
+        - libqtwebkit4
+        - libqt4-test
+        - libqt4-network
+        - libqt4-xmlpatterns
+        - python3-pyqt5
+        - python3-dev
+        - libatomic-ops-dev
+        - glogg
+        - golang-glog-dev
+        - libgoogle-glog-dev
+        - python3-caffe-cpu
+        - libcaffe-cpu1
+        - libcaffe-cpu-dev
+        - caffe-tools-cpu
+        - gogoprotobuf
+        - golang-gogoprotobuf-dev
+        - golang-goprotobuf-dev
+        - libprotobuf-c-dev
+        - libprotobuf-c1
+        - libprotobuf-dev
+        - libprotobuf17
+        - protobuf-c-compiler
+        - protobuf-compiler
+        - python3-protobuf
+        - libceres-dev 
+        - libceres1
+        - liblapacke
+        - libtmglib-dev
+        - libtmglib3
+        - vtk7
+        - tcl-vtk7
+        - python3-vtk7
+        - python-pyvtk
+        - lvtk-tools
+        - lvtk-dev
+        - libvtk7-qt-dev
+        - libvtk7-jni
+        - libvtk7-dev
+        - libvtk7-java
+        - libc6
+        - libeigen3-dev
+        - paraview
+        - qt4-dev-tools
+        - gstreamer1.0-libav
+        - gstreamer1.0-gl
+        - gstreamer1.0-alsa
+        - gstreamer0.10-tools
+        - gstreamer0.10-alsa
+        - qtgstreamer-plugins-qt5
+        - libgstreamer1.0-0
+        - libgstreamer1.0-dev
+        - gstreamer1.0-plugins-rtp
+        - gstreamer1.0-rtsp
+        - gstreamer1.0-espeak
+        - gstreamer1.0-libav
+        - gstreamer1.0-gl
+        - gstreamer1.0-alsa
+        - gstreamer0.10-tools
+        - gstreamer0.10-alsa
+        - qtgstreamer-plugins-qt5
+        - libgstreamer1.0-0
+        - libgstreamer1.0-dev
+        - gstreamer1.0-plugins-rtp
+        - gstreamer1.0-rtsp
+        - gstreamer1.0-espeak
+        - libogre-1.9-dev
+        - libogre-1.9.0v5
+        - ogre-1.9-tools
+        - gir1.2-gst-plugins-base-1.0
+        - libgstreamer-plugins-base1.0-dev
+        - liborc-0.4-dev
+        - liborc-0.4-dev-bin
+        - libjpeg8-dev
+        - libjasper-dev
+        - libpng12-dev
+        - libtiff5-dev
+        - libavcodec-dev
+        - libavformat-dev
+        - libswscale-dev
+        - libdc1394-22-dev
+        - libxine2-dev
+        - libv4l-dev
+        - gir1.2-gst-plugins-base-0.10
+        - gir1.2-gstreamer-0.10
+        - gir1.2-gtk-2.0
+        - gir1.2-harfbuzz-0.0
+        - libatk1.0-dev
+        - libcairo2-dev
+        - libfontconfig1-dev
+        - libgdk-pixbuf2.0-dev
+        - libgraphite2-dev
+        - libharfbuzz-dev
+        - libharfbuzz-gobject0
+        - libqt5opengl5-dev
+        - libxcomposite-dev
+        - libxdamage-dev
+        - libxft-dev
+        - pango1.0-tools
+        - libpango1.0-0
+        - libpango1.0-dev
+        - qt5-default
+        - qt5-qmake
+        - qt5-qmake-bin
+        - qtbase5-dev
+        - qtbase5-dev-tools
+        - x11proto-composite-dev
+        - x11proto-damage-dev
+        - libx264-dev
+        - x264
+        - v4l-utils
+        - liblsmash2
+        - hdf5-helpers
+        - libaec-dev
+        - libhdf5-cpp-103
+        - libhdf5-dev
+        - python-pyfribidi
+        - libass-dev
+        - libenca-dev
+        - golang-protobuf-extensions-dev
+        - python-protobuf
+        - python-protobuf.socketrpc
+        - python-opencv
+        - libopencv-dev python3-opencv
+      tags:
+        - ffmpegdep
+
+        #    - name: rav1e git
+        #      git:
+          #repo: https://github.com/xiph/rav1e.git
+          #dest: /usr/local/src/rav1e
+          #update: yes
+          #version: master
+          #tags:
+            #- rav1e
+
+            #- name: rav1e configure
+            #command:
+              #cmd: cargo build --release
+              #chdir: /usr/local/src/rav1e
+              #tags:
+                #- rav1e
+
+    - name: libklvanc git
+      git:
+        repo: https://github.com/stoth68000/libklvanc.git
+        dest: /usr/local/src/libklvanc
+        update: yes
+        version: master
+      tags:
+        - libklvanc
+
+    - name: libklvanc configure
+      command:
+        cmd: ./autogen.sh --build
+        chdir: /usr/local/src/libklvanc
+      tags:
+        - libklvanc
+
+    - name: libklvanc configure
+      command:
+        cmd: ./configure --enable-shared=no --prefix=/usr
+        chdir: /usr/local/src/libklvanc
+      tags:
+        - libklvanc
+
+    - name: libklvanc make
+      make:
+        chdir: /usr/local/src/libklvanc
+      tags:
+        - libklvanc
+
+    - name: libklvanc make install
+      make:
+        target: install
+        chdir: /usr/local/src/libklvanc
+      tags:
+        - libklvanc
+
+    - name: dav1d git
+      git:
+        repo: https://code.videolan.org/videolan/dav1d.git
+        dest: /usr/local/src/dav1d
+        update: yes
+        version: master
+      tags:
+        - dav1d
+
+    - name: dav1d build directory
+      file:
+        path: /usr/local/src/dav1d/build
+        state: directory
+        mode: '0755'
+      tags:
+        - dav1d
+
+    - name: dav1d configure
+      command:
+        cmd: meson --prefix=/usr ..
+        chdir: /usr/local/src/dav1d/build
+      tags:
+        - dav1d
+
+    - name: dav1d configure
+      command:
+        cmd: ninja
+        chdir: /usr/local/src/dav1d/build
+      tags:
+        - dav1d
+
+    - name: dav1d install
+      command:
+        cmd: ninja install
+        chdir: /usr/local/src/dav1d/build
+      tags:
+        - dav1d
+
+    - name: davs2 git
+      git:
+        repo: https://github.com/pkuvcl/davs2.git
+        dest: /usr/local/src/davs2
+        update: yes
+        version: master
+      tags:
+        - davs2
+
+    - name: davs2 configure
+      command:
+        cmd: ./configure --prefix=/usr
+        chdir: /usr/local/src/davs2/build/linux
+      tags:
+        - davs2
+
+    - name: davs2 make
+      make:
+        chdir: /usr/local/src/davs2/build/linux
+      tags:
+        - davs2
+
+    - name: davs2 install
+      make:
+        chdir: /usr/local/src/dav1d/build/linux
+        target: install
+      tags: 
+        - davs2
+
+    - name: AVISythnPlus git
+      git:
+        repo: https://github.com/AviSynth/AviSynthPlus.git
+        dest: /usr/local/src/AviSynthPlus
+        update: yes
+        version: master
+      tags:
+        - ffmpeg
+
+    - name: AVISythnPlus build directory
+      file:
+        path: /usr/local/src/AviSynthPlus/avisynth-build
+        state: directory
+        mode: '0755'
+      tags:
+        - ffmpeg
+
+    - name: AVISynthPlus compile
+      command:
+        cmd: "cmake ../ -DHEADERS_ONLY:bool=on -DCMAKE_INSTALL_PREFIX=/usr"
+        chdir: /usr/local/src/AviSynthPlus/avisynth-build
+      tags:
+         - ffmpeg
+
+    - name: AVISynthPlus install
+      make:
+        chdir: /usr/local/src/AviSynthPlus/avisynth-build
+        target: install
+      tags:
+        - ffmpeg
+
+#    - name: AV1 aom git
+#      git:
+#        repo: https://aomedia.googlesource.com/aom
+#        dest: /usr/local/src/aom
+#        update: yes
+#        version: master
+#      tags:
+#        - ffmpeg
+ 
+#    - name: AV1 aom build directory
+#      file:
+#        path: /usr/local/src/aom-build
+#        state: directory
+#        mode: '0755'
+#      tags:
+#        - ffmpeg
+
+#    - name: AV1 aom cmake
+#      command:
+#        cmd: "cmake /usr/local/src/aom -DBUILD_SHARED_LIBS=1 -DCMAKE_INSTALL_PREFIX=/usr -DENABLE_CCACHE=1 -DCONFIG_AV1_ENCODER=1"
+#        chdir: /usr/local/src/aom-build
+#      tags:
+#        - ffmpeg
+ 
+#    - name: AV1 aom make
+#      make:
+#        chdir: /usr/local/src/aom-build
+#      tags:
+#        - ffmpeg
+ 
+#    - name: AV1 aom make install
+#      make:
+#        chdir: /usr/local/src/aom-build
+#        target: install
+#      tags:
+#        - ffmpeg
+
+    - name: CELT Download
+      unarchive:
+        src: https://ftp.osuosl.org/pub/xiph/releases/celt/celt-0.11.3.tar.gz
+        dest: /usr/local/src
+        remote_src: yes
+      tags:
+        - celt
+        
+    - name: CELT configure
+      command:
+        cmd: "./configure --prefix=/usr"
+        chdir: /usr/local/src/celt-0.11.3
+      tags:
+        - celt
+
+    - name: CELT make
+      make:
+        chdir: /usr/local/src/celt-0.11.3
+      tags:
+        - celt
+
+    - name: CELT make install
+      make:
+        chdir: /usr/local/src/celt-0.11.3
+        target: install
+      tags:
+        - celt
+
+    - name: FFmpeg git
+      git:
+        repo: https://github.com/FFmpeg/FFmpeg.git
+        dest: /usr/local/src/FFmpeg
+        update: yes
+        version: master
+      tags:
+        - ffmpeg
+
+    - name: Convenient Tools
+      apt:
+        install_recommends: yes
+        pkg:
+        - vim
+        - bash-completion
+        - jq
+        - speedtepst-cli
+      tags:
+        - userland
+
+    - name: Creating .hushlogin inside users home
+      become: False
+      file:
+        path: /home/pi/.hushlogin
+        state: touch
+        owner: pi
+        group: pi
+        mode: 0600
+      tags:
+         - userland
+
+    - name: Alias vi to vim
+      copy:
+        dest: /etc/profile.d/vim.sh
+        group: root
+        owner: root
+        mode: '0644'
+        content: |
+          alias vi=vim
+      tags:
+         - userland
+
+    - name: pull vimrc from git
+      become: False
+      git:
+        repo: https://github.com/amix/vimrc.git
+        dest: /home/pi/.vim_runtime
+        update: yes
+        version: master
+      tags:
+         - userland
+
+    - name: activate vimrc
+      become: False
+      command: chdir=/home/pi "/home/pi/.vim_runtime/install_awesome_vimrc.sh"
+      tags:
+         - userland
+
+    - name: pull vim plugin for yml
+      become: False
+      git:
+        repo: https://github.com/pearofducks/ansible-vim.git
+        dest: /home/pi/.vim_runtime/my_plugins/ansible-vim
+        update: yes
+        version: master
+      tags:
+        - userland
+
+    - name: update vim plugins
+      become: False
+      command:
+        cmd: python update_plugins.py
+        chdir: /home/pi/.vim_runtime
+      tags:
+         - userland
+
+    - name: Reboot
+      become: True
+      command: "sleep 1 && shutdown -r now +1"
+      async: 1
+      poll: 0
+      when: REBOOT == True
+
