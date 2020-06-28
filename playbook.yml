@@ -30,7 +30,7 @@
   vars:
     REBOOT: False
     UPDATE: False
-    MEMSPLIT: "256"
+    MEMSPLIT: "320"
     XKBLAYOUT: "us"
     NETNAMES: False
     BLUETOOTH: present # present or absent
@@ -49,7 +49,7 @@
       onewire: 1
       rgpio: 1
       spi: 1
-      boot_wait: 1
+      boot_wait: 0
       overscan: 1
       camera: 1
       pixdub: 1
@@ -220,15 +220,15 @@
       tags:
          - raspi-config
 
-    - name: WIFI
-      lineinfile:
-        path: /boot/config.txt
-        insertafter: '^#[all]'
-        line: 'dtoverlay=disable-wifi'
-        regexp: "^#?dtoverlay=disable-wifi"
-        state: present
-      tags:
-         - raspi-config
+#    - name: WIFI
+#      lineinfile:
+#        path: /boot/config.txt
+#        insertafter: '^#[all]'
+#        line: 'dtoverlay=disable-wifi'
+#        regexp: "^#?dtoverlay=disable-wifi"
+#        state: present
+#      tags:
+#         - raspi-config
 
     - name: Bluetooth
       lineinfile:
@@ -238,7 +238,14 @@
         regexp: "^#?dtoverlay=pi3-disable-bt"
         state: present
       tags:
-         - raspi-config
+        - raspi-config
+
+    - name: Tweaking Console
+      lineinfile:
+        path: /boot/cmdline.txt
+        backrefs: true
+        regexp: '^(.*rootwait)$'
+        line: '\1 logo.nologo vt.global_cursor_default=0 consoleblank=0 disable_splash=1'
 
     - name: CPU opts
       apt:
@@ -274,10 +281,9 @@
     - name: Blank Console script
       copy:
         dest: /usr/local/bin/clear-tty.sh
-        create: yes
         group: root
         owner: root
-        mode: '0755'
+        mode: 0755
         content: |
           #!/bin/bash
           #
@@ -300,6 +306,33 @@
         regexp: '^%sudo.+ALL=.+$'
         line: '%sudo  ALL=(ALL:ALL) NOPASSWD: ALL'
         validate: /usr/sbin/visudo -cf %s
+
+    - name: Non Free REPO addition
+      apt_repository:
+        repo: deb http://www.deb-multimedia.org buster main non-free
+        state: present
+      tags:
+        - ffmpeg
+
+    - name: Non Free REPO addition
+      command: "apt-get -y --allow-unauthenticated update -oAcquire::AllowInsecureRepositories=true"
+      tags:
+        - ffmpeg
+ 
+    - name: Non Free REPO addition
+      command: "apt-get -y --allow-unauthenticated install deb-multimedia-keyring"
+      tags:
+        - ffmpeg
+ 
+    - name: Non Free REPO addition
+      command: "apt-get -y --allow-unauthenticated upgrade"
+      tags:
+        - ffmpeg
+ 
+    - name: Install non free stuff
+      command: "apt-get -y --allow-unauthenticated install libopenh264-5 libkvazaar4 libfdk-aac2"
+      tags:
+        - ffmpeg
 
     - name: OMXD
       apt:
@@ -343,23 +376,7 @@
         line: "{{ ATEMIP }}\tatem"
         state: present
       tags:
-         - companion
-
-    - name: Download companion config
-      get_url:
-        url: https://github.com/robinhoodis/video_switcher/raw/master/videopi_full-config.companionconfig
-        dest: /home/pi/videopi_full-config.companionconfig
-        group: pi
-        owner: pi
-        mode: 0644
-      tags:
-         - companion
-
-    - name: Put ATEM IP in companion config
-      replace:
-        path: /home/pi/videopi_full-config.companionconfig
-        regexp: '"bmd-atem","product":"ATEM","label":"atem","_configIdx":0,"host":"(?:[0-9]{1,3}\.){3}[0-9]{1,3}"'
-        replace: '"bmd-atem","product":"ATEM","label":"atem","_configIdx":0,"host":"{{ ATEMIP }}"'
+        - companion
 
     - name: Companion Dependencies
       apt:
@@ -372,10 +389,11 @@
         - cmake
         - libudev-dev
         - libusb-1.0-0-dev
+        - npm
       tags:
-         - companion
+        - companion
 
-    - name: Companion USB Dependencies
+    - name: Companion USB permissions
       copy:
         dest: /etc/udev/rules.d/50-companion.rules
         group: root
@@ -396,12 +414,12 @@
           SUBSYSTEM=="usb", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="1f41", MODE:="666", GROUP="plugdev"
           KERNEL=="hidraw", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="1f41", MODE:="666", GROUP="plugdev"
       tags:
-         - companion
+        - companion
 
     - name: Reload USB rules
       command: udevadm control --reload-rules
       tags:
-         - companion
+        - companion
 
     - name: Update npm
       command: npm install n -g
@@ -411,7 +429,7 @@
     - name: Update node
       command: n 8.17.0
       tags:
-         - companion
+        - companion
 
     - name: Install yarn
       command: npm install yarn -g
@@ -424,7 +442,7 @@
          dest: /usr/local/src/companion
          force: yes
       tags:
-         - companion
+        - companion
 
     - name: Update companion modules - takes time....
       command:
@@ -433,18 +451,20 @@
       environment:
         PATH: $HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:{{ ansible_env.PATH }}
       tags:
-         - companion
+        - companion
 
     - name: Build writefile
-      command: chdir=/usr/local/src/companion /usr/local/src/companion/tools/build_writefile.sh
+      command: 
+        cmd: tools/build_writefile.sh
+        chdir: /usr/local/src/companion
       environment:
         PATH: $HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:{{ ansible_env.PATH }}
       tags:
-         - companion
+        - companion
 
-    - name: Companion USB Dependencies
+    - name: Companion UNIT file
       copy:
-        dest: /etc/udev/rules.d/50-companion.rules
+        dest: /etc/systemd/system/companion.service
         group: root
         owner: root
         mode: '0644'
@@ -457,7 +477,7 @@
           [Service]
           Type=simple
           WorkingDirectory=/usr/local/src/companion
-          ExecStart=/usr/local/src/companion/headless.js eth0
+          ExecStart=node /usr/local/src/companion/headless_ip.js 0.0.0.0
           Restart=on-failure
           KillSignal=SIGINT
           TimeoutStopSec=60
@@ -465,7 +485,16 @@
           [Install]
           WantedBy=multi-user.target
       tags:
-         - companion
+        - companion
+
+    - name: Companion startup executable
+      file:
+       path: /usr/local/src/companion/headless_ip.js
+       mode: 0755
+       group: root
+       owner: root
+      tags:
+        - companion-config
 
     - name: Companion config directory
       file:
@@ -475,26 +504,59 @@
        group: root
        owner: root
       tags:
-         - companion
+        - companion-config
 
-    - name: Create a symbolic link
-      file:
-        src: /home/pi/videopi_full-config.companionconfig
+    - name: Download companion config
+      get_url:
+        url: https://github.com/robinhoodis/video_switcher/raw/master/pi/{{ HOSTNAME }}_full-config.companionconfig
         dest: /usr/local/src/companion/undefined/companion/db
-        force: yes
-        owner: root
         group: root
-        state: link
+        owner: root
+        mode: 0644
       tags:
-         - companion
+        - companion-config
+
+    - name: Put ATEM IP in companion config
+      replace:
+        path: /usr/local/src/companion/undefined/companion/db
+        regexp: '"bmd-atem","product":"ATEM","label":"atem","_configIdx":0,"host":"(?:[0-9]{1,3}\.){3}[0-9]{1,3}"'
+        replace: '"bmd-atem","product":"ATEM","label":"atem","_configIdx":0,"host":"{{ ATEMIP }}"'
+        group: pi
+        owner: pi
+        mode: 0644
+      tags:
+        - companion-config
+
+    - name: Companion config
+      copy:
+        dest: /usr/local/src/companion/undefined/companion/config
+        group: root
+        owner: root
+        mode: '0644'
+        content: |
+          {"http_port":8000,"bind_ip":"0.0.0.0","start_minimised":false}
+      tags:
+        - companion-config
+
+#    - name: Create a symbolic link
+#      file:
+#        src: /home/pi/{{ HOSTNAME }}_full-config.companionconfig
+#        dest: /usr/local/src/companion/undefined/companion/db
+#        force: yes
+#        owner: root
+#        group: root
+#        state: link
+#      tags:
+#        - companion
 
     - name: Start Companion
       systemd:
         name: companion.service
-        state: restarted
         enabled: yes
+        daemon_reload: yes
+        state: started
       tags:
-         - companion
+        - companion-config
 
     - name: Music Player
       apt:
@@ -502,6 +564,26 @@
         pkg:
           - mpd
           - mpc
+      tags:
+        - music
+
+    - name: Download default song
+      get_url:
+        url: https://github.com/robinhoodis/video_switcher/raw/master/pi/Music/elysium.wav
+        dest: /home/pi/Music
+        group: pi
+        owner: pi
+        mode: 0644
+      tags:
+        - music
+
+    - name: Download default playlist
+      get_url:
+        url: https://github.com/robinhoodis/video_switcher/raw/master/pi/Music/default_playlist.m3u
+        dest: /home/pi/Music
+        group: pi
+        owner: pi
+        mode: 0644
       tags:
         - music
 
@@ -532,13 +614,13 @@
       tags:
         - music
 
-#    - name: Softare volume out 3.5mm output
+#    - name: Softare volume control
 #      lineinfile:
-#        backrefs: yes
+#        backrefs: no
 #        path: /etc/mpd.conf
 #        state: present
-#        regexp: '^#?mixer_type\s+"(hardware|software)"\s+#\s+optional$'
-#        line: '    mixer_type      "software" # optional'
+#        regexp: '^#?.+mixer_type\s+"(hardware|software)"\s+#\s+optional$'
+#        line: '   mixer_type      "software"      # optional'
 #      tags:
 #        - music
 
@@ -578,51 +660,59 @@
       tags:
         - music
 
+    - name: Set Mixer volume to 0DB
+      become: False
+      command: amixer -c 1 set Headphone 0DB
+      tags:
+        - music
+
     - name: Start Music Player
       systemd:
         name: mpd
         enabled: yes
         state: started
       tags:
+        - music
+
+    - name: Load Playlist
+      become: False
+      command: mpc load default_playlist
+      tags:
          - music
+
+    - name: Install Imagemagick for backgrounds
+      apt:
+        install_recommends: yes
+        pkg:
+        - imagemagick
+      tags:
+        - background
+
+    - name: Download default background
+      get_url:
+        url: https://github.com/robinhoodis/video_switcher/raw/master/pi/Pictures/blue_background.png
+        dest: /home/pi/Pictures/blue_background.png
+        group: pi
+        owner: pi
+        mode: 0644
+      tags:
+        - background
+
+    - name: Load default background
+      command: /usr/bin/convert -resize 1920x1080 -background black -gravity center -extent 1920x1080 /home/pi/Pictures/blue_background.png bgra:/dev/fb0
+      tags:
+        - background
 
     - name: Filesharing
       apt:
         install_recommends: yes
         pkg:
-        - netatalk
         - samba
         - samba-common-bin
       tags:
          - filesharing
 
-    - name: Configure Netatalk Homes
-      lineinfile:
-        path: /etc/netatalk/afp.conf
-        state: present
-        regexp: '^; \[Homes\]$'
-        line: '[Homes]'
-      tags:
-         - filesharing
-
-    - name: Configure Netatalk /home
-      lineinfile:
-        path: /etc/netatalk/afp.conf
-        state: present
-        regexp: '^;.basedir.regex.=.\/xxxx$'
-        line: 'basedir regex = /home'
-      tags:
-         - filesharing
-
-    - name: Start Mac Filesharing
-      systemd:
-        name: netatalk
-        enabled: yes
-        state: started
-      tags:
-         - filesharing
-
-    - name: Start Windows Filesharing
+    - name: Start Filesharing
       systemd:
         name: smbd
         enabled: yes
@@ -637,7 +727,7 @@
         - vim
         - bash-completion
         - jq
-        - speedtepst-cli
+        - speedtest-cli
       tags:
         - userland
 
@@ -670,6 +760,7 @@
         dest: /home/pi/.vim_runtime
         update: yes
         version: master
+        force: yes
       tags:
          - userland
 
