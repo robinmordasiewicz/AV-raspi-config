@@ -27,6 +27,11 @@
       private: no
       default: "{{ lookup('pipe','grep atem /etc/hosts | expand -t 1 | cut -f 1 -d \" \"') | default('192.168.2.240', true)  }}"
 
+    - name: AUDIOOUT
+      prompt: "Default audio output Headphone or HDMI: "
+      private: no
+      default: "{{ lookup('pipe','sudo -u pi amixer cget numid=1 | grep \"^numid\" | grep -o \"Headphone\\|HDMI\"') | default('Headphone', true)  }}"
+
   vars:
     REBOOT: False
     UPDATE: False
@@ -35,7 +40,7 @@
     NETNAMES: False
     BLUETOOTH: present # present or absent
     WIFI: present # present or absent
-    WIFI_COUNTRY: "US"
+    WIFI_COUNTRY: "CA"
     BOOTSPLASH: False
     OVERCLOCK: False
     HDMI_GROUP: 1
@@ -59,46 +64,44 @@
     - name: Update apt-get repo and cache
       apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
       tags:
-         - update
+        - update
 
     - name: Upgrade apt packages
       apt: upgrade=dist force_apt_get=yes
       tags:
-         - update
+        - update
 
-    - name: Installing Firmware packages
+    - name: Firmware
       apt:
         install_recommends: yes
         pkg:
         - rpi-eeprom
         - rpi-eeprom-images
       tags:
-         - update
-
-    - name: Update raspi-config itself
-      become: true
-      apt: name=raspi-config update_cache=yes state=present cache_valid_time=3600
-      when: UPDATE == True
-      tags:
-         - update
-
-    - name: raspi-config
-      command: "raspi-config nonint do_{{ item.key }} {{ item.value }}"
-      when: "item.value != lookup('pipe','sudo raspi-config nonint get_{{item.key}}')"
-      with_dict: "{{ raspiconfig }}"
-      tags:
-        - raspi-config
+        - update
 
     - name: Required Software
       apt:
         pkg:
-        - git
+          - git
+      tags:
+        - update
+
+    - name: raspi-config
+      command: "raspi-config nonint do_{{ item.key }} {{ item.value }}"
+      when: "item.value != lookup('pipe','raspi-config nonint get_{{ item.key }}')"
+      with_dict: "{{ raspiconfig }}"
+      register: returnvalue
+      changed_when: "returnvalue.stderr"
+      tags:
+        - raspi-config-loop
+        - raspi-config
 
     - name: Change hostname
       command: "raspi-config nonint do_hostname {{ HOSTNAME }}"
       when: lookup('pipe','raspi-config nonint get_hostname') != HOSTNAME
       tags:
-         - raspi-config
+        - raspi-config
 
     #N2 Wi-fi
     #- name: Set WiFi credentials
@@ -127,89 +130,89 @@
       when: ( lookup('pipe','raspi-config nonint get_boot_cli') != "0" ) or
             ( lookup('pipe','raspi-config nonint get_autologin') != "1" )
       tags:
-         - raspi-config
+        - raspi-config
 
     - name: Change locale
       command: "raspi-config nonint do_change_locale {{ LOCALE }}"
       when: lookup('env','LANG') != LOCALE
       tags:
-         - raspi-config
+        - raspi-config
 
     - name: Change timezone
       command: "raspi-config nonint do_change_timezone {{ TIMEZONE }}"
       when: lookup('file', '/etc/timezone') != TIMEZONE
       tags:
-         - raspi-config
+        - raspi-config
 
-#    #I3 Change Keyboard Layout
-#    - name: Change keyboard layout
-#      command: "raspi-config nonint do_configure_keyboard {{ XKBLAYOUT }}"
+    - name: Get WiFi country
+      command: "raspi-config nonint get_wifi_country"
+      register: wifi_country
+      changed_when: False
+      ignore_errors: True #to avoid error when WiFi is not present
+      tags:
+        - raspi-config
 
-#    #I4 Change Wi-fi Country
-#    - name: Get WiFi country
-#      command: "raspi-config nonint get_wifi_country"
-#      register: wifi_country
-#      changed_when: False
-#      ignore_errors: True #to avoid error when WiFi is not present
-#
-#    - name: Print current WiFi country
-#      debug: 
-#        msg: "Wifi country is: {{ wifi_country.stdout }}" 
-#
-#    #- name: Set WiFi country
-#    #command: "raspi-config nonint do_wifi_country {{ WIFI_COUNTRY }}"
-
-#6 Overclock
-
-#    #A1 Expand Filesystem
-#    - name: Check if FS is expandable
-#      command: "raspi-config nonint get_can_expand"
-#      register: fs_filled
-#      changed_when: False
-
-#    - name: Print if FS is expandable or not
-#      debug:
-#        msg: "Filesystem is expandable! [{{ fs_filled.stdout }}]"
-#      when: fs_filled.stdout == '0'
-
-    - name: Expand Filesystem
-      command: "raspi-config nonint do_expand_rootfs"
+    - name: Set WiFi country
+      command: "raspi-config nonint do_wifi_country {{ WIFI_COUNTRY }}"
+      when: wifi_country.stdout != WIFI_COUNTRY
+      tags:
+        - raspi-config
 
     - name: Set GPU memory split
       command: "raspi-config nonint do_memory_split {{ MEMSPLIT }}"
       when: lookup('pipe','raspi-config nonint get_config_var gpu_mem /boot/config.txt') != MEMSPLIT
       tags:
-         - raspi-config
+        - raspi-config
 
-#    ### 0 Auto, 1 Force 3.5mm, 2 Force hdmi
-    - name: Set audio out
-      command: "raspi-config nonint do_audio 1"
+    - name: Get audio output
+      command: amixer contents
+      become: False
+      register: audiooutput
+      changed_when: False
       tags:
-         - raspi-config
+        - raspi-config-audio
+        - raspi-config
+
+    - name: Get HDMI or Headphone
+      shell: if [ "{{ AUDIOOUT }}" == "Headphone" ]; then echo 1; else echo 0; fi
+      args:
+        executable: /bin/bash
+      register: AUDIOOUTNUM
+      changed_when: False
+      when: not audiooutput.stdout is search(AUDIOOUT)
+      tags:
+        - raspi-config-audio
+        - raspi-config
+
+    - name: Set audio out
+      command: "raspi-config nonint do_audio {{ AUDIOOUTNUM.stdout }}"
+      when: not audiooutput.stdout is search(AUDIOOUT)
+      tags:
+        - raspi-config-audio
+        - raspi-config
 
     - name: Disable 4K 60fps
       command: "raspi-config nonint do_pi4video V3"
       when: lookup('pipe','raspi-config nonint get_pi4video') != "0"
       tags:
-         - raspi-config
+        - raspi-config
 
     - name: Set HDMI group mode
       command: "raspi-config nonint do_resolution {{ HDMI_GROUP }} {{ HDMI_MOD }}"
       when: ( lookup('pipe','raspi-config nonint get_config_var hdmi_group /boot/config.txt') != "1" ) or
             ( lookup('pipe','raspi-config nonint get_config_var hdmi_mode /boot/config.txt') != "34" )
       tags:
-         - raspi-config
+        - raspi-config
 
     - name: Enable HDMI audio
       lineinfile:
         path: /boot/config.txt
         line: 'hdmi_drive=2'
         regexp: "^#?hdmi_drive=."
-        insertafter: "# DMT (computer monitor) modes"
         state: present
       when: lookup('pipe','raspi-config nonint get_config_var hdmi_drive /boot/config.txt') != "2"
       tags:
-         - raspi-config
+        - raspi-config
 
     - name: Real Clock CPU
       lineinfile:
@@ -218,7 +221,7 @@
         line: 'nohz=off'
         state: present
       tags:
-         - raspi-config
+        - raspi-config
 
 #    - name: WIFI
 #      lineinfile:
@@ -240,17 +243,12 @@
       tags:
         - raspi-config
 
-    - name: Tweaking Console
-      lineinfile:
-        path: /boot/cmdline.txt
-        backrefs: true
-        regexp: '^(.*rootwait)$'
-        line: '\1 logo.nologo vt.global_cursor_default=0 consoleblank=0 disable_splash=1'
-
     - name: CPU opts
       apt:
         pkg:
         - cpufrequtils
+      tags:
+        - optimizations
 
     - name: CPU performance
       lineinfile:
@@ -258,9 +256,22 @@
         create: yes
         state: present
         line: 'GOVERNOR="performance"'
+      tags:
+        - optimizations
 
     - name: Reload CPU freq
       command: systemctl restart cpufrequtils
+      tags:
+        - optimizations
+
+    - name: Tweaking Console
+      lineinfile:
+        path: /boot/cmdline.txt
+        backrefs: true
+        regexp: '^(.*rootwait)$'
+        line: '\1 logo.nologo vt.global_cursor_default=0 consoleblank=0 disable_splash=1'
+      tags:
+        - customizations
 
     - name: Disable console messages
       lineinfile:
@@ -269,6 +280,8 @@
         line: 'dmesg --console-off'
         regexp: "^#?dmesg.--console-off$"
         state: present
+      tags:
+        - customizations
 
     - name: Blank Console
       lineinfile:
@@ -277,6 +290,8 @@
         line: '/usr/local/bin/clear-tty.sh &'
         regexp: "^#?\/usr\/local\/bin\/clear-tty.sh.&$"
         state: present
+      tags:
+        - customizations
 
     - name: Blank Console script
       copy:
@@ -291,21 +306,8 @@
           sleep 10
           /usr/bin/clear > /dev/tty1
           exit 0
-
-    - name: pi to sudo group
-      user:
-        name: pi
-        groups: sudo
-        append: yes
-
-    # NOTE: Fully quoted because of the ': ' on the line. See the Gotchas in the YAML docs.
-    - name: Passwordless sudo for pi user
-      lineinfile:
-        path: /etc/sudoers
-        state: present
-        regexp: '^%sudo.+ALL=.+$'
-        line: '%sudo  ALL=(ALL:ALL) NOPASSWD: ALL'
-        validate: /usr/sbin/visudo -cf %s
+      tags:
+        - customizations
 
     - name: Non Free REPO addition
       apt_repository:
@@ -436,7 +438,7 @@
       tags:
          - companion
 
-    - name: clone companion repo
+    - name: clone companion github
       git:
          repo: https://github.com/bitfocus/companion.git
          dest: /usr/local/src/companion
@@ -476,7 +478,7 @@
 
           [Service]
           Type=simple
-          WorkingDirectory=/usr/local/src/companion
+          WorkingDirectory=/var/run/companion
           ExecStart=node /usr/local/src/companion/headless_ip.js 0.0.0.0
           Restart=on-failure
           KillSignal=SIGINT
@@ -487,18 +489,9 @@
       tags:
         - companion
 
-    - name: Companion startup executable
+    - name: Companion DB directory
       file:
-       path: /usr/local/src/companion/headless_ip.js
-       mode: 0755
-       group: root
-       owner: root
-      tags:
-        - companion-config
-
-    - name: Companion config directory
-      file:
-       path: /usr/local/src/companion/undefined/companion/
+       path: /var/run/companion/undefined/companion/
        state: directory
        mode: 0755
        group: root
@@ -506,52 +499,45 @@
       tags:
         - companion-config
 
-    - name: Download companion config
+    - name: Download companion DB
       get_url:
         url: https://github.com/robinhoodis/video_switcher/raw/master/pi/{{ HOSTNAME }}_full-config.companionconfig
-        dest: /usr/local/src/companion/undefined/companion/db
-        group: root
-        owner: root
+        dest: /var/run/companion/undefined/companion/db
         mode: 0644
       tags:
         - companion-config
 
-    - name: Put ATEM IP in companion config
+    - name: Put ATEM IP in companion DB
       replace:
-        path: /usr/local/src/companion/undefined/companion/db
+        path: /var/run/companion/undefined/companion/db
         regexp: '"bmd-atem","product":"ATEM","label":"atem","_configIdx":0,"host":"(?:[0-9]{1,3}\.){3}[0-9]{1,3}"'
         replace: '"bmd-atem","product":"ATEM","label":"atem","_configIdx":0,"host":"{{ ATEMIP }}"'
-        group: pi
-        owner: pi
+        backup: yes
         mode: 0644
+      tags:
+        - companion-config
+
+    - name: Check for Companion config
+      stat:
+        path: /var/run/companion/undefined/companion/config
+      register: companionconfig
+      changed_when: False
       tags:
         - companion-config
 
     - name: Companion config
       copy:
-        dest: /usr/local/src/companion/undefined/companion/config
-        group: root
-        owner: root
+        dest: /var/run/companion/undefined/companion/config
         mode: '0644'
         content: |
           {"http_port":8000,"bind_ip":"0.0.0.0","start_minimised":false}
+      when: not companionconfig.stat.exists
       tags:
         - companion-config
 
-#    - name: Create a symbolic link
-#      file:
-#        src: /home/pi/{{ HOSTNAME }}_full-config.companionconfig
-#        dest: /usr/local/src/companion/undefined/companion/db
-#        force: yes
-#        owner: root
-#        group: root
-#        state: link
-#      tags:
-#        - companion
-
     - name: Start Companion
       systemd:
-        name: companion.service
+        name: companion
         enabled: yes
         daemon_reload: yes
         state: started
@@ -690,8 +676,8 @@
 
     - name: Download default background
       get_url:
-        url: https://github.com/robinhoodis/video_switcher/raw/master/pi/Pictures/blue_background.png
-        dest: /home/pi/Pictures/blue_background.png
+        url: https://github.com/robinhoodis/video_switcher/raw/master/pi/Pictures/default_background.png
+        dest: /home/pi/Pictures/default_background.png
         group: pi
         owner: pi
         mode: 0644
@@ -699,7 +685,7 @@
         - background
 
     - name: Load default background
-      command: /usr/bin/convert -resize 1920x1080 -background black -gravity center -extent 1920x1080 /home/pi/Pictures/blue_background.png bgra:/dev/fb0
+      command: /usr/bin/convert -resize 1920x1080 -background black -gravity center -extent 1920x1080 /home/pi/Pictures/default_background.png bgra:/dev/fb0
       tags:
         - background
 
@@ -731,14 +717,32 @@
       tags:
         - userland
 
+    - name: pi to sudo group
+      user:
+        name: pi
+        groups: sudo
+        append: yes
+      tags:
+        - userland
+
+    # NOTE: Fully quoted because of the ': ' on the line. See the Gotchas in the YAML docs.
+    - name: Passwordless sudo for pi user
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: '^%sudo.+ALL=.+$'
+        line: '%sudo  ALL=(ALL:ALL) NOPASSWD: ALL'
+        validate: /usr/sbin/visudo -cf %s
+      tags:
+        - userland
+
     - name: Creating .hushlogin inside users home
       become: False
       file:
         path: /home/pi/.hushlogin
-        state: touch
+        state: file
         owner: pi
         group: pi
-        mode: 0600
       tags:
          - userland
 
@@ -766,7 +770,10 @@
 
     - name: activate vimrc
       become: False
-      command: chdir=/home/pi "/home/pi/.vim_runtime/install_awesome_vimrc.sh"
+      command:
+        chdir: /home/pi
+        cmd: /home/pi/.vim_runtime/install_awesome_vimrc.sh
+        creates: /home/pi/.vimrc
       tags:
          - userland
 
