@@ -7,6 +7,21 @@
 
   vars_prompt:
 
+    - name: GITHUBUSEREMAIL
+      prompt: "Github email address: "
+      private: no
+      default: "{{ lookup('ini', 'email section=user file=/home/pi/.gitconfig', errors='ignore') | default('user@example.com', true)  }}"
+ 
+    - name: GITHUBUSERNAME
+      prompt: "Github username: "
+      private: no
+      default: "{{ lookup('ini', 'name section=user file=/home/pi/.gitconfig', errors='ignore') | default('example', true)  }}"
+ 
+    - name: GITHUBHELPER
+      prompt: "Github helper: "
+      private: no
+      default: "{{ lookup('ini', 'helper section=credential file=/home/pi/.gitconfig', errors='ignore') | default('cache --timeout=36000', true)  }}"
+
     - name: HOSTNAME
       prompt: "Hostname: "
       private: no
@@ -97,6 +112,27 @@
           - git
       tags:
         - update
+
+    - name: Git config email
+      become: False
+      git_config:
+          scope: global
+          name: user.email
+          value: "{{ GITHUBUSEREMAIL }}"
+ 
+    - name: Git config username
+      become: False
+      git_config:
+          scope: global
+          name: user.name
+          value: "{{ GITHUBUSERNAME }}"
+ 
+    - name: Git config cache
+      become: False
+      git_config:
+          scope: global
+          name: credential.helper
+          value: "{{ GITHUBHELPER }}"
 
     - name: raspi-config
       command: "raspi-config nonint do_{{ item.key }} {{ item.value }}"
