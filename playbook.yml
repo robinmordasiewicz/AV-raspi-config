@@ -32,6 +32,17 @@
       private: no
       default: "{{ lookup('pipe','sudo -u pi amixer cget numid=1 | grep \"^numid\" | grep -o \"Headphone\\|HDMI\"') | default('Headphone', true)  }}"
 
+    - name: WIFIENABLED
+      prompt: "Enable WIFI: \nEnter [Enable or Disable]"
+      private: no
+      default: "{{ lookup('pipe','sudo -u pi amixer cget numid=1 | grep \"^numid\" | grep -o \"Headphone\\|HDMI\"') | default('Enabled', true)  }}"
+
+    - name: WIFICOUNTRY
+      prompt: ""
+      private: no
+      default: "{{ lookup('pipe','sudo -u pi amixer cget numid=1 | grep \"^numid\" | grep -o \"Headphone\\|HDMI\"') | default('Enabled', true)  }}"
+
+
   vars:
     REBOOT: False
     UPDATE: False
@@ -40,7 +51,7 @@
     NETNAMES: False
     BLUETOOTH: present # present or absent
     WIFI: present # present or absent
-    WIFI_COUNTRY: "CA"
+    WIFICOUNTRY: "CA"
     BOOTSPLASH: False
     OVERCLOCK: False
     HDMI_GROUP: 1
@@ -103,28 +114,6 @@
       tags:
         - raspi-config
 
-    #N2 Wi-fi
-    #- name: Set WiFi credentials
-      #command: "raspi-config nonint do_wifi_ssid_passphrase {{ SSID }} {{ PASSPHRASE }}"
-    
-#    #N3 Network interface names
-#    - name: Get network names status
-#      command: "raspi-config nonint get_net_names"
-#      register: pi_netnames
-#      changed_when: False
-
-#    - name: Print current network names status
-#      debug:
-#        msg: "Current network names status: {{ pi_netnames.stdout }}"
-
-#    - name: Enable network names
-#      command: "raspi-config nonint do_net_names 0"
-#      when: (NETNAMES == True) and (pi_netnames.stdout != '0')
-
-#    - name: Disable network names
-#      command: "raspi-config nonint do_net_names 1"
-#      when: (NETNAMES == True) and (pi_netnames.stdout != '1')
-
     - name: Set Boot behaviour
       command: "raspi-config nonint do_boot_behaviour B1"
       when: ( lookup('pipe','raspi-config nonint get_boot_cli') != "0" ) or
@@ -144,21 +133,29 @@
       tags:
         - raspi-config
 
-    - name: Get WiFi country
-      command: "raspi-config nonint get_wifi_country"
-      register: wifi_country
-      changed_when: False
-      ignore_errors: True #to avoid error when WiFi is not present
+#    - name: WIFI
+#      lineinfile:
+#        path: /boot/config.txt
+#        insertafter: '^#[all]'
+#        line: 'dtoverlay=disable-wifi'
+#        regexp: "^#?dtoverlay=disable-wifi"
+#        state: present
+#      tags:
+#         - raspi-config
+
+    #N2 Wi-fi
+    #- name: Set WiFi credentials
+    #command: "raspi-config nonint do_wifi_ssid_passphrase {{ SSID }} {{ PASSPHRASE }}"
+    
+    - name: WiFi country
+      command: "raspi-config nonint do_wifi_country {{ WIFICOUNTRY }}"
+      when: lookup('pipe','raspi-config nonint get_wifi_country') != {{ WIFICOUNTRY }}
+      ignore_errors: True
       tags:
+        - raspi-config-wifi
         - raspi-config
 
-    - name: Set WiFi country
-      command: "raspi-config nonint do_wifi_country {{ WIFI_COUNTRY }}"
-      when: wifi_country.stdout != WIFI_COUNTRY
-      tags:
-        - raspi-config
-
-    - name: Set GPU memory split
+    - name: GPU memory split
       command: "raspi-config nonint do_memory_split {{ MEMSPLIT }}"
       when: lookup('pipe','raspi-config nonint get_config_var gpu_mem /boot/config.txt') != MEMSPLIT
       tags:
@@ -222,16 +219,6 @@
         state: present
       tags:
         - raspi-config
-
-#    - name: WIFI
-#      lineinfile:
-#        path: /boot/config.txt
-#        insertafter: '^#[all]'
-#        line: 'dtoverlay=disable-wifi'
-#        regexp: "^#?dtoverlay=disable-wifi"
-#        state: present
-#      tags:
-#         - raspi-config
 
     - name: Bluetooth
       lineinfile:
@@ -496,6 +483,7 @@
        mode: 0755
        group: root
        owner: root
+       recurse: yes
       tags:
         - companion-config
 
@@ -684,8 +672,13 @@
       tags:
         - background
 
-    - name: Load default background
-      command: /usr/bin/convert -resize 1920x1080 -background black -gravity center -extent 1920x1080 /home/pi/Pictures/default_background.png bgra:/dev/fb0
+    - name: Download default video
+      get_url:
+        url: https://github.com/robinhoodis/video_switcher/raw/master/pi/Videos/default_video.mp4
+        dest: /home/pi/Videos/default_video.mp4
+        group: pi
+        owner: pi
+        mode: 0644
       tags:
         - background
 
