@@ -230,12 +230,12 @@
     #- name: Set WiFi credentials
     #command: "raspi-config nonint do_wifi_ssid_passphrase {{ SSID }} {{ PASSPHRASE }}"
     
-    - name: WiFi country
-      command: "raspi-config nonint do_wifi_country {{ WIFICOUNTRY }}"
-      when: lookup('pipe','raspi-config nonint get_wifi_country', errors='ignore') != {{ WIFICOUNTRY }}
-      ignore_errors: True
-      tags:
-        - raspi-config
+    #    - name: WiFi country
+    #     command: "raspi-config nonint do_wifi_country {{ WIFICOUNTRY }}"
+    #   when: lookup('pipe','raspi-config nonint get_wifi_country', errors='ignore') != {{ WIFICOUNTRY }}
+    #  ignore_errors: True
+    #  tags:
+      #    - raspi-config
 
     - name: GPU memory split
       command: "raspi-config nonint do_memory_split {{ MEMSPLIT }}"
@@ -547,7 +547,7 @@
 
           [Service]
           Type=simple
-          WorkingDirectory=/var/run/companion
+          WorkingDirectory=/var/local/companion
           ExecStart=node /usr/local/src/companion/headless_ip.js 0.0.0.0
           Restart=on-failure
           KillSignal=SIGINT
@@ -560,7 +560,7 @@
 
     - name: Companion DB directory
       file:
-       path: /var/run/companion/undefined/companion/
+       path: /var/local/companion/undefined/companion/
        state: directory
        mode: 0755
        group: root
@@ -572,14 +572,14 @@
     - name: Download companion DB
       get_url:
         url: https://github.com/robinhoodis/video_switcher/raw/master/pi/{{ HOSTNAME }}_full-config.companionconfig
-        dest: /var/run/companion/undefined/companion/db
+        dest: /var/local/companion/undefined/companion/db
         mode: 0644
       tags:
         - companion-config
 
     - name: Put ATEM IP in companion DB
       replace:
-        path: /var/run/companion/undefined/companion/db
+        path: /var/local/companion/undefined/companion/db
         regexp: '"bmd-atem","product":"ATEM","label":"atem","_configIdx":0,"host":"(?:[0-9]{1,3}\.){3}[0-9]{1,3}"'
         replace: '"bmd-atem","product":"ATEM","label":"atem","_configIdx":0,"host":"{{ ATEMIP }}"'
         backup: yes
@@ -589,7 +589,7 @@
 
     - name: Check for Companion config
       stat:
-        path: /var/run/companion/undefined/companion/config
+        path: /var/local/companion/undefined/companion/config
       register: companionconfig
       changed_when: False
       tags:
@@ -597,7 +597,7 @@
 
     - name: Companion config
       copy:
-        dest: /var/run/companion/undefined/companion/config
+        dest: /var/local/companion/undefined/companion/config
         mode: '0644'
         content: |
           {"http_port":8000,"bind_ip":"0.0.0.0","start_minimised":false}
