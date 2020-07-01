@@ -7,6 +7,11 @@
 
   vars_prompt:
 
+    - name: FIRSTLASTNAME
+      prompt: "Full Name: "
+      private: no
+      default: "{{ lookup('ini', 'name section=user file=/home/pi/.gitconfig', errors='ignore') | default('John Smith', true)  }}"
+  
     - name: GITHUBUSEREMAIL
       prompt: "Github email address: "
       private: no
@@ -15,7 +20,7 @@
     - name: GITHUBUSERNAME
       prompt: "Github username: "
       private: no
-      default: "{{ lookup('ini', 'name section=user file=/home/pi/.gitconfig', errors='ignore') | default('example', true)  }}"
+      default: "{{ lookup('ini', 'username section=user file=/home/pi/.gitconfig', errors='ignore') | default('example', true)  }}"
  
     - name: GITHUBHELPER
       prompt: "Github helper: "
@@ -47,16 +52,15 @@
       private: no
       default: "{{ lookup('pipe','sudo -u pi amixer cget numid=1 | grep \"^numid\" | grep -o \"Headphone\\|HDMI\"') | default('Headphone', true)  }}"
 
-    - name: WIFIENABLED
-      prompt: "Enable WIFI: \nEnter [Enable or Disable]"
+    - name: WIFIDESIREDENABLED
+      prompt: "Enable WIFI: "
       private: no
-      default: "{{ lookup('pipe','sudo -u pi amixer cget numid=1 | grep \"^numid\" | grep -o \"Headphone\\|HDMI\"') | default('Enabled', true)  }}"
+      default: "{{ 'no' if (lookup('pipe','cat /boot/config.txt | grep \"^dtoverlay=disable-wifi$\"', errors='ignore')) else 'yes' }}"
 
     - name: WIFICOUNTRY
       prompt: ""
       private: no
       default: "{{ lookup('pipe','sudo -u pi amixer cget numid=1 | grep \"^numid\" | grep -o \"Headphone\\|HDMI\"') | default('Enabled', true)  }}"
-
 
   vars:
     REBOOT: False
@@ -65,8 +69,6 @@
     XKBLAYOUT: "us"
     NETNAMES: False
     BLUETOOTH: present # present or absent
-    WIFI: present # present or absent
-    WIFICOUNTRY: "CA"
     BOOTSPLASH: False
     OVERCLOCK: False
     HDMI_GROUP: 1
@@ -113,19 +115,32 @@
       tags:
         - update
 
+    - name: Git config Full Name
+      become: False
+      git_config:
+          scope: global
+          name: user.name
+          value: "{{ FIRSTLASTNAME }}"
+      tags:
+        - github
+
     - name: Git config email
       become: False
       git_config:
           scope: global
           name: user.email
           value: "{{ GITHUBUSEREMAIL }}"
+      tags:
+        - github
  
     - name: Git config username
       become: False
       git_config:
           scope: global
-          name: user.name
+          name: user.username
           value: "{{ GITHUBUSERNAME }}"
+      tags:
+        - github
  
     - name: Git config cache
       become: False
@@ -133,6 +148,8 @@
           scope: global
           name: credential.helper
           value: "{{ GITHUBHELPER }}"
+      tags:
+        - github
 
     - name: raspi-config
       command: "raspi-config nonint do_{{ item.key }} {{ item.value }}"
@@ -169,15 +186,45 @@
       tags:
         - raspi-config
 
-#    - name: WIFI
-#      lineinfile:
-#        path: /boot/config.txt
-#        insertafter: '^#[all]'
-#        line: 'dtoverlay=disable-wifi'
-#        regexp: "^#?dtoverlay=disable-wifi"
-#        state: present
-#      tags:
-#         - raspi-config
+        #    - name: WIFI STATE
+        #   command: "{{ 'no' if (lookup('pipe','cat /boot/config.txt | grep \"^dtoverlay=disable-wifi$\"', errors='ignore')) else 'yes' }}"
+        #  register: WIFIDISABLED
+        # changed_when: False
+        #  tags:
+          #    - raspi-config-wifi
+          #    - raspi-config
+
+    - name: WIFI Current State
+      shell: if [ `cat /boot/config.txt | grep -q "^dtoverlay=disable-wifi$"` ]; then echo yes; else echo no; fi
+      args:
+        executable: /bin/bash
+      register: WIFIDISABLED
+      changed_when: False
+      tags:
+        - raspi-config-wifi
+        - raspi-config
+
+    - name: WIFI NEW State
+      shell: if [ "{{ WIFIDESIREDENABLED }}" == "yes" ]; then echo absent; else echo present; fi
+      args:
+        executable: /bin/bash
+      register: NEWSTATE
+      changed_when: False
+      tags:
+        - raspi-config-wifi
+        - raspi-config
+
+    - name: WIFI
+      lineinfile:
+        path: /boot/config.txt
+        insertafter: '^#[all]'
+        line: 'dtoverlay=disable-wifi'
+        regexp: "^#?dtoverlay=disable-wifi"
+        state: "{{ NEWSTATE.stdout }}"
+      when : WIFIDISABLED != WIFIDESIREDENABLED
+      tags:
+        - raspi-config-wifi
+        - raspi-config
 
     #N2 Wi-fi
     #- name: Set WiFi credentials
@@ -185,10 +232,9 @@
     
     - name: WiFi country
       command: "raspi-config nonint do_wifi_country {{ WIFICOUNTRY }}"
-      when: lookup('pipe','raspi-config nonint get_wifi_country') != {{ WIFICOUNTRY }}
+      when: lookup('pipe','raspi-config nonint get_wifi_country', errors='ignore') != {{ WIFICOUNTRY }}
       ignore_errors: True
       tags:
-        - raspi-config-wifi
         - raspi-config
 
     - name: GPU memory split
