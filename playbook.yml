@@ -120,6 +120,7 @@
       apt:
         pkg:
           - git
+          - raspi-config
       tags:
         - update
 
