@@ -678,7 +678,7 @@
 
     - name: Download default song
       get_url:
-        url: https://github.com/robinhoodis/video_switcher/raw/master/pi/Music/elysium.wav
+        url: https://raw.githubusercontent.com/robinhoodis/video_switcher/master/pi/Music/elysium.wav
         dest: /home/pi/Music
         group: pi
         owner: pi
@@ -688,7 +688,7 @@
 
     - name: Download default playlist
       get_url:
-        url: https://github.com/robinhoodis/video_switcher/raw/master/pi/Music/default_playlist.m3u
+        url: https://raw.githubusercontent.com/robinhoodis/video_switcher/master/pi/Music/default_playlist.m3u
         dest: /home/pi/Music
         group: pi
         owner: pi
