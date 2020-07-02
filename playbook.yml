@@ -369,8 +369,8 @@
       lineinfile:
         path: /boot/config.txt
         insertafter: '^#[all]'
-        line: 'dtoverlay=pi3-disable-bt'
-        regexp: "^#?dtoverlay=pi3-disable-bt"
+        line: 'dtoverlay=disable-bt'
+        regexp: "^#?dtoverlay=disable-bt"
         state: present
       tags:
         - raspi-config
