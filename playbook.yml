@@ -82,7 +82,7 @@
       ssh: 0
       vnc: 1
       i2c: 1
-      serial: 0
+      serial: 1
       onewire: 1
       rgpio: 1
       spi: 1
@@ -232,6 +232,7 @@
         line: 'dtoverlay=disable-bt'
         regexp: "^#?dtoverlay=disable-bt"
         state: "{{ BLUETOOTHSTATE.stdout }}"
+      notify: reboot
       when : BLUETOOTHDISABLED != BLUETOOTHDESIREDENABLED
       tags:
         - raspi-config-bluetooth
@@ -241,7 +242,7 @@
       systemd:
         name: hciuart
         enabled: "{{ BLUETOOTHDESIREDENABLED }}"
-        state: "{{ HCIUARTSTATE.stdout  }}"
+        #        state: "{{ HCIUARTSTATE.stdout  }}"
       tags:
         - raspi-config-bluetooth
         - raspi-config
