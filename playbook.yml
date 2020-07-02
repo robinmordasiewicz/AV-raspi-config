@@ -57,6 +57,11 @@
       private: no
       default: "{{ 'no' if (lookup('pipe','cat /boot/config.txt | grep \"^dtoverlay=disable-wifi$\"', errors='ignore')) else 'yes' }}"
 
+    - name: BLUETOOTHDESIREDENABLED
+      prompt: "Enable Bluetooth: "
+      private: no
+      default: "{{ 'no' if (lookup('pipe','cat /boot/config.txt | grep \"^dtoverlay=disable-bt$\"', errors='ignore')) else 'yes' }}"
+
     - name: WIFICOUNTRY
       prompt: ""
       private: no
@@ -68,7 +73,6 @@
     MEMSPLIT: "320"
     XKBLAYOUT: "us"
     NETNAMES: False
-    BLUETOOTH: present # present or absent
     BOOTSPLASH: False
     OVERCLOCK: False
     HDMI_GROUP: 1
@@ -78,7 +82,7 @@
       ssh: 0
       vnc: 1
       i2c: 1
-      serial: 1
+      serial: 0
       onewire: 1
       rgpio: 1
       spi: 1
@@ -87,6 +91,10 @@
       camera: 1
       pixdub: 1
       blanking: 1
+  
+  handlers:
+    - name: reboot
+      command: "shutdown -r now +1"
 
   tasks:
     - name: Update apt-get repo and cache
@@ -153,6 +161,7 @@
 
     - name: raspi-config
       command: "raspi-config nonint do_{{ item.key }} {{ item.value }}"
+      notify: reboot
       when: "item.value != lookup('pipe','raspi-config nonint get_{{ item.key }}')"
       with_dict: "{{ raspiconfig }}"
       register: returnvalue
@@ -186,13 +195,56 @@
       tags:
         - raspi-config
 
-        #    - name: WIFI STATE
-        #   command: "{{ 'no' if (lookup('pipe','cat /boot/config.txt | grep \"^dtoverlay=disable-wifi$\"', errors='ignore')) else 'yes' }}"
-        #  register: WIFIDISABLED
-        # changed_when: False
-        #  tags:
-          #    - raspi-config-wifi
-          #    - raspi-config
+    - name: Bluetooth Current State
+      shell: if [ `cat /boot/config.txt | grep -q "^dtoverlay=disable-bt$"` ]; then echo yes; else echo no; fi
+      args:
+        executable: /bin/bash
+      register: BLUETOOTHDISABLED
+      changed_when: False
+      tags:
+        - raspi-config-bluetooth
+        - raspi-config
+
+    - name: HCIUART Daemon State
+      shell: if [ "{{ BLUETOOTHDESIREDENABLED }}" == "yes" ]; then echo started; else echo stopped; fi
+      args:
+        executable: /bin/bash
+      register: HCIUARTSTATE
+      changed_when: False
+      tags:
+        - raspi-config-bluetooth
+        - raspi-config
+
+    - name: Bluetooth NEW State
+      shell: if [ "{{ BLUETOOTHDESIREDENABLED }}" == "yes" ]; then echo absent; else echo present; fi
+      args:
+        executable: /bin/bash
+      register: BLUETOOTHSTATE
+      changed_when: False
+      tags:
+        - raspi-config-bluetooth
+        - raspi-config
+
+    - name: Bluetooth
+      lineinfile:
+        path: /boot/config.txt
+        insertafter: '^#[all]'
+        line: 'dtoverlay=disable-bt'
+        regexp: "^#?dtoverlay=disable-bt"
+        state: "{{ BLUETOOTHSTATE.stdout }}"
+      when : BLUETOOTHDISABLED != BLUETOOTHDESIREDENABLED
+      tags:
+        - raspi-config-bluetooth
+        - raspi-config
+
+    - name: Bluetooth Service
+      systemd:
+        name: hciuart
+        enabled: "{{ BLUETOOTHDESIREDENABLED }}"
+        state: "{{ HCIUARTSTATE.stdout  }}"
+      tags:
+        - raspi-config-bluetooth
+        - raspi-config
 
     - name: WIFI Current State
       shell: if [ `cat /boot/config.txt | grep -q "^dtoverlay=disable-wifi$"` ]; then echo yes; else echo no; fi
@@ -869,11 +921,4 @@
         chdir: /home/pi/.vim_runtime
       tags:
          - userland
-
-    - name: Reboot
-      become: True
-      command: "sleep 1 && shutdown -r now +1"
-      async: 1
-      poll: 0
-      when: REBOOT == True
 
