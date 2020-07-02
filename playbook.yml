@@ -431,32 +431,32 @@
       tags:
         - customizations
 
-    - name: Non Free REPO addition
-      apt_repository:
-        repo: deb http://www.deb-multimedia.org buster main non-free
-        state: present
-      tags:
-        - ffmpeg
+        #    - name: Non Free REPO addition
+        #  apt_repository:
+          #   repo: deb http://www.deb-multimedia.org buster main non-free
+          #   state: present
+          #  tags:
+            #   - ffmpeg
 
-    - name: Non Free REPO addition
-      command: "apt-get -y --allow-unauthenticated update -oAcquire::AllowInsecureRepositories=true"
-      tags:
-        - ffmpeg
+            #   - name: Non Free REPO addition
+            #  command: "apt-get -y --allow-unauthenticated update -oAcquire::AllowInsecureRepositories=true"
+            #   tags:
+              #   - ffmpeg
  
-    - name: Non Free REPO addition
-      command: "apt-get -y --allow-unauthenticated install deb-multimedia-keyring"
-      tags:
-        - ffmpeg
+              #    - name: Non Free REPO addition
+              #   command: "apt-get -y --allow-unauthenticated install deb-multimedia-keyring"
+              #   tags:
+                #    - ffmpeg
  
-    - name: Non Free REPO addition
-      command: "apt-get -y --allow-unauthenticated upgrade"
-      tags:
-        - ffmpeg
+                #  - name: Non Free REPO addition
+                #    command: "apt-get -y --allow-unauthenticated upgrade"
+                #    tags:
+                  #     - ffmpeg
  
-    - name: Install non free stuff
-      command: "apt-get -y --allow-unauthenticated install libopenh264-5 libkvazaar4 libfdk-aac2"
-      tags:
-        - ffmpeg
+                  #   - name: Install non free stuff
+                  #    command: "apt-get -y --allow-unauthenticated install libopenh264-5 libkvazaar4 libfdk-aac2"
+                  #      tags:
+                    #        - ffmpeg
 
     - name: OMXD
       apt:
