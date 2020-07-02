@@ -901,7 +901,7 @@
       become: False
       file:
         path: /home/pi/.hushlogin
-        state: file
+        state: touch
         owner: pi
         group: pi
       tags:
