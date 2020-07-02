@@ -948,6 +948,14 @@
       tags:
         - userland
 
+    - name: Vim Python tools
+      apt:
+        install_recommends: yes
+        pkg:
+        - python-requests
+      tags:
+        - userland
+
     - name: update vim plugins
       become: False
       command:
