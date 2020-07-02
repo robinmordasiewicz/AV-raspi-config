@@ -676,6 +676,17 @@
       tags:
         - music
 
+    - name: Music directory
+      file:
+       path: /home/pi/Music
+       state: directory
+       mode: 0755
+       group: pi
+       owner: pi
+       recurse: yes
+      tags:
+        - music
+
     - name: Download default song
       get_url:
         url: https://raw.githubusercontent.com/robinhoodis/video_switcher/master/pi/Music/elysium.wav
@@ -768,10 +779,10 @@
         line: 'auto_update "yes"'
       tags:
         - music
-
+        # ROBIN - fix the output - this only works with Headphone at the moment
     - name: Set Mixer volume to 0DB
       become: False
-      command: amixer -c 1 set Headphone 0DB
+      command: amixer -c 0 set Headphone 0DB
       tags:
         - music
 
@@ -797,6 +808,17 @@
       tags:
         - background
 
+    - name: Pictures directory
+      file:
+       path: /home/pi/Pictures
+       state: directory
+       mode: 0755
+       group: pi
+       owner: pi
+       recurse: yes
+      tags:
+        - background
+
     - name: Download default background
       get_url:
         url: https://github.com/robinhoodis/video_switcher/raw/master/pi/Pictures/default_background.png
@@ -804,6 +826,17 @@
         group: pi
         owner: pi
         mode: 0644
+      tags:
+        - background
+
+    - name: Videos directory
+      file:
+       path: /home/pi/Videos
+       state: directory
+       mode: 0755
+       group: pi
+       owner: pi
+       recurse: yes
       tags:
         - background
 
