@@ -537,7 +537,7 @@
 
     - name: Download default song
       get_url:
-        url: https://raw.githubusercontent.com/robinhoodis/video_switcher/master/pi/Music/elysium.wav
+        url: https://raw.githubusercontent.com/robinmordasiewicz/video_switcher/master/pi/Music/elysium.wav
         dest: /home/pi/Music
         owner: pi
         group: pi
@@ -547,7 +547,7 @@
 
     - name: Download default playlist
       get_url:
-        url: https://raw.githubusercontent.com/robinhoodis/video_switcher/master/pi/Music/default_playlist.m3u
+        url: https://raw.githubusercontent.com/robinmordasiewicz/video_switcher/master/pi/Music/default_playlist.m3u
         dest: /home/pi/Music
         owner: pi
         group: audio
@@ -699,7 +699,7 @@
 
     - name: Download default background
       get_url:
-        url: https://github.com/robinhoodis/video_switcher/raw/master/pi/Pictures/default_background.png
+        url: https://github.com/robinmordasiewicz/video_switcher/raw/master/pi/Pictures/default_background.png
         dest: /home/pi/Pictures/default_background.png
         group: pi
         owner: pi
@@ -720,7 +720,7 @@
 
     - name: Download default video
       get_url:
-        url: https://github.com/robinhoodis/video_switcher/raw/master/pi/Videos/default_video.mp4
+        url: https://github.com/robinmordasiewicz/video_switcher/raw/master/pi/Videos/default_video.mp4
         dest: /home/pi/Videos/default_video.mp4
         group: pi
         owner: pi
@@ -859,7 +859,7 @@
 
     - name: Download companion DB
       get_url:
-        url: https://github.com/robinhoodis/video_switcher/raw/master/pi/{{ HOSTNAME }}_full-config.companionconfig
+        url: https://github.com/robinmordasiewicz/video_switcher/raw/master/pi/{{ HOSTNAME }}_full-config.companionconfig
         dest: /var/local/companion/undefined/companion/db
         mode: 0644
       tags:
