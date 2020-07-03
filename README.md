@@ -6,7 +6,7 @@ This is an example repo for an atem mini and bitfocus.io companion config for St
 For this to work, you require a Rasberry PI4B with raspian OS installed.
 Once your Raspberry PI is running, log into it and run the following commands.
 
-```
+```console
 sudo apt-get -y install ansible wget
 wget -N https://raw.githubusercontent.com/robinhoodis/video_switcher/master/playbook.yml
 ansible-playbook playbook.yml
