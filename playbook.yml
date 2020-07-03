@@ -528,9 +528,9 @@
       file:
        path: /home/pi/Music
        state: directory
-       mode: 0755
-       group: pi
+       mode: 0775
        owner: pi
+       group: audio
        recurse: yes
       tags:
         - music
@@ -539,8 +539,8 @@
       get_url:
         url: https://raw.githubusercontent.com/robinhoodis/video_switcher/master/pi/Music/elysium.wav
         dest: /home/pi/Music
-        group: pi
         owner: pi
+        group: pi
         mode: 0644
       tags:
         - music
@@ -549,9 +549,9 @@
       get_url:
         url: https://raw.githubusercontent.com/robinhoodis/video_switcher/master/pi/Music/default_playlist.m3u
         dest: /home/pi/Music
-        group: pi
         owner: pi
-        mode: 0644
+        group: audio
+        mode: 0664
       tags:
         - music
 
@@ -561,6 +561,15 @@
         pkg:
           - mpd
           - mpc
+      tags:
+        - music
+
+    - name: Configure Playlist Folder
+      lineinfile:
+        path: /etc/mpd.conf
+        state: present
+        regexp: '^#?group\s+\"(nogroup|audio)\"$'
+        line: 'group "audio"'
       tags:
         - music
 
@@ -645,11 +654,29 @@
       tags:
         - music
 
-    - name: Load Playlist
+    - name: MPC Update
+      become: False
+      command: mpc update
+      tags:
+        - music
+
+    - name: MPC load playlist
       become: False
       command: mpc load default_playlist
       tags:
-         - music
+        - music
+
+    - name: MPC load playlist
+      become: False
+      command: mpc repeat on
+      tags:
+        - music
+
+        #    - name: Load Playlist
+        #  become: False
+        #  command: mpc load default_playlist
+        # tags:
+          #  - music
 
     - name: Install Imagemagick for backgrounds
       apt:
