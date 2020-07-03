@@ -51,5 +51,7 @@ This project requires no license.
 * Hat tip to anyone whose code was used
 * Aaron Parecki
 * John Barker
+* Bill Church
+* Adam Schumacher
 
 <script src="https://utteranc.es/client.js" repo="robinhoodis/video_switcher" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
