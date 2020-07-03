@@ -7,7 +7,7 @@ Automate the deployment of a raspberry PI4 running software configured to automa
 #### Required
 
 * Raspberry Pi4 with 4GB or 8GB of RAM
-* [32-bit Raspian Lite](https://downloads.raspberrypi.org/raspios_lite_armhf_latest) [https://www.raspberrypi.org/documentation/installation/installing-images/README.md](installed).
+* [32-bit Raspian Lite](https://downloads.raspberrypi.org/raspios_lite_armhf_latest) [installed](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
   * Desktop and Full versions work, but Raspian LITE is preferred. ( haven't tested 64 bit yet )
 * Raspberry Pi4 connected to your network with access to the internet
 
