@@ -29,7 +29,20 @@ ansible-playbook playbook.yml
 
 ## Contents
 
+## Authors
 
+* **Robin Mordasiewicz** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
 
+See also the list of [contributors](https://github.com/robinhoodis/video_switcher/contributors) who participated in this project.
+
+## License
+
+This project requires no license.
+
+## Acknowledgments
+
+* Hat tip to anyone whose code was used
+* Aaron Parecki
+* John Barker
 
 <script src="https://utteranc.es/client.js" repo="robinhoodis/video_switcher" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
