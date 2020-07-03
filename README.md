@@ -7,7 +7,7 @@ Automate the deployment of a raspberry PI4 running software configured to automa
 #### Required
 
 * Raspberry Pi4 with 4GB or 8GB of RAM
-* [32-bit Raspian Lite](https://downloads.raspberrypi.org/raspios_lite_armhf_latest) [installed](https://www.raspberrypi.org/documentation/installation/installing-images/README.md){target="_blank"}.
+* [32-bit Raspian Lite](https://downloads.raspberrypi.org/raspios_lite_armhf_latest) [installed](https://www.raspberrypi.org/documentation/installation/installing-images/README.md){:target="_blank" rel="noopener"}.
   * Desktop and Full versions work, but Raspian LITE is preferred. ( haven't tested 64 bit yet )
 * Raspberry Pi4 connected to your network with access to the internet
 
@@ -22,13 +22,13 @@ Run the following three commands on your raspberry PI4 and follow prompts.
  
 ```console
 
-sudo apt-get -y install ansible wget
+sudo apt-get -y install ansible
 wget -N https://raw.githubusercontent.com/robinhoodis/video_switcher/master/playbook.yml
 ansible-playbook playbook.yml  
 
 ```
 
-[![IMAGE ALT TEXT](http://img.youtube.com/vi/ZMYQ-EMctgc/maxresdefault.jpg)](http://www.youtube.com/watch?v=ZMYQ-EMctgc "ATEM mini motion graphics"){target="_blank"} 
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/ZMYQ-EMctgc/maxresdefault.jpg)](http://www.youtube.com/watch?v=ZMYQ-EMctgc "ATEM mini motion graphics"){:target="_blank" rel="noopener"}
 
 ## Contents
 
