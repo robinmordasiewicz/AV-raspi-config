@@ -524,180 +524,6 @@
       tags:
         - omx
 
-    - name: ATEM mini /etc/hosts
-      lineinfile:
-        dest: /etc/hosts
-        regexp: '^(?:[0-9]{1,3}\.){3}[0-9]{1,3}.*atem$'
-        line: "{{ ATEMIP }}\tatem"
-        state: present
-      tags:
-        - companion
-
-    - name: Companion Dependencies
-      apt:
-        install_recommends: yes
-        pkg:
-        - libgusb-dev
-        - nodejs
-        - git
-        - build-essential
-        - cmake
-        - libudev-dev
-        - libusb-1.0-0-dev
-        - npm
-      tags:
-        - companion
-
-    - name: Companion USB permissions
-      copy:
-        dest: /etc/udev/rules.d/50-companion.rules
-        group: root
-        owner: root
-        mode: '0644'
-        content: |
-          SUBSYSTEM=="input", GROUP="input", MODE="0666"
-          SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0060", MODE:="666", GROUP="plugdev"
-          KERNEL=="hidraw", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0060", MODE:="666", GROUP="plugdev"
-          SUBSYSTEM=="usb", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="1f40", MODE:="666", GROUP="plugdev"
-          KERNEL=="hidraw", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="1f40", MODE:="666", GROUP="plugdev"
-          SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0063", MODE:="666", GROUP="plugdev"
-          KERNEL=="hidraw", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0063", MODE:="666", GROUP="plugdev"
-          SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006c", MODE:="666", GROUP="plugdev"
-          KERNEL=="hidraw", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006c", MODE:="666", GROUP="plugdev"
-          SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006d", MODE:="666", GROUP="plugdev"
-          KERNEL=="hidraw", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006d", MODE:="666", GROUP="plugdev"
-          SUBSYSTEM=="usb", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="1f41", MODE:="666", GROUP="plugdev"
-          KERNEL=="hidraw", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="1f41", MODE:="666", GROUP="plugdev"
-      tags:
-        - companion
-
-    - name: Reload USB rules
-      command: udevadm control --reload-rules
-      tags:
-        - companion
-
-    - name: Update npm
-      command: npm install n -g
-      tags:
-         - companion
-
-    - name: Update node
-      command: n 8.17.0
-      tags:
-        - companion
-
-    - name: Install yarn
-      command: npm install yarn -g
-      tags:
-         - companion
-
-    - name: clone companion github
-      git:
-         repo: https://github.com/bitfocus/companion.git
-         dest: /usr/local/src/companion
-         force: yes
-      tags:
-        - companion
-
-    - name: Update companion modules - takes time....
-      command:
-        cmd: yarn update
-        chdir: /usr/local/src/companion 
-      environment:
-        PATH: $HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:{{ ansible_env.PATH }}
-      tags:
-        - companion
-
-    - name: Build writefile
-      command: 
-        cmd: tools/build_writefile.sh
-        chdir: /usr/local/src/companion
-      environment:
-        PATH: $HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:{{ ansible_env.PATH }}
-      tags:
-        - companion
-
-    - name: Companion UNIT file
-      copy:
-        dest: /etc/systemd/system/companion.service
-        group: root
-        owner: root
-        mode: '0644'
-        content: |
-          [Unit]
-          Description=Bitfocus Companion (v2.0.0)
-          After=network-online.target
-          Wants=network-online.target
-
-          [Service]
-          Type=simple
-          WorkingDirectory=/var/local/companion
-          ExecStart=node /usr/local/src/companion/headless_ip.js 0.0.0.0
-          Restart=on-failure
-          KillSignal=SIGINT
-          TimeoutStopSec=60
-
-          [Install]
-          WantedBy=multi-user.target
-      tags:
-        - companion
-
-    - name: Companion DB directory
-      file:
-       path: /var/local/companion/undefined/companion/
-       state: directory
-       mode: 0755
-       group: root
-       owner: root
-       recurse: yes
-      tags:
-        - companion-config
-
-    - name: Download companion DB
-      get_url:
-        url: https://github.com/robinhoodis/video_switcher/raw/master/pi/{{ HOSTNAME }}_full-config.companionconfig
-        dest: /var/local/companion/undefined/companion/db
-        mode: 0644
-      tags:
-        - companion-config
-
-    - name: Put ATEM IP in companion DB
-      replace:
-        path: /var/local/companion/undefined/companion/db
-        regexp: '"bmd-atem","product":"ATEM","label":"atem","_configIdx":0,"host":"(?:[0-9]{1,3}\.){3}[0-9]{1,3}"'
-        replace: '"bmd-atem","product":"ATEM","label":"atem","_configIdx":0,"host":"{{ ATEMIP }}"'
-        backup: yes
-        mode: 0644
-      tags:
-        - companion-config
-
-    - name: Check for Companion config
-      stat:
-        path: /var/local/companion/undefined/companion/config
-      register: companionconfig
-      changed_when: False
-      tags:
-        - companion-config
-
-    - name: Companion config
-      copy:
-        dest: /var/local/companion/undefined/companion/config
-        mode: '0644'
-        content: |
-          {"http_port":8000,"bind_ip":"0.0.0.0","start_minimised":false}
-      when: not companionconfig.stat.exists
-      tags:
-        - companion-config
-
-    - name: Start Companion
-      systemd:
-        name: companion
-        enabled: yes
-        daemon_reload: yes
-        state: started
-      tags:
-        - companion-config
-
     - name: Music directory
       file:
        path: /home/pi/Music
@@ -874,6 +700,180 @@
         mode: 0644
       tags:
         - background
+
+    - name: ATEM mini /etc/hosts
+      lineinfile:
+        dest: /etc/hosts
+        regexp: '^(?:[0-9]{1,3}\.){3}[0-9]{1,3}.*atem$'
+        line: "{{ ATEMIP }}\tatem"
+        state: present
+      tags:
+        - companion
+
+    - name: Companion Dependencies
+      apt:
+        install_recommends: yes
+        pkg:
+        - libgusb-dev
+        - nodejs
+        - git
+        - build-essential
+        - cmake
+        - libudev-dev
+        - libusb-1.0-0-dev
+        - npm
+      tags:
+        - companion
+
+    - name: Companion USB permissions
+      copy:
+        dest: /etc/udev/rules.d/50-companion.rules
+        group: root
+        owner: root
+        mode: '0644'
+        content: |
+          SUBSYSTEM=="input", GROUP="input", MODE="0666"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0060", MODE:="666", GROUP="plugdev"
+          KERNEL=="hidraw", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0060", MODE:="666", GROUP="plugdev"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="1f40", MODE:="666", GROUP="plugdev"
+          KERNEL=="hidraw", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="1f40", MODE:="666", GROUP="plugdev"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0063", MODE:="666", GROUP="plugdev"
+          KERNEL=="hidraw", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0063", MODE:="666", GROUP="plugdev"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006c", MODE:="666", GROUP="plugdev"
+          KERNEL=="hidraw", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006c", MODE:="666", GROUP="plugdev"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006d", MODE:="666", GROUP="plugdev"
+          KERNEL=="hidraw", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006d", MODE:="666", GROUP="plugdev"
+          SUBSYSTEM=="usb", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="1f41", MODE:="666", GROUP="plugdev"
+          KERNEL=="hidraw", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="1f41", MODE:="666", GROUP="plugdev"
+      tags:
+        - companion
+
+    - name: Reload USB rules
+      command: udevadm control --reload-rules
+      tags:
+        - companion
+
+    - name: Update npm
+      command: npm install n -g
+      tags:
+         - companion
+
+    - name: Update node
+      command: n 8.17.0
+      tags:
+        - companion
+
+    - name: Install yarn
+      command: npm install yarn -g
+      tags:
+         - companion
+
+    - name: clone companion github
+      git:
+         repo: https://github.com/bitfocus/companion.git
+         dest: /usr/local/src/companion
+         force: yes
+      tags:
+        - companion
+
+    - name: Update companion modules - takes time....
+      command:
+        cmd: yarn update
+        chdir: /usr/local/src/companion 
+      environment:
+        PATH: $HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:{{ ansible_env.PATH }}
+      tags:
+        - companion
+
+    - name: Build writefile
+      command: 
+        cmd: tools/build_writefile.sh
+        chdir: /usr/local/src/companion
+      environment:
+        PATH: $HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:{{ ansible_env.PATH }}
+      tags:
+        - companion
+
+    - name: Companion UNIT file
+      copy:
+        dest: /etc/systemd/system/companion.service
+        group: root
+        owner: root
+        mode: '0644'
+        content: |
+          [Unit]
+          Description=Bitfocus Companion (v2.0.0)
+          After=network-online.target
+          Wants=network-online.target
+
+          [Service]
+          Type=simple
+          WorkingDirectory=/var/local/companion
+          ExecStart=node /usr/local/src/companion/headless_ip.js 0.0.0.0
+          Restart=on-failure
+          KillSignal=SIGINT
+          TimeoutStopSec=60
+
+          [Install]
+          WantedBy=multi-user.target
+      tags:
+        - companion
+
+    - name: Companion DB directory
+      file:
+       path: /var/local/companion/undefined/companion/
+       state: directory
+       mode: 0755
+       group: root
+       owner: root
+       recurse: yes
+      tags:
+        - companion-config
+
+    - name: Download companion DB
+      get_url:
+        url: https://github.com/robinhoodis/video_switcher/raw/master/pi/{{ HOSTNAME }}_full-config.companionconfig
+        dest: /var/local/companion/undefined/companion/db
+        mode: 0644
+      tags:
+        - companion-config
+
+    - name: Put ATEM IP in companion DB
+      replace:
+        path: /var/local/companion/undefined/companion/db
+        regexp: '"bmd-atem","product":"ATEM","label":"atem","_configIdx":0,"host":"(?:[0-9]{1,3}\.){3}[0-9]{1,3}"'
+        replace: '"bmd-atem","product":"ATEM","label":"atem","_configIdx":0,"host":"{{ ATEMIP }}"'
+        backup: yes
+        mode: 0644
+      tags:
+        - companion-config
+
+    - name: Check for Companion config
+      stat:
+        path: /var/local/companion/undefined/companion/config
+      register: companionconfig
+      changed_when: False
+      tags:
+        - companion-config
+
+    - name: Companion config
+      copy:
+        dest: /var/local/companion/undefined/companion/config
+        mode: '0644'
+        content: |
+          {"http_port":8000,"bind_ip":"0.0.0.0","start_minimised":false}
+      when: not companionconfig.stat.exists
+      tags:
+        - companion-config
+
+    - name: Start Companion
+      systemd:
+        name: companion
+        enabled: yes
+        daemon_reload: yes
+        state: started
+      tags:
+        - companion-config
 
     - name: Filesharing
       apt:
