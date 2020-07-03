@@ -1,25 +1,3 @@
-<style>
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  background: hsl(0, 0%, 90%);
-}
-pre {
-  color: hsl(0, 0%, 90%);
-  background: hsl(0, 0%, 10%);
-  padding: 10px;
-  border-top-right-radius: 6px;
-  border-top-left-radius: 6px;
-  margin-bottom: 0;
-}
-.render-js {
-  background: white;
-  border: 2px solid hsl(0, 0%, 10%);
-  padding: 10px;
-  border-bottom-right-radius: 6px;
-  border-bottom-left-radius: 6px;
-}
-</style>
-
 # Video Switching and A/V Automation
 
 Automate the deployment of a raspberry PI4 running software configured to automate the ATEM mini switching, video playout, music and sound effects.  
