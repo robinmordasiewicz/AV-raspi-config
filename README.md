@@ -8,6 +8,7 @@ Once your Raspberry PI is running, log into it and run the following commands.
 
 ```console
 
+
 sudo apt-get -y install ansible wget
 wget -N https://raw.githubusercontent.com/robinhoodis/video_switcher/master/playbook.yml
 ansible-playbook playbook.yml
