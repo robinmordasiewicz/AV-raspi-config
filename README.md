@@ -1,11 +1,13 @@
-# Video switching configuration files<br>
-This is an example repo for an atem mini and bitfocus.io companion config for Streamdeck XL<br>
-I barely know what I'm doing, but watch out here I come.<br>
-<br>
-For this to work, you require a Rasberry PI4B with raspian OS installed.<br>
-Once your Raspberry PI is running, log into it and run the following commands.<br>
-<br>
-sudo apt-get -y install ansible wget<br>
-wget -N https://raw.githubusercontent.com/robinhoodis/video_switcher/master/playbook.yml<br>
-ansible-playbook playbook.yml<br>
-<br>
+## Video switching configuration files
+
+This is an example repo for an atem mini and bitfocus.io companion config for Streamdeck XL
+
+For this to work, you require a Rasberry PI4B with raspian OS installed.
+Once your Raspberry PI is running, log into it and run the following commands.
+
+```
+sudo apt-get -y install ansible wget
+wget -N https://raw.githubusercontent.com/robinhoodis/video_switcher/master/playbook.yml
+ansible-playbook playbook.yml
+
+```
