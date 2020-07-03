@@ -30,27 +30,22 @@
     - name: HOSTNAME
       prompt: "Hostname: "
       private: no
-      default: "{{ lookup('pipe','raspi-config nonint get_hostname') }}"
-
-    - name: TIMEZONE
-      prompt: "Timezone: "
-      private: no
-      default: "{{ lookup('file', '/etc/timezone') }}"
+      default: "{{ lookup('pipe','raspi-config nonint get_hostname', errors='ignore') }}"
 
     - name: LOCALE
       prompt: "LANG: "
       private: no
-      default: "{{ lookup('env','LANG') }}"
+      default: "{{ lookup('env','LANG') | default('en_US.UTF-8')}}"
 
     - name: ATEMIP
       prompt: "Atem mini IP: "
       private: no
-      default: "{{ lookup('pipe','grep atem /etc/hosts | expand -t 1 | cut -f 1 -d \" \"') | default('192.168.2.240', true)  }}"
+      default: "{{ lookup('pipe','grep atem /etc/hosts | expand -t 1 | cut -f 1 -d \" \"', errors='ignore') | default('192.168.2.240', true)  }}"
 
     - name: AUDIOOUT
       prompt: "Default audio output Headphone or HDMI: "
       private: no
-      default: "{{ lookup('pipe','sudo -u pi amixer cget numid=1 | grep \"^numid\" | grep -o \"Headphone\\|HDMI\"') | default('Headphone', true)  }}"
+      default: "{{ lookup('pipe','sudo -u pi amixer cget numid=1 | grep \"^numid\" | grep -o \"Headphone\\|HDMI\"', errors='ignore') | default('Headphone', true)  }}"
 
     - name: WIFIDESIREDENABLED
       prompt: "Enable WIFI: "
@@ -62,22 +57,10 @@
       private: no
       default: "{{ 'no' if (lookup('pipe','cat /boot/config.txt | grep \"^dtoverlay=disable-bt$\"', errors='ignore')) else 'yes' }}"
 
-    - name: WIFICOUNTRY
-      prompt: ""
-      private: no
-      default: "{{ lookup('pipe','sudo -u pi amixer cget numid=1 | grep \"^numid\" | grep -o \"Headphone\\|HDMI\"') | default('Enabled', true)  }}"
-
   vars:
-    REBOOT: False
-    UPDATE: False
     MEMSPLIT: "320"
-    XKBLAYOUT: "us"
-    NETNAMES: False
-    BOOTSPLASH: False
-    OVERCLOCK: False
     HDMI_GROUP: 1
     HDMI_MOD: 34
-    GLDRIVER: False
     raspiconfig:
       ssh: 0
       vnc: 1
@@ -181,7 +164,7 @@
       tags:
         - github
 
-    - name: raspi-config
+    - name: raspi-config defaults
       command: "raspi-config nonint do_{{ item.key }} {{ item.value }}"
       notify: reboot
       when: "item.value != lookup('pipe','raspi-config nonint get_{{ item.key }}')"
@@ -192,32 +175,53 @@
         - raspi-config-loop
         - raspi-config
 
-    - name: Change hostname
+    - name: Set Hostname {{ HOSTNAME }}
       command: "raspi-config nonint do_hostname {{ HOSTNAME }}"
+      notify: reboot
       when: lookup('pipe','raspi-config nonint get_hostname') != HOSTNAME
       tags:
         - raspi-config
 
     - name: Set Boot behaviour
       command: "raspi-config nonint do_boot_behaviour B1"
+      notify: reboot
       when: ( lookup('pipe','raspi-config nonint get_boot_cli') != "0" ) or
             ( lookup('pipe','raspi-config nonint get_autologin') != "1" )
       tags:
         - raspi-config
 
-    - name: Change locale
+    - name: Get region
+      uri:
+        url: https://freegeoip.app/json/
+        body_format: json
+        method: GET
+        headers:
+          Content-Type: application/json
+          Accept: application/json
+        return_content: yes
+      register: region
+      changed_when: False
+      tags:
+        - raspi-config-region
+        - raspi-config
+
+    - name: Set timezone {{ region.json.time_zone }}
+      command: "raspi-config nonint do_change_timezone {{ region.json.time_zone }}"
+      notify: reboot
+      when: lookup('file', '/etc/timezone', errors='ignore') != region.json.time_zone
+      tags:
+        - raspi-config-region
+        - raspi-config
+
+    - name: Set locale
       command: "raspi-config nonint do_change_locale {{ LOCALE }}"
+      notify: reboot
       when: lookup('env','LANG') != LOCALE
       tags:
+        - raspi-config-region-disabled
         - raspi-config
 
-    - name: Change timezone
-      command: "raspi-config nonint do_change_timezone {{ TIMEZONE }}"
-      when: lookup('file', '/etc/timezone') != TIMEZONE
-      tags:
-        - raspi-config
-
-    - name: Bluetooth Current State
+    - name: Get Bluetooth state
       shell: if [ `cat /boot/config.txt | grep -q "^dtoverlay=disable-bt$"` ]; then echo yes; else echo no; fi
       args:
         executable: /bin/bash
@@ -227,17 +231,7 @@
         - raspi-config-bluetooth
         - raspi-config
 
-    - name: HCIUART Daemon State
-      shell: if [ "{{ BLUETOOTHDESIREDENABLED }}" == "yes" ]; then echo started; else echo stopped; fi
-      args:
-        executable: /bin/bash
-      register: HCIUARTSTATE
-      changed_when: False
-      tags:
-        - raspi-config-bluetooth
-        - raspi-config
-
-    - name: Bluetooth NEW State
+    - name: Get Bluetooth NEW State
       shell: if [ "{{ BLUETOOTHDESIREDENABLED }}" == "yes" ]; then echo absent; else echo present; fi
       args:
         executable: /bin/bash
@@ -247,7 +241,7 @@
         - raspi-config-bluetooth
         - raspi-config
 
-    - name: Bluetooth
+    - name: Set Bluetooth {{ 'enabled' if ( "{{ BLUETOOTHDESIREDENABLED }}" == "yes"  ) else 'disabled' }}
       lineinfile:
         path: /boot/config.txt
         insertafter: '^#[all]'
@@ -255,21 +249,20 @@
         regexp: "^#?dtoverlay=disable-bt"
         state: "{{ BLUETOOTHSTATE.stdout }}"
       notify: reboot
-      when : BLUETOOTHDISABLED != BLUETOOTHDESIREDENABLED
       tags:
         - raspi-config-bluetooth
         - raspi-config
 
-    - name: Bluetooth Service
+    - name: Set Bluetooth HCIUART {{ 'enabled' if ( "{{ BLUETOOTHDESIREDENABLED }}" == "yes"  ) else 'disabled' }}
       systemd:
         name: hciuart
         enabled: "{{ BLUETOOTHDESIREDENABLED }}"
-        #        state: "{{ HCIUARTSTATE.stdout  }}"
+      notify: reboot
       tags:
         - raspi-config-bluetooth
         - raspi-config
 
-    - name: WIFI Current State
+    - name: Get WIFI Current State
       shell: if [ `cat /boot/config.txt | grep -q "^dtoverlay=disable-wifi$"` ]; then echo yes; else echo no; fi
       args:
         executable: /bin/bash
@@ -279,7 +272,7 @@
         - raspi-config-wifi
         - raspi-config
 
-    - name: WIFI NEW State
+    - name: Get WIFI NEW State
       shell: if [ "{{ WIFIDESIREDENABLED }}" == "yes" ]; then echo absent; else echo present; fi
       args:
         executable: /bin/bash
@@ -288,15 +281,16 @@
       tags:
         - raspi-config-wifi
         - raspi-config
-
-    - name: WIFI
+    
+    - name: Set WIFI {{ 'enabled' if ( "{{ WIFIDESIREDENABLED }}" == "yes"  ) else 'disabled' }}
       lineinfile:
         path: /boot/config.txt
         insertafter: '^#[all]'
         line: 'dtoverlay=disable-wifi'
         regexp: "^#?dtoverlay=disable-wifi"
         state: "{{ NEWSTATE.stdout }}"
-      when : WIFIDISABLED != WIFIDESIREDENABLED
+      notify: reboot
+      #     when : WIFIDISABLED.stdout != WIFIDESIREDENABLED
       tags:
         - raspi-config-wifi
         - raspi-config
@@ -305,15 +299,19 @@
     #- name: Set WiFi credentials
     #command: "raspi-config nonint do_wifi_ssid_passphrase {{ SSID }} {{ PASSPHRASE }}"
     
-    #    - name: WiFi country
-    #     command: "raspi-config nonint do_wifi_country {{ WIFICOUNTRY }}"
-    #   when: lookup('pipe','raspi-config nonint get_wifi_country', errors='ignore') != {{ WIFICOUNTRY }}
-    #  ignore_errors: True
-    #  tags:
-      #    - raspi-config
+    - name: Set WiFi country {{ region.json.country_code }}
+      command: "raspi-config nonint do_wifi_country {{ region.json.country_code }}"
+      notify: reboot
+      when: ( lookup('pipe','raspi-config nonint get_wifi_country', errors='ignore') != region.json.country_code ) and 
+            ( WIFIDESIREDENABLED == "yes" )
+      ignore_errors: True
+      tags:
+        - raspi-config-wifi
+        - raspi-config
 
-    - name: GPU memory split
+    - name: Set GPU memory split {{ MEMSPLIT }}
       command: "raspi-config nonint do_memory_split {{ MEMSPLIT }}"
+      notify: reboot
       when: lookup('pipe','raspi-config nonint get_config_var gpu_mem /boot/config.txt') != MEMSPLIT
       tags:
         - raspi-config
@@ -367,17 +365,16 @@
       tags:
         - raspi-config
 
-    - name: Enable HDMI audio
+    - name: Set HDMI audio
       lineinfile:
         path: /boot/config.txt
         line: 'hdmi_drive=2'
         regexp: "^#?hdmi_drive=."
         state: present
-      when: lookup('pipe','raspi-config nonint get_config_var hdmi_drive /boot/config.txt') != "2"
       tags:
         - raspi-config
 
-    - name: Real Clock CPU
+    - name: Set Real Clock
       lineinfile:
         path: /boot/config.txt
         insertafter: '^#[all]'
@@ -386,24 +383,14 @@
       tags:
         - raspi-config
 
-    - name: Bluetooth
-      lineinfile:
-        path: /boot/config.txt
-        insertafter: '^#[all]'
-        line: 'dtoverlay=disable-bt'
-        regexp: "^#?dtoverlay=disable-bt"
-        state: present
-      tags:
-        - raspi-config
-
-    - name: CPU opts
+    - name: Install CPU opts
       apt:
         pkg:
         - cpufrequtils
       tags:
         - optimizations
 
-    - name: CPU performance
+    - name: Set CPU performance
       lineinfile:
         path: /etc/default/cpufrequtils
         create: yes
@@ -413,7 +400,10 @@
         - optimizations
 
     - name: Reload CPU freq
-      command: systemctl restart cpufrequtils
+      systemd:
+        name: cpufrequtils
+        enabled: yes
+        state: restarted
       tags:
         - optimizations
 
@@ -426,7 +416,7 @@
       tags:
         - customizations
 
-    - name: Disable console messages
+    - name: Disable dmesg console messages
       lineinfile:
         path: /etc/rc.local
         insertbefore: '^exit 0'
@@ -489,14 +479,14 @@
                   #      tags:
                     #        - ffmpeg
 
-    - name: OMXD
+    - name: Install OMX Player
       apt:
         pkg:
           - omxplayer
       tags:
         - omx
 
-    - name: OMXD git
+    - name: Download OMXD
       git:
         repo: https://github.com/subogero/omxd.git
         dest: /usr/local/src/omxd
@@ -555,7 +545,7 @@
       tags:
         - music
 
-    - name: Music Player
+    - name: Install Music Player Daemon and Client
       apt:
         install_recommends: yes
         pkg:
@@ -902,7 +892,7 @@
       tags:
         - companion-config
 
-    - name: Filesharing
+    - name: Install Fileshare
       apt:
         install_recommends: yes
         pkg:
@@ -911,7 +901,7 @@
       tags:
          - filesharing
 
-    - name: Start Filesharing
+    - name: Start Fileshare
       systemd:
         name: smbd
         enabled: yes
