@@ -1,3 +1,11 @@
+<script src="https://utteranc.es/client.js"
+        repo="https://github.com/robinhoodis/video_switcher.git"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
 ## Video switching configuration files
 
 This is an example repo for an atem mini and bitfocus.io companion config for Streamdeck XL
@@ -11,12 +19,3 @@ wget -N https://raw.githubusercontent.com/robinhoodis/video_switcher/master/play
 ansible-playbook playbook.yml
 
 ```
-
-
-<script src="https://utteranc.es/client.js"
-        repo="https://github.com/robinhoodis/video_switcher.git"
-        issue-term="pathname"
-        theme="github-light"
-        crossorigin="anonymous"
-        async>
-</script>
