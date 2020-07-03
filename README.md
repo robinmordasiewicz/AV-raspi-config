@@ -4,13 +4,13 @@ Automate the deployment of a raspberry PI4 running software configured to automa
 
 ## Prerequisites
 
-### Required
+#### Required
 
 - Raspberry Pi4 with 4GB or 8GB of RAM
 - Raspian, Raspian Lite, of Ubuntu installed
 - Connected to the network with access to the internet
 
-### Optional
+#### Optional
 
 - HDMI port connected from the PI4 to HDMI input #4 on the ATEM mini
 - 3.5mm stereo cable connected from the PI4 to Aux input #1 on the ATEM mini
