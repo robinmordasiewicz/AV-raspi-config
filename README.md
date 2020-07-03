@@ -14,7 +14,7 @@ ansible-playbook playbook.yml
 
 
 <script src="https://utteranc.es/client.js"
-        repo="[ENTER REPO HERE]"
+        repo="https://github.com/robinhoodis/video_switcher.git"
         issue-term="pathname"
         theme="github-light"
         crossorigin="anonymous"
