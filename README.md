@@ -27,7 +27,7 @@ ansible-playbook playbook.yml
 
 ```
 
-[![IMAGE ALT TEXT](http://img.youtube.com/vi/ZMYQ-EMctgc/maxresdefault.jpg)](http://www.youtube.com/watch?v=ZMYQ-EMctgc "ATEM mini motion graphics")
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/ZMYQ-EMctgc/hqdefault.jpg)](http://www.youtube.com/watch?v=ZMYQ-EMctgc "ATEM mini motion graphics")
 
 ## Contents
 
