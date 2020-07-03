@@ -23,7 +23,7 @@ Run the following three commands on your raspberry PI4 and follow prompts.
 ```console
 
 sudo apt-get -y install ansible
-wget -N https://raw.githubusercontent.com/robinhoodis/video_switcher/master/playbook.yml
+wget -N https://raw.githubusercontent.com/robinmordasiewicz/video_switcher/master/playbook.yml
 ansible-playbook playbook.yml  
 
 ```
@@ -43,7 +43,7 @@ ansible-playbook playbook.yml
 
 **Robin Mordasiewicz** - *Initial work*
 
-See also the list of [contributors](https://github.com/robinhoodis/video_switcher/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/robinmordasiewicz/video_switcher/contributors) who participated in this project.
 
 ## License
 
@@ -57,4 +57,4 @@ This project requires no license.
 * Bill Church
 * Adam Schumacher
 
-<script src="https://utteranc.es/client.js" repo="robinhoodis/video_switcher" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
+<script src="https://utteranc.es/client.js" repo="robinmordasiewicz/video_switcher" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
