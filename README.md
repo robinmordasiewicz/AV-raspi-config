@@ -29,7 +29,7 @@ ansible-playbook playbook.yml
 
 ## Contents
 
-* companion
+* [https://bitfocus.io/]companion - [https://www.facebook.com/groups/2047850215433318/]Facebook
 * omxplayer
 * omxd
 * imagemagick
