@@ -27,6 +27,8 @@ ansible-playbook playbook.yml
 
 ```
 
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/ZMYQ-EMctgc/0.jpg)](http://www.youtube.com/watch?v=ZMYQ-EMctgc "ATEM mini motion graphics")
+
 ## Contents
 
 * [Bitfocus.io Companion](https://bitfocus.io/) - [Companion Facebook group](https://www.facebook.com/groups/2047850215433318/)
