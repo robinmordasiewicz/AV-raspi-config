@@ -31,7 +31,7 @@ ansible-playbook playbook.yml
 
 ## Authors
 
-* **Robin Mordasiewicz** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+* **Robin Mordasiewicz** - *Initial work*
 
 See also the list of [contributors](https://github.com/robinhoodis/video_switcher/contributors) who participated in this project.
 
