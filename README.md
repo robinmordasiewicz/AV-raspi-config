@@ -7,8 +7,8 @@ Automate the deployment of a raspberry PI4 running software configured to automa
 #### Required
 
 * Raspberry Pi4 with 4GB or 8GB of RAM
-* Raspian, Raspian Lite, or Ubuntu installed
-* Connected to the network with access to the internet
+* 32-bit Raspian, or 32-bit Raspian Lite installed ( haven't tested 64 bit yet )
+* Raspberry Pi4 connected to your network with access to the internet
 
 #### Optional
 
