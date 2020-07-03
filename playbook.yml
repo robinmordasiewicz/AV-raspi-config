@@ -97,6 +97,28 @@
       command: "shutdown -r now +1"
 
   tasks:
+
+    - name: Add the user 'pi'
+      user:
+        name: pi
+        comment: "{{ FIRSTLASTNAME }}"
+        group: pi
+        groups: sudo
+        append: yes
+      tags:
+        - piuser
+
+    # NOTE: Fully quoted because of the ': ' on the line. See the Gotchas in the YAML docs.
+    - name: Passwordless sudo for pi user
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: '^%sudo.+ALL=.+$'
+        line: '%sudo  ALL=(ALL:ALL) NOPASSWD: ALL'
+        validate: /usr/sbin/visudo -cf %s
+      tags:
+        - piuser
+
     - name: Update apt-get repo and cache
       apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
       tags:
@@ -120,7 +142,6 @@
       apt:
         pkg:
           - git
-          - raspi-config
       tags:
         - update
 
@@ -879,25 +900,6 @@
         - bash-completion
         - jq
         - speedtest-cli
-      tags:
-        - userland
-
-    - name: pi to sudo group
-      user:
-        name: pi
-        groups: sudo
-        append: yes
-      tags:
-        - userland
-
-    # NOTE: Fully quoted because of the ': ' on the line. See the Gotchas in the YAML docs.
-    - name: Passwordless sudo for pi user
-      lineinfile:
-        path: /etc/sudoers
-        state: present
-        regexp: '^%sudo.+ALL=.+$'
-        line: '%sudo  ALL=(ALL:ALL) NOPASSWD: ALL'
-        validate: /usr/sbin/visudo -cf %s
       tags:
         - userland
 
