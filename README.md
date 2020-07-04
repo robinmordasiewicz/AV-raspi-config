@@ -28,6 +28,8 @@ ansible-playbook playbook.yml
 
 ```
 
+![](https://github.com/robinmordasiewicz/video_switcher/raw/master/install_terminal.gif)
+
 [![IMAGE ALT TEXT](http://img.youtube.com/vi/ZMYQ-EMctgc/maxresdefault.jpg)](http://www.youtube.com/watch?v=ZMYQ-EMctgc "ATEM mini motion graphics"){:target="_blank" rel="noopener"}
 
 ## Contents
