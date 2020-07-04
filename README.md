@@ -59,4 +59,6 @@ This project requires no license.
 * Bill Church
 * Adam Schumacher
 
+https://robinmordasiewicz.github.io/video_switcher/
+
 <script src="https://utteranc.es/client.js" repo="robinmordasiewicz/video_switcher" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
