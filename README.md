@@ -23,7 +23,7 @@ Run the following three commands on your raspberry PI4 and follow prompts.
 ```console
 
 sudo apt-get -y install ansible
-wget -N https://raw.githubusercontent.com/robinmordasiewicz/video_switcher/master/playbook.yml
+wget -q --show-progress https://raw.githubusercontent.com/robinmordasiewicz/video_switcher/master/playbook.yml
 ansible-playbook playbook.yml  
 
 ```
