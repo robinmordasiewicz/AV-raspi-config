@@ -23,7 +23,7 @@ config:
   # Explicitly set the number of rows
   # or use `auto` to take the current
   # number of rows of your shell
-  rows: 32
+  rows: 34
   
   # Amount of times to repeat GIF
   # If value is -1, play once
@@ -111,9 +111,9 @@ config:
     brightWhite: "#f9f9f4"
   
 records:
-  - delay: 344
-    content: "\e]7;file://FLD-ML-00035407/Users/mordasiewicz\a\e[?1034h$ "
-  - delay: 516
+  - delay: 0
+    content: "\e[00;36m[robin@laptop]\e[00m:\e[00;34m~ $\e[00m\e[0;37m "
+  - delay: 816
     content: s
   - delay: 105
     content: s
@@ -154,7 +154,7 @@ records:
   - delay: 359
     content: "\r\n"
   - delay: 800
-    content: "\rpi@192.168.1.15's password: "
+    content: "\r\e[0mpi@192.168.1.15's password: \e[0;37m"
   - delay: 1500
     content: '*'
   - delay: 256
@@ -174,9 +174,9 @@ records:
   - delay: 129
     content: '*'
   - delay: 800
-    content: "\r\n\r\n"
+    content: "\e[00m\r\n\r\n"
   - delay: 500
-    content: "\e]0;pi@raspberrypi: ~\a\e[01;32mpi@raspberrypi\e[00m:\e[01;34m~ $\e[00m "
+    content: "\e[00;32mpi@raspberrypi\e[00m:\e[00;34m~ $\e[00m\e[0;37m "
   - delay: 1000
     content: s
   - delay: 238
@@ -240,7 +240,7 @@ records:
   - delay: 88
     content: e
   - delay: 400
-    content: "\r\n"
+    content: "\e[00m\r\n"
   - delay: 300
     content: "\rReading package lists... 0%\r"
   - delay: 250
@@ -318,17 +318,17 @@ records:
   - delay: 600
     content: "Setting up ansible (2.7.7+dfsg-1) ...\r\n\r\n"
   - delay: 1000
-    content: "\e]0;pi@raspberrypi: ~\a\e[01;32mpi@raspberrypi\e[00m:\e[01;34m~ $\e[00m "
+    content: "\e[00;32mpi@raspberrypi\e[00m:\e[00;34m~ $\e[00m \e[0;37m"
   - delay: 832
-    content: w
+    content: "w"
   - delay: 120
-    content: g
+    content: "g"
   - delay: 152
-    content: e
+    content: "e"
   - delay: 100
-    content: t
+    content: "t"
   - delay: 600
-    content: " -q --show-progress https://raw.githubusercontent.com/robinmordasiewicz/video_switcher/master/playbook.yml\n"
+    content: " -q --show-progress https://raw.githubusercontent.com/robinmordasiewicz/video_switcher/master/playbook.yml\e[00m\n"
   - delay: 800
     content: "\rplaybook.yml      0%[=>                        ]       0  --.-KB/s          "
   - delay: 250
@@ -352,11 +352,11 @@ records:
   - delay: 500
     content: "\rplaybook.yml    100%[=========================>]  25.02K  --.-KB/s  in 5.01s\r\n\r\n"
   - delay: 600
-    content: "\e]0;pi@raspberrypi: ~\a\e[01;32mpi@raspberrypi\e[00m:\e[01;34m~ $\e[00m "
+    content: "\e[00;32mpi@raspberrypi\e[00m:\e[00;34m~ $\e[00m \e[0;37m"
   - delay: 600
     content: a
   - delay: 282
-    content: 'n'
+    content: n
   - delay: 177
     content: s
   - delay: 232
@@ -380,88 +380,100 @@ records:
   - delay: 187
     content: a
   - delay: 161
-    content: 'ybook.yml '
+    content: "ybook.yml\e[0m"
   - delay: 607
     content: "\r\n"
-  - delay: 1708
-    content: "[WARNING]: hosts list is empty. Implicit localhost does not match 'all'\r\n"
-  - delay: 1007
-    content: "Hostname:  [raspberrypi]: "
-  - delay: 300
-    content: "\rHostname:  [raspberrypi]: v"
-  - delay: 200
-    content: "\rHostname:  [raspberrypi]: vi"
-  - delay: 250
-    content: "\rHostname:  [raspberrypi]: vid"
   - delay: 400
-    content: "\rHostname:  [raspberrypi]: video"
+    content: "[WARNING]: hosts list is empty. Implicit localhost does not match all\r\n"
+  - delay: 0
+    content: "\r\n"
+  - delay: 0
+    content: "Enter settings or press \"Enter\" to accept [defaults]\r\n"
+  - delay: 0
+    content: "Hostname:       [raspberrypi]: "
+  - delay: 1250
+    content: "\rHostname:       [raspberrypi]: \e[0;37mv\e[0m"
+  - delay: 200
+    content: "\rHostname:       [raspberrypi]: \e[0;37mvi\e[0m"
+  - delay: 250
+    content: "\rHostname:       [raspberrypi]: \e[0;37mvid\e[0m"
+  - delay: 400
+    content: "\rHostname:       [raspberrypi]: \e[0;37mvideo\e[0m"
   - delay: 300
-    content: "\rHostname:  [raspberrypi]: videopi"
+    content: "\rHostname:       [raspberrypi]: \e[0;37mvideopi\e[0m"
   - delay: 1241
-    content: "\r\nLANG:  [en_US.UTF-8]: "
+    content: "\r\nLanguage Code:  [en_GB.UTF-8]: "
   - delay: 350
-    content: "\rLANG:  [en_US.UTF-8]: e"
+    content: "\rLanguage Code:  [en_GB.UTF-8]: \e[0;37me\e[0m"
   - delay: 350
-    content: "\rLANG:  [en_US.UTF-8]: en"
+    content: "\rLanguage Code:  [en_GB.UTF-8]: \e[0;37men\e[0m"
   - delay: 150
-    content: "\rLANG:  [en_US.UTF-8]: en_C"
+    content: "\rLanguage Code:  [en_GB.UTF-8]: \e[0;37men_U\e[0m"
   - delay: 250
-    content: "\rLANG:  [en_US.UTF-8]: en_CA"
+    content: "\rLanguage Code:  [en_GB.UTF-8]: \e[0;37men_US\e[0m"
   - delay: 450
-    content: "\rLANG:  [en_US.UTF-8]: en_CA."
+    content: "\rLanguage Code:  [en_GB.UTF-8]: \e[0;37men_US.\e[0m"
   - delay: 250
-    content: "\rLANG:  [en_US.UTF-8]: en_CA.U"
+    content: "\rLanguage Code:  [en_GB.UTF-8]: \e[0;37men_US.U\e[0m"
   - delay: 550
-    content: "\rLANG:  [en_US.UTF-8]: en_CA.UT"
+    content: "\rLanguage Code:  [en_GB.UTF-8]: \e[0;37men_US.UT\e[0m"
   - delay: 350
-    content: "\rLANG:  [en_US.UTF-8]: en_CA.UTF"
+    content: "\rLanguage Code:  [en_GB.UTF-8]: \e[0;37men_US.UTF\e[0m"
   - delay: 450
-    content: "\rLANG:  [en_US.UTF-8]: en_CA.UTF-"
+    content: "\rLanguage Code:  [en_GB.UTF-8]: \e[0;37men_US.UTF-\e[0m"
   - delay: 250
-    content: "\rLANG:  [en_US.UTF-8]: en_CA.UTF-8"
-  - delay: 1088
-    content: "\r\n\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: "
-  - delay: 250
-    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: 1"
+    content: "\rLanguage Code:  [en_GB.UTF-8]: \e[0;37men_US.UTF-8\e[0m"
+  - delay: 400
+    content: "\r\n\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]:                 <--- Your ATEM Mini IP here"
+  - delay: 1500
+    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: \e[0;37m1\e[0m               <--- Your ATEM Mini IP here"
   - delay: 180
-    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: 19"
+    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: \e[0;37m19\e[0m              <--- Your ATEM Mini IP here"
   - delay: 200
-    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: 192."
+    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: \e[0;37m192.\e[0m            <--- Your ATEM Mini IP here"
   - delay: 300
-    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: 192.1"
+    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: \e[0;37m192.1\e[0m           <--- Your ATEM Mini IP here"
   - delay: 250
-    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: 192.16"
+    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: \e[0;37m192.16\e[0m          <--- Your ATEM Mini IP here"
   - delay: 150
-    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: 192.168"
+    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: \e[0;37m192.168\e[0m         <--- Your ATEM Mini IP here"
   - delay: 250
-    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: 192.168."
+    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: \e[0;37m192.168.\e[0m        <--- Your ATEM Mini IP here"
   - delay: 250
-    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: 192.168.1"
+    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: \e[0;37m192.168.1\e[0m       <--- Your ATEM Mini IP here"
   - delay: 300
-    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: 192.168.1."
+    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: \e[0;37m192.168.1.\e[0m      <--- Your ATEM Mini IP here"
   - delay: 180
-    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: 192.168.1.2"
+    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: \e[0;37m192.168.1.2\e[0m     <--- Your ATEM Mini IP here"
   - delay: 200
-    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: 192.168.1.24"
+    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: \e[0;37m192.168.1.24\e[0m    <--- Your ATEM Mini IP here"
   - delay: 350
-    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: 192.168.1.240"
-  - delay: 1303
-    content: "\r\nEnable WIFI:      [yes]: "
-  - delay: 250
-    content: "\rEnable WIFI:      [yes]: n"
-  - delay: 350
-    content: "\rEnable WIFI:      [yes]: no"
-  - delay: 1063
-    content: "\r\nEnable Bluetooth: [yes]: "
-  - delay: 250
-    content: "\rEnable Bluetooth: [yes]: n"
-  - delay: 250
-    content: "\rEnable Bluetooth: [yes]: no"
-  - delay: 831
+    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: \e[0;37m192.168.1.240\e[0m   <--- Your ATEM Mini IP here"
+  - delay: 850
+    content: "\r\e[1;37mAtem Mini\e[0m IP: [192.168.2.240]: \e[0;37m192.168.1.240\e[0m                              \r"
+  - delay: 100
+    content: "\r\nEnable WIFI:            [yes]:                 <--- I am not using WIFI"
+  - delay: 1250
+    content: "\rEnable WIFI:            [yes]: \e[0;37mn\e[0m               <--- I am not using WIFI"
+  - delay: 450
+    content: "\rEnable WIFI:            [yes]: \e[0;37mno\e[0m              <--- I am not using WIFI"
+  - delay: 1000
+    content: "\rEnable WIFI:            [yes]: \e[0;37mno\e[0m                                      \r"
+  - delay: 200
+    content: "\r\nEnable Bluetooth:       [yes]:                 <--- I am not using bluetooth"
+  - delay: 1250
+    content: "\rEnable Bluetooth:       [yes]: \e[0;37mn\e[0m               <--- I am not using bluetooth"
+  - delay: 450
+    content: "\rEnable Bluetooth:       [yes]: \e[0;37mno\e[0m              <--- I am not using bluetooth"
+  - delay: 1000
+    content: "\rEnable Bluetooth:       [yes]: \e[0;37mno\e[0m                                           \r"
+  - delay: 300
     content: "\r\n"
   - delay: 21
     content: "\r\nPLAY [Raspberry PI4 AV Automation] *****************************************\r\n"
-  - delay: 75
-    content: "\r\nTASK [Gathering Facts] *****************************************************\r\n"
-  - delay: 1290
-    content: "\e[0;32mok: [localhost]\e[0m\r\n"
+  - delay: 450
+    content: "TASK [Gathering Facts] *****************************************************\r\n"
+  - delay: 0
+    content: "\r\n\e[0;32m    The ansible playbook will continue to run, and will reboot\r\n"
+  - delay: 0
+    content: "    the PI with Music, Video, and Companion configured for your \e[0m\e[1;97mATEM Mini\e[0m\r\n"
