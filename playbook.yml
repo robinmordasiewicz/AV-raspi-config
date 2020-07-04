@@ -675,7 +675,6 @@
         - libudev-dev
         - libusb-1.0-0-dev
         - npm
-        - yarn
       tags:
         - companion
 
@@ -720,10 +719,10 @@
       tags:
         - companion
 
-        #    - name: Install yarn
-        #   command: npm install yarn -g
-        #  tags:
-          #   - companion
+    - name: Install yarn
+      command: npm install yarn -g
+      tags:
+        - companion
 
     - name: clone companion github
       git:
