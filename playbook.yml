@@ -789,13 +789,6 @@
         - companion-unitfile
         - companion
 
-    - name: Display all variables/facts known for a host
-      debug:
-        var: companionunitfile
-      tags:
-        - companion-unitfile
-        - companion
-
     - name: Companion DB directory
       file:
         path: /var/local/companion/undefined/companion/
