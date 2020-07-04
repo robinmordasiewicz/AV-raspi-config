@@ -23,7 +23,7 @@ config:
   # Explicitly set the number of rows
   # or use `auto` to take the current
   # number of rows of your shell
-  rows: 33
+  rows: 32
   
   # Amount of times to repeat GIF
   # If value is -1, play once
@@ -49,12 +49,13 @@ config:
   # To hide the title use the value null
   # Don't forget to add a backgroundColor style with a null as type
   frameBox:
-    type: floating
+    type: window
     title: Terminal
     style:
-      border: 0px black solid
-      # boxShadow: none
-      # margin: 0px
+      border: 2px black solid
+      backgroundColor: black
+      boxShadow: none
+      margin: 0px
   
   # Add a watermark image to the rendered gif
   # You need to specify an absolute path for
@@ -240,47 +241,47 @@ records:
     content: e
   - delay: 400
     content: "\r\n"
-  - delay: 400
+  - delay: 300
     content: "\rReading package lists... 0%\r"
-  - delay: 500
+  - delay: 250
     content: "\rReading package lists... 20%\r"
-  - delay: 500
+  - delay: 250
     content: "\rReading package lists... 40%\r"
-  - delay: 500
+  - delay: 250
     content: "\rReading package lists... 60%\r"
-  - delay: 500
+  - delay: 250
     content: "\rReading package lists... 80%\r"
-  - delay: 500
+  - delay: 250
     content: "\rReading package lists... 100%\r"
-  - delay: 800
+  - delay: 500
     content: "\rReading package lists... Done\r\r\n"
   - delay: 300
     content: "\rBuilding dependency tree... 0%\r"
-  - delay: 500
+  - delay: 250
     content: "\rBuilding dependency tree... 20%\r"
-  - delay: 500
+  - delay: 250
     content: "\rBuilding dependency tree... 40%\r"
-  - delay: 500
+  - delay: 250
     content: "\rBuilding dependency tree... 60%\r"
-  - delay: 500
+  - delay: 250
     content: "\rBuilding dependency tree... 80%\r"
-  - delay: 500
+  - delay: 250
     content: "\rBuilding dependency tree... 100%\r"
-  - delay: 800
+  - delay: 600
     content: "\rBuilding dependency tree... Done\r\r\n"
   - delay: 300
     content: "\rReading state information... 0%\r"
-  - delay: 500
+  - delay: 300
     content: "\rReading state information... 20%\r"
-  - delay: 500
+  - delay: 300
     content: "\rReading state information... 40%\r"
-  - delay: 500
+  - delay: 250
     content: "\rReading state information... 60%\r"
-  - delay: 500
+  - delay: 300
     content: "\rReading state information... 80%\r"
-  - delay: 800
+  - delay: 500
     content: "\rReading state information... 100%\r"
-  - delay: 1000
+  - delay: 500
     content: "\rReading state information... Done\r\r\n"
   - delay: 300
     content: "The following NEW packages will be installed:\r\n"
@@ -292,33 +293,33 @@ records:
     content: "(Reading database ... \r"
   - delay: 80
     content: "(Reading database ... 5%\r(Reading database ... 10%\r(Reading database ... 15%\r(Reading database ... 20%\r(Reading database ... 25%\r(Reading database ... 30%\r(Reading database ... 35%\r(Reading database ... 40%\r(Reading database ... 45%\r(Reading database ... 50%\r"
-  - delay: 400
+  - delay: 200
     content: "(Reading database ... 55%\r"
-  - delay: 500
+  - delay: 200
     content: "(Reading database ... 60%\r"
-  - delay: 500
+  - delay: 200
     content: "(Reading database ... 65%\r"
-  - delay: 500
+  - delay: 200
     content: "(Reading database ... 70%\r"
-  - delay: 500
+  - delay: 200
     content: "(Reading database ... 75%\r"
-  - delay: 500
+  - delay: 200
     content: "(Reading database ... 80%\r"
-  - delay: 500
+  - delay: 200
     content: "(Reading database ... 85%\r"
-  - delay: 500
+  - delay: 200
     content: "(Reading database ... 90%\r"
-  - delay: 500
+  - delay: 200
     content: "(Reading database ... 95%\r"
-  - delay: 800
+  - delay: 200
     content: "(Reading database ... 100%\r"
-  - delay: 800
+  - delay: 400
     content: "(Reading database ... Done\r\n"
-  - delay: 1012
+  - delay: 600
     content: "Setting up ansible (2.7.7+dfsg-1) ...\r\n\r\n"
-  - delay: 1500
+  - delay: 1000
     content: "\e]0;pi@raspberrypi: ~\a\e[01;32mpi@raspberrypi\e[00m:\e[01;34m~ $\e[00m "
-  - delay: 1032
+  - delay: 832
     content: w
   - delay: 120
     content: g
@@ -326,33 +327,33 @@ records:
     content: e
   - delay: 100
     content: t
-  - delay: 900
+  - delay: 600
     content: " -q --show-progress https://raw.githubusercontent.com/robinmordasiewicz/video_switcher/master/playbook.yml\n"
   - delay: 800
     content: "\rplaybook.yml      0%[=>                        ]       0  --.-KB/s          "
-  - delay: 400
+  - delay: 250
     content: "\rplaybook.yml     10%[==>                       ]    .80K  --.-KB/s  in 0.84s"
-  - delay: 400
+  - delay: 250
     content: "\rplaybook.yml     20%[=====>                    ]   2.50K  --.-KB/s  in 1.22s"
-  - delay: 400
+  - delay: 250
     content: "\rplaybook.yml     30%[=======>                  ]   4.50K  --.-KB/s  in 1.68s"
-  - delay: 400
+  - delay: 250
     content: "\rplaybook.yml     40%[=========>                ]   6.50K  --.-KB/s  in 2.30s"
-  - delay: 400
+  - delay: 250
     content: "\rplaybook.yml     50%[============>             ]   9.78K  --.-KB/s  in 2.81s"
-  - delay: 400
+  - delay: 250
     content: "\rplaybook.yml     60%[===============>          ]  11.45K  --.-KB/s  in 3.37s"
-  - delay: 500
+  - delay: 300
     content: "\rplaybook.yml     70%[=================>        ]  14.05K  --.-KB/s  in 3.94s"
-  - delay: 600
+  - delay: 400
     content: "\rplaybook.yml     80%[====================>     ]  18.50K  --.-KB/s  in 4.37s"
-  - delay: 800
+  - delay: 450
     content: "\rplaybook.yml     90%[=======================>  ]  20.50K  --.-KB/s  in 4.73s"
-  - delay: 800
+  - delay: 500
     content: "\rplaybook.yml    100%[=========================>]  25.02K  --.-KB/s  in 5.01s\r\n\r\n"
-  - delay: 800
+  - delay: 600
     content: "\e]0;pi@raspberrypi: ~\a\e[01;32mpi@raspberrypi\e[00m:\e[01;34m~ $\e[00m "
-  - delay: 1000
+  - delay: 600
     content: a
   - delay: 282
     content: 'n'
@@ -383,8 +384,8 @@ records:
   - delay: 607
     content: "\r\n"
   - delay: 1708
-    content: "\e[1;35m [WARNING]: hosts list is empty. Implicit localhost does not match 'all'\e[0m\r\n\e[1;35m\e[0m\r\n"
-  - delay: 1507
+    content: "[WARNING]: hosts list is empty. Implicit localhost does not match 'all'\r\n"
+  - delay: 1007
     content: "Hostname:  [raspberrypi]: "
   - delay: 300
     content: "\rHostname:  [raspberrypi]: v"
@@ -396,7 +397,7 @@ records:
     content: "\rHostname:  [raspberrypi]: video"
   - delay: 300
     content: "\rHostname:  [raspberrypi]: videopi"
-  - delay: 1641
+  - delay: 1241
     content: "\r\nLANG:  [en_US.UTF-8]: "
   - delay: 350
     content: "\rLANG:  [en_US.UTF-8]: e"
