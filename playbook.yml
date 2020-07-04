@@ -7,26 +7,6 @@
 
   vars_prompt:
 
-    - name: FIRSTLASTNAME
-      prompt: "Full Name: "
-      private: no
-      default: "{{ lookup('ini', 'name section=user file=/home/pi/.gitconfig', errors='ignore') | default('John Smith', true)  }}"
-  
-    - name: GITHUBUSEREMAIL
-      prompt: "Github email address: "
-      private: no
-      default: "{{ lookup('ini', 'email section=user file=/home/pi/.gitconfig', errors='ignore') | default('user@example.com', true)  }}"
- 
-    - name: GITHUBUSERNAME
-      prompt: "Github username: "
-      private: no
-      default: "{{ lookup('ini', 'username section=user file=/home/pi/.gitconfig', errors='ignore') | default('example', true)  }}"
- 
-    - name: GITHUBHELPER
-      prompt: "Github helper: "
-      private: no
-      default: "{{ lookup('ini', 'helper section=credential file=/home/pi/.gitconfig', errors='ignore') | default('cache --timeout=36000', true)  }}"
-
     - name: HOSTNAME
       prompt: "Hostname: "
       private: no
@@ -61,6 +41,7 @@
     MEMSPLIT: "320"
     HDMI_GROUP: 1
     HDMI_MOD: 34
+    developer: true
     raspiconfig:
       ssh: 0
       vnc: 1
@@ -79,19 +60,40 @@
     - name: reboot
       command: "shutdown -r now +1"
 
+    - name: restart-mpd
+      systemd:
+        name: mpd
+        state: restarted
+
+    - name: restart-companion
+      systemd:
+        name: companion
+        enabled: yes
+        daemon_reload: yes
+        state: started
+      tags:
+        - companion-db
+        - companion-config
+        - companion
+
   tasks:
+
+    - name: Remove libpam-chksshpwd
+      apt:
+        pkg: libpam-chksshpwd
+        state: absent
+      when: developer
 
     - name: Add the user 'pi'
       user:
         name: pi
-        comment: "{{ FIRSTLASTNAME }}"
         group: pi
         groups: sudo
         append: yes
       tags:
         - piuser
 
-    # NOTE: Fully quoted because of the ': ' on the line. See the Gotchas in the YAML docs.
+    # NOTE: Fully quoted because of the ': ' on the line.
     - name: Passwordless sudo for pi user
       lineinfile:
         path: /etc/sudoers
@@ -128,49 +130,14 @@
       tags:
         - update
 
-    - name: Git config Full Name
-      become: False
-      git_config:
-          scope: global
-          name: user.name
-          value: "{{ FIRSTLASTNAME }}"
-      tags:
-        - github
-
-    - name: Git config email
-      become: False
-      git_config:
-          scope: global
-          name: user.email
-          value: "{{ GITHUBUSEREMAIL }}"
-      tags:
-        - github
- 
-    - name: Git config username
-      become: False
-      git_config:
-          scope: global
-          name: user.username
-          value: "{{ GITHUBUSERNAME }}"
-      tags:
-        - github
- 
-    - name: Git config cache
-      become: False
-      git_config:
-          scope: global
-          name: credential.helper
-          value: "{{ GITHUBHELPER }}"
-      tags:
-        - github
-
     - name: raspi-config defaults
       command: "raspi-config nonint do_{{ item.key }} {{ item.value }}"
+      ignore_errors: yes
       notify: reboot
-      when: "item.value != lookup('pipe','raspi-config nonint get_{{ item.key }}')"
+      when: lookup('pipe','raspi-config nonint get_{{ item.key }}') != "{{ item.value }}"
       with_dict: "{{ raspiconfig }}"
       register: returnvalue
-      changed_when: "returnvalue.stderr"
+      changed_when: "returnvalue"
       tags:
         - raspi-config-loop
         - raspi-config
@@ -290,7 +257,6 @@
         regexp: "^#?dtoverlay=disable-wifi"
         state: "{{ NEWSTATE.stdout }}"
       notify: reboot
-      #     when : WIFIDISABLED.stdout != WIFIDESIREDENABLED
       tags:
         - raspi-config-wifi
         - raspi-config
@@ -356,6 +322,7 @@
       command: "raspi-config nonint do_pi4video V3"
       when: lookup('pipe','raspi-config nonint get_pi4video') != "0"
       tags:
+        - raspi-config-pi4video
         - raspi-config
 
     - name: Set HDMI group mode
@@ -368,9 +335,10 @@
     - name: Set HDMI audio
       lineinfile:
         path: /boot/config.txt
-        line: 'hdmi_drive=2'
         regexp: "^#?hdmi_drive=."
+        line: 'hdmi_drive=2'
         state: present
+      notify: reboot
       tags:
         - raspi-config
 
@@ -380,6 +348,7 @@
         insertafter: '^#[all]'
         line: 'nohz=off'
         state: present
+      notify: reboot
       tags:
         - raspi-config
 
@@ -396,6 +365,7 @@
         create: yes
         state: present
         line: 'GOVERNOR="performance"'
+      register: cpufreq
       tags:
         - optimizations
 
@@ -404,6 +374,7 @@
         name: cpufrequtils
         enabled: yes
         state: restarted
+      when: cpufreq.changed
       tags:
         - optimizations
 
@@ -413,6 +384,7 @@
         backrefs: true
         regexp: '^(.*rootwait)$'
         line: '\1 logo.nologo vt.global_cursor_default=0 consoleblank=0 disable_splash=1'
+      notify: reboot
       tags:
         - customizations
 
@@ -423,6 +395,7 @@
         line: 'dmesg --console-off'
         regexp: "^#?dmesg.--console-off$"
         state: present
+      notify: reboot
       tags:
         - customizations
 
@@ -433,6 +406,7 @@
         line: '/usr/local/bin/clear-tty.sh &'
         regexp: "^#?\/usr\/local\/bin\/clear-tty.sh.&$"
         state: present
+      notify: reboot
       tags:
         - customizations
 
@@ -452,33 +426,6 @@
       tags:
         - customizations
 
-        #    - name: Non Free REPO addition
-        #  apt_repository:
-          #   repo: deb http://www.deb-multimedia.org buster main non-free
-          #   state: present
-          #  tags:
-            #   - ffmpeg
-
-            #   - name: Non Free REPO addition
-            #  command: "apt-get -y --allow-unauthenticated update -oAcquire::AllowInsecureRepositories=true"
-            #   tags:
-              #   - ffmpeg
- 
-              #    - name: Non Free REPO addition
-              #   command: "apt-get -y --allow-unauthenticated install deb-multimedia-keyring"
-              #   tags:
-                #    - ffmpeg
- 
-                #  - name: Non Free REPO addition
-                #    command: "apt-get -y --allow-unauthenticated upgrade"
-                #    tags:
-                  #     - ffmpeg
- 
-                  #   - name: Install non free stuff
-                  #    command: "apt-get -y --allow-unauthenticated install libopenh264-5 libkvazaar4 libfdk-aac2"
-                  #      tags:
-                    #        - ffmpeg
-
     - name: Install OMX Player
       apt:
         pkg:
@@ -490,13 +437,24 @@
       git:
         repo: https://github.com/subogero/omxd.git
         dest: /usr/local/src/omxd
-        force: yes
+      register: omxdgit
       tags:
+        - omx-git
+        - omx
+
+    - name: OMXD make clean
+      make:
+        chdir: /usr/local/src/omxd
+        target: clean
+      when: omxdgit.remote_url_changed
+      tags:
+        - omx-git
         - omx
 
     - name: OMXD compile
       make:
         chdir: /usr/local/src/omxd
+      register: omxdmake
       tags:
         - omx
 
@@ -504,6 +462,7 @@
       make:
         chdir: /usr/local/src/omxd
         target: install
+      when: omxdmake.changed
       tags:
         - omx
 
@@ -511,37 +470,40 @@
       make:
         chdir: /usr/local/src/omxd
         target: start
+      when: omxdmake.changed
       tags:
         - omx
 
-    - name: Music directory
+    - name: Create Music directory
       file:
-       path: /home/pi/Music
-       state: directory
-       mode: 0775
-       owner: pi
-       group: audio
-       recurse: yes
+        path: /home/pi/Music
+        state: directory
+        mode: 0775
+        owner: pi
+        group: audio
+      notify: restart-mpd
       tags:
         - music
 
     - name: Download default song
       get_url:
         url: https://raw.githubusercontent.com/robinmordasiewicz/video_switcher/master/pi/Music/elysium.wav
-        dest: /home/pi/Music
+        dest: /home/pi/Music/elysium.wav
         owner: pi
         group: pi
         mode: 0644
+      notify: restart-mpd
       tags:
         - music
 
     - name: Download default playlist
       get_url:
         url: https://raw.githubusercontent.com/robinmordasiewicz/video_switcher/master/pi/Music/default_playlist.m3u
-        dest: /home/pi/Music
+        dest: /home/pi/Music/default_playlist.m3u
         owner: pi
         group: audio
         mode: 0664
+      notify: restart-mpd
       tags:
         - music
 
@@ -560,6 +522,7 @@
         state: present
         regexp: '^#?group\s+\"(nogroup|audio)\"$'
         line: 'group "audio"'
+      notify: restart-mpd
       tags:
         - music
 
@@ -569,6 +532,7 @@
         state: present
         regexp: '^#?bind_to_address\s+\"(any|localhost)\"$'
         line: 'bind_to_address "any"'
+      notify: restart-mpd
       tags:
         - music
 
@@ -578,6 +542,7 @@
         state: present
         regexp: '^#?bind_to_address\s+\"\S*\/run\/mpd\/socket\"$'
         line: 'bind_to_address "/var/run/mpd/socket"'
+      notify: restart-mpd
       tags:
         - music
 
@@ -587,6 +552,7 @@
         state: present
         regexp: '^#?\s+device\s+"hw:[0-1],0"\s+#\soptional$'
         line: '    device      "hw:1,0" # optional'
+      notify: restart-mpd
       tags:
         - music
 
@@ -606,6 +572,7 @@
         state: present
         regexp: '^#?music_directory.+".+"$'
         line: 'music_directory "/home/pi/Music"'
+      notify: restart-mpd
       tags:
         - music
 
@@ -615,6 +582,7 @@
         state: present
         regexp: '^#?restore_paused.+\"(yes|no)\"$'
         line: 'restore_paused "yes"'
+      notify: restart-mpd
       tags:
         - music
 
@@ -624,6 +592,7 @@
         state: present
         regexp: '^#?playlist_directory.+".+"$'
         line: 'playlist_directory "/home/pi/Music"'
+      notify: restart-mpd
       tags:
         - music
 
@@ -633,14 +602,7 @@
         state: present
         regexp: '^#?auto_update\s+"yes"$'
         line: 'auto_update "yes"'
-      tags:
-        - music
-
-    - name: Start Music Player
-      systemd:
-        name: mpd
-        enabled: yes
-        state: restarted
+      notify: restart-mpd
       tags:
         - music
 
@@ -649,24 +611,6 @@
       command: mpc update
       tags:
         - music
-
-    - name: MPC load playlist
-      become: False
-      command: mpc load default_playlist
-      tags:
-        - music
-
-    - name: MPC load playlist
-      become: False
-      command: mpc repeat on
-      tags:
-        - music
-
-        #    - name: Load Playlist
-        #  become: False
-        #  command: mpc load default_playlist
-        # tags:
-          #  - music
 
     - name: Install Imagemagick for backgrounds
       apt:
@@ -683,7 +627,6 @@
        mode: 0755
        group: pi
        owner: pi
-       recurse: yes
       tags:
         - background
 
@@ -704,7 +647,6 @@
        mode: 0755
        group: pi
        owner: pi
-       recurse: yes
       tags:
         - background
 
@@ -739,6 +681,7 @@
         - libudev-dev
         - libusb-1.0-0-dev
         - npm
+        - yarn
       tags:
         - companion
 
@@ -762,13 +705,22 @@
           KERNEL=="hidraw", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="006d", MODE:="666", GROUP="plugdev"
           SUBSYSTEM=="usb", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="1f41", MODE:="666", GROUP="plugdev"
           KERNEL=="hidraw", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="1f41", MODE:="666", GROUP="plugdev"
+      notify: restart-companion
+      register: companionusb
       tags:
-        - companion
+        - companion-usb
+
+        #    - name: Display all variables/facts known for a host
+        #  debug:
+          #   var: companionusb
+          # tags:
+            #  - companion-usb
 
     - name: Reload USB rules
       command: udevadm control --reload-rules
+      when: companionusb.changed
       tags:
-        - companion
+        - companion-usb
 
     - name: Update npm
       command: npm install n -g
@@ -780,32 +732,42 @@
       tags:
         - companion
 
-    - name: Install yarn
-      command: npm install yarn -g
-      tags:
-         - companion
+        #    - name: Install yarn
+        #   command: npm install yarn -g
+        #  tags:
+          #   - companion
 
     - name: clone companion github
       git:
-         repo: https://github.com/bitfocus/companion.git
-         dest: /usr/local/src/companion
-         force: yes
+        repo: https://github.com/bitfocus/companion.git
+        dest: /usr/local/src/companion
+        force: yes
+        recursive: yes
+        track_submodules: yes
+      notify: restart-companion
+      register: companiongit
       tags:
+        - companion-git
         - companion
-
+            
     - name: Update companion modules - takes time....
       command:
         cmd: yarn update
-        chdir: /usr/local/src/companion 
+        chdir: /usr/local/src/companion
+      notify: restart-companion
+      when: companiongit.remote_url_changed or companiongit.submodules_changed
       environment:
         PATH: $HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:{{ ansible_env.PATH }}
       tags:
+        - companion-git
         - companion
 
     - name: Build writefile
       command: 
         cmd: tools/build_writefile.sh
         chdir: /usr/local/src/companion
+      notify: restart-companion
+      when: companiongit.remote_url_changed or companiongit.submodules_changed
       environment:
         PATH: $HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:{{ ansible_env.PATH }}
       tags:
@@ -833,27 +795,47 @@
 
           [Install]
           WantedBy=multi-user.target
+      notify: restart-companion
+      register: companionunitfile
       tags:
+        - companion-unitfile
+        - companion
+
+    - name: Display all variables/facts known for a host
+      debug:
+        var: companionunitfile
+      tags:
+        - companion-unitfile
         - companion
 
     - name: Companion DB directory
       file:
-       path: /var/local/companion/undefined/companion/
-       state: directory
-       mode: 0755
-       group: root
-       owner: root
-       recurse: yes
+        path: /var/local/companion/undefined/companion/
+        state: directory
+        mode: 0755
+        group: root
+        owner: root
       tags:
-        - companion-config
+        - companion-db
+        - companion
 
     - name: Download companion DB
       get_url:
         url: https://github.com/robinmordasiewicz/video_switcher/raw/master/pi/{{ HOSTNAME }}_full-config.companionconfig
         dest: /var/local/companion/undefined/companion/db
         mode: 0644
+      notify: restart-companion
+      register: companiondb
       tags:
-        - companion-config
+        - companion-db
+        - companion
+
+    - name: Display all variables/facts known for a host
+      debug:
+        var: companiondb
+      tags:
+        - companion-db
+        - companion
 
     - name: Put ATEM IP in companion DB
       replace:
@@ -862,7 +844,9 @@
         replace: '"bmd-atem","product":"ATEM","label":"atem","_configIdx":0,"host":"{{ ATEMIP }}"'
         backup: yes
         mode: 0644
+      notify: restart-companion
       tags:
+        - companion-db
         - companion-config
 
     - name: Check for Companion config
@@ -872,6 +856,7 @@
       changed_when: False
       tags:
         - companion-config
+        - companion
 
     - name: Companion config
       copy:
@@ -882,15 +867,16 @@
       when: not companionconfig.stat.exists
       tags:
         - companion-config
+        - companion
 
     - name: Start Companion
       systemd:
         name: companion
         enabled: yes
-        daemon_reload: yes
-        state: started
       tags:
+        - companion-db
         - companion-config
+        - companion
 
     - name: Install Fileshare
       apt:
