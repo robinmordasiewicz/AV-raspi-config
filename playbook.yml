@@ -70,7 +70,7 @@
         name: companion
         enabled: yes
         daemon_reload: yes
-        state: started
+        state: restarted
       tags:
         - companion-db
         - companion-config
@@ -185,7 +185,7 @@
       notify: reboot
       when: lookup('env','LANG') != LOCALE
       tags:
-        - raspi-config-region-disabled
+        - raspi-config-region
         - raspi-config
 
     - name: Get Bluetooth state
@@ -606,12 +606,6 @@
       tags:
         - music
 
-    - name: MPC Update
-      become: False
-      command: mpc update
-      tags:
-        - music
-
     - name: Install Imagemagick for backgrounds
       apt:
         install_recommends: yes
@@ -709,12 +703,6 @@
       register: companionusb
       tags:
         - companion-usb
-
-        #    - name: Display all variables/facts known for a host
-        #  debug:
-          #   var: companionusb
-          # tags:
-            #  - companion-usb
 
     - name: Reload USB rules
       command: udevadm control --reload-rules
@@ -830,13 +818,6 @@
         - companion-db
         - companion
 
-    - name: Display all variables/facts known for a host
-      debug:
-        var: companiondb
-      tags:
-        - companion-db
-        - companion
-
     - name: Put ATEM IP in companion DB
       replace:
         path: /var/local/companion/undefined/companion/db
@@ -847,7 +828,7 @@
       notify: restart-companion
       tags:
         - companion-db
-        - companion-config
+        - companion
 
     - name: Check for Companion config
       stat:
@@ -906,15 +887,17 @@
       tags:
         - userland
 
-    - name: Creating .hushlogin inside users home
+    - name: .hushlogin
       become: False
-      file:
-        path: /home/pi/.hushlogin
-        state: touch
-        owner: pi
+      copy:
+        content: ""
+        dest: /home/pi/.hushlogin
+        force: no
         group: pi
+        owner: pi
+        mode: 0644
       tags:
-         - userland
+        - userland-hush
 
     - name: Alias vi to vim
       copy:
