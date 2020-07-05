@@ -442,11 +442,17 @@
         - omx-git
         - omx
 
+    - name: Display all variables/facts known for a host
+      debug:
+        var: omxdgit
+      tags:
+        - omx
+
     - name: OMXD make clean
       make:
         chdir: /usr/local/src/omxd
         target: clean
-      when: omxdgit.remote_url_changed
+      when: omxdgit.remote_url_changed is defined and omxdgit.remote_url_changed
       tags:
         - omx-git
         - omx
@@ -742,7 +748,8 @@
         cmd: yarn update
         chdir: /usr/local/src/companion
       notify: restart-companion
-      when: companiongit.remote_url_changed or companiongit.submodules_changed
+      when: (companiongit.remote_url_changed is defined and companiongit.remote_url_changed) or
+            (companiongit.submodules_changed is defined and companiongit.submodules_changed)
       environment:
         PATH: $HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:{{ ansible_env.PATH }}
       tags:
@@ -951,7 +958,8 @@
       command:
         cmd: python update_plugins.py
         chdir: /home/pi/.vim_runtime
-      when: vimrcgit.remote_url_changed or vimymlgit.remote_url_changed
+      when: ( vimrcgit.remote_url_changed is defined and vimrcgit.remote_url_changed ) or
+            ( vimymlgit.remote_url_changed is defined and vimymlgit.remote_url_changed )
       tags:
         - userland-vim
         - userland
