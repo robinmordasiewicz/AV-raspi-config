@@ -22,10 +22,13 @@
       private: no
       default: "{{ lookup('pipe','grep atem /etc/hosts | expand -t 1 | cut -f 1 -d \" \"', errors='ignore') | default('192.168.2.240', true)  }}"
 
-    - name: AUDIOOUT
-      prompt: "Default audio output Headphone or HDMI: "
-      private: no
-      default: "{{ lookup('pipe','sudo -u pi amixer cget numid=1 | grep \"^numid\" | grep -o \"Headphone\\|HDMI\"', errors='ignore') | default('Headphone', true)  }}"
+# ROBIN - need to add in music player over HDMI option
+#       - for now lets just comment this out and statically assign AUDIOOUT in vars:
+#
+#    - name: AUDIOOUT
+#      prompt: "Default audio output Headphone or HDMI: "
+#      private: no
+#      default: "{{ lookup('pipe','sudo -u pi amixer cget numid=1 | grep \"^numid\" | grep -o \"Headphone\\|HDMI\"', errors='ignore') | default('Headphone', true)  }}"
 
     - name: WIFIDESIREDENABLED
       prompt: "Enable WIFI: "
@@ -39,6 +42,7 @@
 
   vars:
     MEMSPLIT: "320"
+    AUDIOOUT: "Headphone"
     HDMI_GROUP: 1
     HDMI_MOD: 34
     developer: true
