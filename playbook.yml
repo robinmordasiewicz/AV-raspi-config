@@ -31,12 +31,12 @@
 #      default: "{{ lookup('pipe','sudo -u pi amixer cget numid=1 | grep \"^numid\" | grep -o \"Headphone\\|HDMI\"', errors='ignore') | default('Headphone', true)  }}"
 
     - name: WIFIDESIREDENABLED
-      prompt: "Enable WIFI:                "
+      prompt: "Enable WIFI:               "
       private: no
       default: "{{ 'no' if (lookup('pipe','cat /boot/config.txt | grep \"^dtoverlay=disable-wifi$\"', errors='ignore')) else 'yes' }}"
 
     - name: BLUETOOTHDESIREDENABLED
-      prompt: "Enable Bluetooth:           "
+      prompt: "Enable Bluetooth:          "
       private: no
       default: "{{ 'no' if (lookup('pipe','cat /boot/config.txt | grep \"^dtoverlay=disable-bt$\"', errors='ignore')) else 'yes' }}"
 
