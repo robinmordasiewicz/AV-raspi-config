@@ -306,7 +306,6 @@
         - raspi-config
 
     - name: Get audio output
-      #command: sudo -u pi amixer contents
       command: amixer contents
       become_user: pi
       register: audiooutput
@@ -731,20 +730,45 @@
       when: companionusb.changed
       tags:
         - companion-usb
-
-    - name: Update npm
-      command: npm install n -g
+     
+    - name: n node.js package
+      npm:
+        name: n
+        global: yes
       tags:
-         - companion
-
-    - name: Update node
-      command: n 8.17.0
-      tags:
+        - companion-n
         - companion
 
-    - name: Install yarn
-      command: npm install yarn -g
+    - name: Checking n version 8.17.0
+      command: "n list"
+      register: nodeversion
+      changed_when: False
       tags:
+        - companion-n
+        - companion
+
+    - name: Checking n version 8.17.0
+      command: "n rm {{ item }}"
+      with_items:
+        - "{{ nodeversion.stdout_lines }}"
+      when: nodeversion.stdout != 'node/8.17.0'
+      tags:
+        - companion-n
+        - companion
+
+    - name: Install node 8.17.0
+      command: n 8.17.0
+      when: nodeversion.stdout != 'node/8.17.0'
+      tags:
+        - companion
+        - companion-n
+
+    - name: yarn node.js package
+      npm:
+        name: yarn
+        global: yes
+      tags:
+        - companion-yarn
         - companion
 
     - name: clone companion github
