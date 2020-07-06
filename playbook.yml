@@ -747,7 +747,7 @@
         - companion-n
         - companion
 
-    - name: Checking n version 8.17.0
+    - name: Remove incompatible n version
       command: "n rm {{ item }}"
       with_items:
         - "{{ nodeversion.stdout_lines }}"
