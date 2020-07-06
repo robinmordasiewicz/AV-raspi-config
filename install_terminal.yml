@@ -52,7 +52,7 @@ config:
     type: window
     title: Terminal
     style:
-      border: 2px black solid
+      border: 0px black solid
       backgroundColor: black
       boxShadow: none
       margin: 0px
