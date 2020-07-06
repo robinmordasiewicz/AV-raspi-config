@@ -80,6 +80,15 @@
         - companion-config
         - companion
 
+    - name: restart-cpufreq
+      systemd:
+        name: cpufrequtils
+        enabled: yes
+        state: restarted
+      when: cpufreq.changed
+      tags:
+        - optimizations
+
   tasks:
 
     - name: Remove libpam-chksshpwd
@@ -370,16 +379,7 @@
         create: yes
         state: present
         line: 'GOVERNOR="performance"'
-      register: cpufreq
-      tags:
-        - optimizations
-
-    - name: Reload CPU freq
-      systemd:
-        name: cpufrequtils
-        enabled: yes
-        state: restarted
-      when: cpufreq.changed
+      notify: restart-cpufreq
       tags:
         - optimizations
 
@@ -954,8 +954,8 @@
       command:
         cmd: python update_plugins.py
         chdir: /home/pi/.vim_runtime
-      when: ( vimrcgit.remote_url_changed is defined and vimrcgit.remote_url_changed ) or
-            ( vimymlgit.remote_url_changed is defined and vimymlgit.remote_url_changed )
+      when: ( vimrcgit.remote_url_changed is not defined or vimrcgit.remote_url_changed ) or
+            ( vimymlgit.remote_url_changed is not defined or vimymlgit.remote_url_changed )
       tags:
         - userland-vim
         - userland
