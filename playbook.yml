@@ -8,17 +8,17 @@
   vars_prompt:
 
     - name: HOSTNAME
-      prompt: "Hostname: "
+      prompt: "Hostname:          "
       private: no
       default: "{{ lookup('pipe','raspi-config nonint get_hostname', errors='ignore') }}"
 
     - name: LOCALE
-      prompt: "LANG: "
+      prompt: "Language Code:     "
       private: no
       default: "{{ lookup('env','LANG') | default('en_US.UTF-8')}}"
 
     - name: ATEMIP
-      prompt: "Atem mini IP: "
+      prompt: "Atem mini IP:    "
       private: no
       default: "{{ lookup('pipe','grep atem /etc/hosts | expand -t 1 | cut -f 1 -d \" \"', errors='ignore') | default('192.168.2.240', true)  }}"
 
@@ -31,12 +31,12 @@
 #      default: "{{ lookup('pipe','sudo -u pi amixer cget numid=1 | grep \"^numid\" | grep -o \"Headphone\\|HDMI\"', errors='ignore') | default('Headphone', true)  }}"
 
     - name: WIFIDESIREDENABLED
-      prompt: "Enable WIFI: "
+      prompt: "Enable WIFI:                "
       private: no
       default: "{{ 'no' if (lookup('pipe','cat /boot/config.txt | grep \"^dtoverlay=disable-wifi$\"', errors='ignore')) else 'yes' }}"
 
     - name: BLUETOOTHDESIREDENABLED
-      prompt: "Enable Bluetooth: "
+      prompt: "Enable Bluetooth:           "
       private: no
       default: "{{ 'no' if (lookup('pipe','cat /boot/config.txt | grep \"^dtoverlay=disable-bt$\"', errors='ignore')) else 'yes' }}"
 
@@ -287,8 +287,9 @@
         - raspi-config
 
     - name: Get audio output
-      command: sudo -u pi amixer contents
-      become: False
+      #command: sudo -u pi amixer contents
+      command: amixer contents
+      become_user: pi
       register: audiooutput
       changed_when: False
       tags:
@@ -444,12 +445,6 @@
       register: omxdgit
       tags:
         - omx-git
-        - omx
-
-    - name: Display all variables/facts known for a host
-      debug:
-        var: omxdgit
-      tags:
         - omx
 
     - name: OMXD make clean
@@ -739,36 +734,34 @@
         repo: https://github.com/bitfocus/companion.git
         dest: /usr/local/src/companion
         force: yes
-        recursive: yes
-        track_submodules: yes
-      notify: restart-companion
+        recursive: no
+        track_submodules: no
       register: companiongit
+      changed_when: ( companiongit.remote_url_changed is not defined or companiongit.remote_url_changed ) 
       tags:
         - companion-git
         - companion
-            
+
     - name: Update companion modules - takes time....
       command:
         cmd: yarn update
         chdir: /usr/local/src/companion
-      notify: restart-companion
-      when: (companiongit.remote_url_changed is defined and companiongit.remote_url_changed) or
-            (companiongit.submodules_changed is defined and companiongit.submodules_changed)
       environment:
         PATH: $HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:{{ ansible_env.PATH }}
       tags:
         - companion-git
         - companion
+        - companion-update
 
     - name: Build writefile
       command: 
         cmd: tools/build_writefile.sh
         chdir: /usr/local/src/companion
-      notify: restart-companion
-      when: companiongit.remote_url_changed or companiongit.submodules_changed
       environment:
         PATH: $HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:{{ ansible_env.PATH }}
+      notify: restart-companion
       tags:
+        - companion-update
         - companion
 
     - name: Companion UNIT file
@@ -794,7 +787,6 @@
           [Install]
           WantedBy=multi-user.target
       notify: restart-companion
-      register: companionunitfile
       tags:
         - companion-unitfile
         - companion
@@ -853,7 +845,7 @@
         - companion-config
         - companion
 
-    - name: Start Companion
+    - name: Autostart Companion
       systemd:
         name: companion
         enabled: yes
