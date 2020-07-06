@@ -99,6 +99,14 @@
       tags:
         - omx
 
+    - name: restart-fileshare
+      systemd:
+        name: smbd
+        enabled: yes
+        state: restarted
+      tags:
+         - filesharing
+
   tasks:
 
     - name: Remove libpam-chksshpwd
@@ -909,7 +917,7 @@
       systemd:
         name: smbd
         enabled: yes
-        state: started
+      notify: restart-fileshare
       tags:
          - filesharing
 
