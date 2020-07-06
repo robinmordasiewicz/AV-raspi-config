@@ -914,6 +914,7 @@
         dest: /home/pi/.vim_runtime
         force: yes
       register: vimrcgit
+      changed_when: ( vimrcgit.remote_url_changed is not defined or vimrcgit.remote_url_changed ) 
       tags:
         - userland-vim
         - userland
