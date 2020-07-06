@@ -67,7 +67,10 @@
     - name: restart-mpd
       systemd:
         name: mpd
+        enabled: yes
         state: restarted
+      tags:
+        - music
 
     - name: restart-companion
       systemd:
@@ -85,9 +88,16 @@
         name: cpufrequtils
         enabled: yes
         state: restarted
-      when: cpufreq.changed
       tags:
         - optimizations
+
+    - name: restart-omxd
+      systemd:
+        name: omxd
+        enabled: yes
+        state: restarted
+      tags:
+        - omx
 
   tasks:
 
@@ -476,6 +486,14 @@
         chdir: /usr/local/src/omxd
         target: start
       when: omxdmake.changed
+      notify: restart-omxd
+      tags:
+        - omx
+
+    - name: Autostart OMXD
+      systemd:
+        name: omxd
+        enabled: yes
       tags:
         - omx
 
