@@ -1,4 +1,4 @@
-# Video Switching and A/V Automation
+# RASPI-CONFIG for ATEM mini Switching and A/V Automation
 
 Automate the deployment of a raspberry PI4 running software configured to automate the ATEM mini switching, video playout, music and sound effects.  
 
@@ -55,9 +55,6 @@ This project requires no license.
 ## Acknowledgments
 
 * Hat tip to anyone whose code was used
-* Aaron Parecki
-* John Barker
-* Bill Church
 * Adam Schumacher
 
 https://robinmordasiewicz.github.io/video_switcher/
