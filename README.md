@@ -1,5 +1,5 @@
 # RASPI-CONFIG for ATEM mini
-## Switching and A/V Automation
+Switching and A/V Automation
 
 Automate the deployment of a raspberry PI4 running software configured to automate the ATEM mini switching, video playout, music and sound effects.  
 
