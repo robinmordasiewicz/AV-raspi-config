@@ -59,4 +59,4 @@ This project requires no license.
 
 https://robinmordasiewicz.github.io/raspi-config/
 
-<script src="https://utteranc.es/client.js" repo="robinmordasiewicz/video_switcher" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
+<script src="https://utteranc.es/client.js" repo="robinmordasiewicz/raspi-config" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
