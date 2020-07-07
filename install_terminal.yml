@@ -328,29 +328,29 @@ records:
   - delay: 100
     content: "t"
   - delay: 600
-    content: " -q --show-progress https://raw.githubusercontent.com/robinmordasiewicz/video_switcher/master/playbook.yml\e[00m\n"
+    content: " -q --show-progress https://raw.githubusercontent.com/robinmordasiewicz/video_switcher/master/raspi-config.yml\e[00m\n"
   - delay: 800
-    content: "\rplaybook.yml      0%[=>                        ]       0  --.-KB/s          "
+    content: "\rraspi-config.yml      0%[=>                        ]       0  --.-KB/s          "
   - delay: 250
-    content: "\rplaybook.yml     10%[==>                       ]    .80K  --.-KB/s  in 0.84s"
+    content: "\rraspi-config.yml     10%[==>                       ]    .80K  --.-KB/s  in 0.84s"
   - delay: 250
-    content: "\rplaybook.yml     20%[=====>                    ]   2.50K  --.-KB/s  in 1.22s"
+    content: "\rraspi-config.yml     20%[=====>                    ]   2.50K  --.-KB/s  in 1.22s"
   - delay: 250
-    content: "\rplaybook.yml     30%[=======>                  ]   4.50K  --.-KB/s  in 1.68s"
+    content: "\rraspi-config.yml     30%[=======>                  ]   4.50K  --.-KB/s  in 1.68s"
   - delay: 250
-    content: "\rplaybook.yml     40%[=========>                ]   6.50K  --.-KB/s  in 2.30s"
+    content: "\rraspi-config.yml     40%[=========>                ]   6.50K  --.-KB/s  in 2.30s"
   - delay: 250
-    content: "\rplaybook.yml     50%[============>             ]   9.78K  --.-KB/s  in 2.81s"
+    content: "\rraspi-config.yml     50%[============>             ]   9.78K  --.-KB/s  in 2.81s"
   - delay: 250
-    content: "\rplaybook.yml     60%[===============>          ]  11.45K  --.-KB/s  in 3.37s"
+    content: "\rraspi-config.yml     60%[===============>          ]  11.45K  --.-KB/s  in 3.37s"
   - delay: 300
-    content: "\rplaybook.yml     70%[=================>        ]  14.05K  --.-KB/s  in 3.94s"
+    content: "\rraspi-config.yml     70%[=================>        ]  14.05K  --.-KB/s  in 3.94s"
   - delay: 400
-    content: "\rplaybook.yml     80%[====================>     ]  18.50K  --.-KB/s  in 4.37s"
+    content: "\rraspi-config.yml     80%[====================>     ]  18.50K  --.-KB/s  in 4.37s"
   - delay: 450
-    content: "\rplaybook.yml     90%[=======================>  ]  20.50K  --.-KB/s  in 4.73s"
+    content: "\rraspi-config.yml     90%[=======================>  ]  20.50K  --.-KB/s  in 4.73s"
   - delay: 500
-    content: "\rplaybook.yml    100%[=========================>]  25.02K  --.-KB/s  in 5.01s\r\n\r\n"
+    content: "\rraspi-config.yml    100%[=========================>]  25.02K  --.-KB/s  in 5.01s\r\n\r\n"
   - delay: 600
     content: "\e[00;32mpi@raspberrypi\e[00m:\e[00;34m~ $\e[00m \e[0;37m"
   - delay: 600

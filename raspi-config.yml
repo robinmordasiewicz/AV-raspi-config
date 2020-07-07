@@ -576,6 +576,16 @@
       tags:
         - music
 
+    - name: Add the user mpd to audio group
+      user:
+        name: mpd
+        groups: audio
+        append: yes
+      notify: restart-mpd
+      tags:
+        - music
+        - mpduser
+
     - name: Configure Playlist Folder
       lineinfile:
         path: /etc/mpd.conf
