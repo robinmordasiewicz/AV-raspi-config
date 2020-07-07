@@ -8,7 +8,7 @@ Automate the deployment of a raspberry PI4 running software configured to automa
 #### Required
 
 * Raspberry Pi4 with 4GB or 8GB of RAM
-* [32-bit Raspian Lite](https://downloads.raspberrypi.org/raspios_lite_armhf_latest) [installed](https://www.raspberrypi.org/documentation/installation/installing-images/README.md){:target="_blank" rel="noopener"}.
+* [32-bit Raspian Lite](https://downloads.raspberrypi.org/raspios_lite_armhf_latest) [installed](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
   * Desktop and Full versions work, but Raspian LITE is preferred. ( haven't tested 64 bit yet )
 * Raspberry Pi4 connected to your network with access to the internet
 
@@ -32,7 +32,7 @@ ansible-playbook playbook.yml
 
 ```
 
-![](https://github.com/robinmordasiewicz/raspi-config/raw/master/install_terminal.gif)
+![](install_terminal.gif)
 
 ## Contents
 
@@ -42,12 +42,6 @@ ansible-playbook playbook.yml
 * imagemagick
 * mpd
 * mpc
-
-## Authors
-
-**Robin Mordasiewicz** - *Initial work*
-
-See also the list of [contributors](https://github.com/robinmordasiewicz/raspi-config/contributors) who participated in this project.
 
 ## License
 
