@@ -1,4 +1,4 @@
-# PI-Atem-Companion Scene Switching and A/V Automation
+# PI-Atem-Companion - Scene Switching and A/V Automation
 
 ### Atem Mini, Companion, Sound Effects, Background Music, and Video Playout
 
