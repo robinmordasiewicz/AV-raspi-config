@@ -504,6 +504,36 @@
       tags:
         - omx
 
+    - name: Autostart alsa-utils
+      systemd:
+        name: alsa-utils
+        enabled: yes
+      tags:
+        - music-alsa
+
+    - name: Get Headphone volume settings
+      become_user: pi
+      shell: amixer scontents | grep -Po \\[\\d+\\.\\d+dB\\]\\s+\\[o\(n\|f\)
+      args:
+        executable: /bin/bash
+      register: amixervolume
+      changed_when: false
+      tags:
+        - music-alsa
+
+    - name: Set Headphones output
+      become_user: pi
+      command: amixer set Headphone,0 0dB unmute
+      when: amixervolume.stdout != '[0.00dB] [on'
+      tags:
+        - music-alsa
+
+    - name: Save Alsa state
+      command: alsactl store
+      when: amixervolume.stdout != '[0.00dB] [on'
+      tags:
+        - music-alsa
+
     - name: Create Music directory
       file:
         path: /home/pi/Music
