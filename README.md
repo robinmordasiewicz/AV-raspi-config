@@ -32,7 +32,7 @@ ansible-playbook playbook.yml
 
 ```
 
-![](https://github.com/robinmordasiewicz/rasp-config/raw/master/install_terminal.gif)
+![](https://github.com/robinmordasiewicz/raspi-config/raw/master/install_terminal.gif)
 
 ## Contents
 
