@@ -24,14 +24,14 @@ Run the following three commands on your raspberry PI4 and follow prompts.
 
 sudo apt-get -y install ansible
 
-wget -q --show-progress https://raw.githubusercontent.com/robinmordasiewicz/video_switcher/master/playbook.yml
+wget -q --show-progress https://raw.githubusercontent.com/robinmordasiewicz/raspi-config/master/playbook.yml
 
 ansible-playbook playbook.yml
 
 
 ```
 
-![](https://github.com/robinmordasiewicz/video_switcher/raw/master/install_terminal.gif)
+![](https://github.com/robinmordasiewicz/rasp-config/raw/master/install_terminal.gif)
 
 ## Contents
 
@@ -46,7 +46,7 @@ ansible-playbook playbook.yml
 
 **Robin Mordasiewicz** - *Initial work*
 
-See also the list of [contributors](https://github.com/robinmordasiewicz/video_switcher/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/robinmordasiewicz/raspi-config/contributors) who participated in this project.
 
 ## License
 
@@ -57,6 +57,6 @@ This project requires no license.
 * Hat tip to anyone whose code was used
 * Adam Schumacher
 
-https://robinmordasiewicz.github.io/video_switcher/
+https://robinmordasiewicz.github.io/raspi-config/
 
 <script src="https://utteranc.es/client.js" repo="robinmordasiewicz/video_switcher" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
