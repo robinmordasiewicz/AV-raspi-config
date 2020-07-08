@@ -56,4 +56,4 @@ This project requires no license.
 
 https://robinmordasiewicz.github.io/PI-Atem-Companion/
 
-<script src="https://utteranc.es/client.js" repo="robinmordasiewicz/raspi-config" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
+<script src="https://utteranc.es/client.js" repo="robinmordasiewicz/PI-Atem-Companion" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
