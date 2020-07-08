@@ -1,4 +1,4 @@
-PI-Atem-Companion - A/V Scene Automation
+AV-raspi-config - A/V Scene Automation
 ========================================
 
 ### Atem Mini, bitfocus.io Companion, Sound Effects, Background Music, and Video Playout
@@ -27,7 +27,7 @@ Run the following three commands on your raspberry PI4 and follow prompts.
 
 sudo apt-get -y install ansible
 
-curl -O https://raw.githubusercontent.com/robinmordasiewicz/PI-Atem-Companion/master/raspi-config.yml
+curl -O https://raw.githubusercontent.com/robinmordasiewicz/AV-raspi-config/master/raspi-config.yml
 
 ansible-playbook raspi-config.yml
 
@@ -54,6 +54,6 @@ This project requires no license.
 * Hat tip to anyone whose code was used
 * Yourname Here
 
-https://robinmordasiewicz.github.io/PI-Atem-Companion/
+https://robinmordasiewicz.github.io/AV-raspi-config/
 
-<script src="https://utteranc.es/client.js" repo="robinmordasiewicz/PI-Atem-Companion" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
+<script src="https://utteranc.es/client.js" repo="robinmordasiewicz/AV-raspi-config" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
