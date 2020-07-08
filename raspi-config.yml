@@ -1050,7 +1050,7 @@
     - name: Configure Filesharing
       ini_file:
           path: /etc/samba/smb.conf
-          section: Global
+          section: global
           option: "min protocol"
           value: "SMB2"
       notify: restart-fileshare
@@ -1060,7 +1060,7 @@
     - name: Configure Filesharing
       ini_file:
           path: /etc/samba/smb.conf
-          section: Global
+          section: global
           option: "ea support"
           value: "yes"
       notify: restart-fileshare
@@ -1070,7 +1070,7 @@
     - name: Configure Filesharing
       ini_file:
           path: /etc/samba/smb.conf
-          section: Global
+          section: global
           option: "vfs objects"
           value: "catia fruit streams_xattr"
       notify: restart-fileshare
@@ -1080,7 +1080,7 @@
     - name: Configure Filesharing
       ini_file:
           path: /etc/samba/smb.conf
-          section: Global
+          section: global
           option: "fruit:metadata"
           value: "stream"
       notify: restart-fileshare
@@ -1090,7 +1090,7 @@
     - name: Configure Filesharing
       ini_file:
           path: /etc/samba/smb.conf
-          section: Global
+          section: global
           option: "fruit:model"
           value: "MacSamba"
       notify: restart-fileshare
@@ -1100,7 +1100,7 @@
     - name: Configure Filesharing
       ini_file:
           path: /etc/samba/smb.conf
-          section: Global
+          section: global
           option: "fruit:veto_appledouble"
           value: "no"
       notify: restart-fileshare
@@ -1110,7 +1110,7 @@
     - name: Configure Filesharing
       ini_file:
           path: /etc/samba/smb.conf
-          section: Global
+          section: global
           option: "fruit:posix_rename"
           value: "yes"
       notify: restart-fileshare
@@ -1120,7 +1120,7 @@
     - name: Configure Filesharing
       ini_file:
           path: /etc/samba/smb.conf
-          section: Global
+          section: global
           option: "fruit:zero_file_id"
           value: "yes"
       notify: restart-fileshare
@@ -1130,7 +1130,7 @@
     - name: Configure Filesharing
       ini_file:
           path: /etc/samba/smb.conf
-          section: Global
+          section: global
           option: "fruit:wipe_intentionally_left_blank_rfork"
           value: "yes"
       notify: restart-fileshare
@@ -1140,7 +1140,7 @@
     - name: Configure Filesharing
       ini_file:
           path: /etc/samba/smb.conf
-          section: Global
+          section: global
           option: "fruit:delete_empty_adfiles"
           value: "yes"
       notify: restart-fileshare
