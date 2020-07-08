@@ -1,4 +1,8 @@
-# PI-Atem-Companion - Scene A/V Automation
+PI-Atem-Companion
+==================
+
+Scene A/V Automation
+--------------------
 ### Atem Mini, bitfocus.io Companion, Sound Effects, Background Music, and Video Playout
 
 Automate the deployment of a raspberry PI4 running software configured to automate the ATEM mini switching, video playout, music and sound effects.  
