@@ -522,7 +522,7 @@
 
     - name: Get Headphone volume settings
       become_user: pi
-      shell: amixer scontents | grep -Po \\[\\d+\\.\\d+dB\\]\\s+\\[o\(n\|f\)
+      shell: amixer scontents | grep -Po \\[-?\\d+\\.\\d+dB\\]\\s+\\[o\(n\|f\)
       args:
         executable: /bin/bash
       register: amixervolume
