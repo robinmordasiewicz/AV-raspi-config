@@ -126,6 +126,14 @@
       tags:
          - filesharing
 
+    - name: restart-avahi
+      systemd:
+        name: avahi-daemon
+        state: restarted
+        enabled: yes
+      tags:
+         - filesharing
+
   tasks:
 
     - name: Remove libpam-chksshpwd
@@ -993,6 +1001,39 @@
         pkg:
         - samba
         - samba-common-bin
+        - avahi-daemon
+      tags:
+         - filesharing
+
+    - name: Avahi Configs
+      copy:
+        dest: /etc/avahi/services/samba.service
+        group: root
+        owner: root
+        mode: 0755
+        content: |
+            <?xml version="1.0" standalone='no'?><!--*-nxml-*-->
+            <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+            <service-group>
+              <name replace-wildcards="yes">%h</name>
+              <service>
+                <type>_smb._tcp</type>
+                <port>445</port>
+              </service>
+              <service>
+                <type>_device-info._tcp</type>
+                <port>0</port>
+                <txt-record>model=RackMac</txt-record>
+              </service>
+            </service-group>
+      notify: restart-avahi
+      tags:
+          - filesharing
+
+    - name: Start Avahi
+      systemd:
+        name: avahi-daemon
+        enabled: yes
       tags:
          - filesharing
 
@@ -1003,6 +1044,106 @@
           | smbpasswd -s -a {{ PIUSER }}
       register: smbpasswd
       changed_when: "'Added user' in smbpasswd.stdout"
+      tags:
+         - filesharing
+
+    - name: Configure Filesharing
+      ini_file:
+          path: /etc/samba/smb.conf
+          section: Global
+          option: "min protocol"
+          value: "SMB2"
+      notify: restart-fileshare
+      tags:
+         - filesharing
+
+    - name: Configure Filesharing
+      ini_file:
+          path: /etc/samba/smb.conf
+          section: Global
+          option: "ea support"
+          value: "yes"
+      notify: restart-fileshare
+      tags:
+         - filesharing
+
+    - name: Configure Filesharing
+      ini_file:
+          path: /etc/samba/smb.conf
+          section: Global
+          option: "vfs objects"
+          value: "catia fruit streams_xattr"
+      notify: restart-fileshare
+      tags:
+         - filesharing
+
+    - name: Configure Filesharing
+      ini_file:
+          path: /etc/samba/smb.conf
+          section: Global
+          option: "fruit:metadata"
+          value: "stream"
+      notify: restart-fileshare
+      tags:
+         - filesharing
+
+    - name: Configure Filesharing
+      ini_file:
+          path: /etc/samba/smb.conf
+          section: Global
+          option: "fruit:model"
+          value: "MacSamba"
+      notify: restart-fileshare
+      tags:
+         - filesharing
+
+    - name: Configure Filesharing
+      ini_file:
+          path: /etc/samba/smb.conf
+          section: Global
+          option: "fruit:veto_appledouble"
+          value: "no"
+      notify: restart-fileshare
+      tags:
+         - filesharing
+
+    - name: Configure Filesharing
+      ini_file:
+          path: /etc/samba/smb.conf
+          section: Global
+          option: "fruit:posix_rename"
+          value: "yes"
+      notify: restart-fileshare
+      tags:
+         - filesharing
+
+    - name: Configure Filesharing
+      ini_file:
+          path: /etc/samba/smb.conf
+          section: Global
+          option: "fruit:zero_file_id"
+          value: "yes"
+      notify: restart-fileshare
+      tags:
+         - filesharing
+
+    - name: Configure Filesharing
+      ini_file:
+          path: /etc/samba/smb.conf
+          section: Global
+          option: "fruit:wipe_intentionally_left_blank_rfork"
+          value: "yes"
+      notify: restart-fileshare
+      tags:
+         - filesharing
+
+    - name: Configure Filesharing
+      ini_file:
+          path: /etc/samba/smb.conf
+          section: Global
+          option: "fruit:delete_empty_adfiles"
+          value: "yes"
+      notify: restart-fileshare
       tags:
          - filesharing
 
