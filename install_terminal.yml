@@ -320,37 +320,27 @@ records:
   - delay: 1000
     content: "\e[00;32mpi@raspberrypi\e[00m:\e[00;34m~ $\e[00m \e[0;37m"
   - delay: 832
-    content: "w"
+    content: "c"
   - delay: 120
-    content: "g"
+    content: "u"
   - delay: 152
-    content: "e"
+    content: "r"
   - delay: 100
-    content: "t"
+    content: "l"
+  - delay: 100
+    content: " "
+  - delay: 100
+    content: '-'
+  - delay: 100
+    content: "O"
   - delay: 600
-    content: " -q --show-progress https://raw.githubusercontent.com/robinmordasiewicz/video_switcher/master/raspi-config.yml\e[00m\n"
-  - delay: 800
-    content: "\rraspi-config.yml      0%[=>                        ]       0  --.-KB/s          "
-  - delay: 250
-    content: "\rraspi-config.yml     10%[==>                       ]    .80K  --.-KB/s  in 0.84s"
-  - delay: 250
-    content: "\rraspi-config.yml     20%[=====>                    ]   2.50K  --.-KB/s  in 1.22s"
-  - delay: 250
-    content: "\rraspi-config.yml     30%[=======>                  ]   4.50K  --.-KB/s  in 1.68s"
-  - delay: 250
-    content: "\rraspi-config.yml     40%[=========>                ]   6.50K  --.-KB/s  in 2.30s"
-  - delay: 250
-    content: "\rraspi-config.yml     50%[============>             ]   9.78K  --.-KB/s  in 2.81s"
-  - delay: 250
-    content: "\rraspi-config.yml     60%[===============>          ]  11.45K  --.-KB/s  in 3.37s"
-  - delay: 300
-    content: "\rraspi-config.yml     70%[=================>        ]  14.05K  --.-KB/s  in 3.94s"
-  - delay: 400
-    content: "\rraspi-config.yml     80%[====================>     ]  18.50K  --.-KB/s  in 4.37s"
-  - delay: 450
-    content: "\rraspi-config.yml     90%[=======================>  ]  20.50K  --.-KB/s  in 4.73s"
-  - delay: 500
-    content: "\rraspi-config.yml    100%[=========================>]  25.02K  --.-KB/s  in 5.01s\r\n\r\n"
+    content: " https://raw.githubusercontent.com/robinmordasiewicz/PI-Atem-Companion/master/raspi-config.yml\e[00m\n"
+  - delay: 10
+    content: "\r  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current "
+  - delay: 10
+    content: "\r\n                                 Dload  Upload   Total   Spent    Left  Speed"
+  - delay: 10
+    content: "\r\n100 31765  100 31765    0     0   127k      0 --:--:-- --:--:-- --:--:--  127k\r\n\r\n"
   - delay: 600
     content: "\e[00;32mpi@raspberrypi\e[00m:\e[00;34m~ $\e[00m \e[0;37m"
   - delay: 600
@@ -374,13 +364,13 @@ records:
   - delay: 158
     content: 'aybook '
   - delay: 2067
-    content: p
+    content: r
   - delay: 155
-    content: l
-  - delay: 187
     content: a
+  - delay: 187
+    content: s
   - delay: 161
-    content: "ybook.yml\e[0m"
+    content: "pi-config.yml\e[0m"
   - delay: 607
     content: "\r\n"
   - delay: 400
@@ -390,7 +380,15 @@ records:
   - delay: 0
     content: "Enter settings or press \"Enter\" to accept [defaults]\r\n"
   - delay: 0
-    content: "Hostname:       [raspberrypi]: "
+    content: "Username:                [pi]:      <--- I am not changing the PI username"
+  - delay: 2000
+    content: "\rUsername:                [pi]:                                             "
+  - delay: 100
+    content: "\r\nPassword:         [raspberry]:           <--- I am not changing the password"
+  - delay: 2000
+    content: "\rPassword:         [raspberry]:                                                 "
+  - delay: 0
+    content: "\r\nHostname:       [raspberrypi]: "
   - delay: 1250
     content: "\rHostname:       [raspberrypi]: \e[0;37mv\e[0m"
   - delay: 200
