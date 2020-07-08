@@ -13,7 +13,7 @@
       default: "{{ lookup('env','USER', errors='ignore') | default('pi')}}"
 
     - name: PIPASSWORD
-      prompt: "{{ PIUSER }} password:         "
+      prompt: "Password:            "
       private: no
       default: "raspberry"
 
