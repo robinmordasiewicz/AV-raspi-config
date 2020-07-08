@@ -50,7 +50,7 @@ This project requires no license.
 ## Acknowledgments
 
 * Hat tip to anyone whose code was used
-* Adam Schumacher
+* Yourname Here
 
 https://robinmordasiewicz.github.io/PI-Atem-Companion/
 
