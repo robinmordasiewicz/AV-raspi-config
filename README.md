@@ -1,4 +1,4 @@
-PI-Atem-Companion - Scene A/V Automation
+PI-Atem-Companion - A/V Scene Automation
 ========================================
 
 ### Atem Mini, bitfocus.io Companion, Sound Effects, Background Music, and Video Playout
