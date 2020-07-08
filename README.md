@@ -27,9 +27,9 @@ Run the following three commands on your raspberry PI4 and follow prompts.
 
 sudo apt-get -y install ansible
 
-wget -q --show-progress https://raw.githubusercontent.com/robinmordasiewicz/raspi-config/master/playbook.yml
+curl -O https://raw.githubusercontent.com/robinmordasiewicz/PI-Atem-Companion/master/raspi-config.yml
 
-ansible-playbook playbook.yml
+ansible-playbook raspi-config.yml
 
 
 ```
