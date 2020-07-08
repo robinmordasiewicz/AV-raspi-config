@@ -121,7 +121,6 @@
     - name: restart-fileshare
       systemd:
         name: smbd
-        enabled: yes
         state: restarted
       tags:
          - filesharing
@@ -1037,123 +1036,36 @@
       tags:
          - filesharing
 
-    - name: Configure Samba users.
+    - name: Configure Filesharing
+      ini_file:
+          path: /etc/samba/smb.conf
+          section: "{{ item.section }}"
+          option: "{{ item.option }}"
+          value: "{{ item.value }}"
+      with_items:
+          - { section: "global", option: "min protocol", value: "SMB2" }
+          - { section: "global", option: "max protocol", value: "SMB3" }
+          - { section: "global", option: "ea support", value: "yes" }
+          - { section: "global", option: "vfs objects", value: "catia fruit streams_xattr" }
+          - { section: "global", option: "fruit:metadata", value: "stream" }
+          - { section: "global", option: "fruit:model", value: "MacSamba" }
+          - { section: "global", option: "fruit:veto_appledouble", value: "no" }
+          - { section: "global", option: "fruit:posix_rename", value: "yes" }
+          - { section: "global", option: "fruit:zero_file_id", value: "yes" }
+          - { section: "global", option: "fruit:wipe_intentionally_left_blank_rfork", value: "yes" }
+          - { section: "global", option: "fruit:delete_empty_adfiles", value: "yes" }
+          - { section: "homes", option: "read only", value: "no" }
+      notify: restart-fileshare
+      tags:
+         - filesharing
+
+    - name: Configure Samba users
       shell: >
           (pdbedit --user={{ PIUSER }} 2>&1 > /dev/null)
           || (echo '{{ PIPASSWORD }}'; echo '{{ PIPASSWORD }}')
           | smbpasswd -s -a {{ PIUSER }}
       register: smbpasswd
       changed_when: "'Added user' in smbpasswd.stdout"
-      tags:
-         - filesharing
-
-    - name: Configure Filesharing
-      ini_file:
-          path: /etc/samba/smb.conf
-          section: global
-          option: "min protocol"
-          value: "SMB2"
-      notify: restart-fileshare
-      tags:
-         - filesharing
-
-    - name: Configure Filesharing
-      ini_file:
-          path: /etc/samba/smb.conf
-          section: global
-          option: "ea support"
-          value: "yes"
-      notify: restart-fileshare
-      tags:
-         - filesharing
-
-    - name: Configure Filesharing
-      ini_file:
-          path: /etc/samba/smb.conf
-          section: global
-          option: "vfs objects"
-          value: "catia fruit streams_xattr"
-      notify: restart-fileshare
-      tags:
-         - filesharing
-
-    - name: Configure Filesharing
-      ini_file:
-          path: /etc/samba/smb.conf
-          section: global
-          option: "fruit:metadata"
-          value: "stream"
-      notify: restart-fileshare
-      tags:
-         - filesharing
-
-    - name: Configure Filesharing
-      ini_file:
-          path: /etc/samba/smb.conf
-          section: global
-          option: "fruit:model"
-          value: "MacSamba"
-      notify: restart-fileshare
-      tags:
-         - filesharing
-
-    - name: Configure Filesharing
-      ini_file:
-          path: /etc/samba/smb.conf
-          section: global
-          option: "fruit:veto_appledouble"
-          value: "no"
-      notify: restart-fileshare
-      tags:
-         - filesharing
-
-    - name: Configure Filesharing
-      ini_file:
-          path: /etc/samba/smb.conf
-          section: global
-          option: "fruit:posix_rename"
-          value: "yes"
-      notify: restart-fileshare
-      tags:
-         - filesharing
-
-    - name: Configure Filesharing
-      ini_file:
-          path: /etc/samba/smb.conf
-          section: global
-          option: "fruit:zero_file_id"
-          value: "yes"
-      notify: restart-fileshare
-      tags:
-         - filesharing
-
-    - name: Configure Filesharing
-      ini_file:
-          path: /etc/samba/smb.conf
-          section: global
-          option: "fruit:wipe_intentionally_left_blank_rfork"
-          value: "yes"
-      notify: restart-fileshare
-      tags:
-         - filesharing
-
-    - name: Configure Filesharing
-      ini_file:
-          path: /etc/samba/smb.conf
-          section: global
-          option: "fruit:delete_empty_adfiles"
-          value: "yes"
-      notify: restart-fileshare
-      tags:
-         - filesharing
-
-    - name: Configure Filesharing
-      ini_file:
-          path: /etc/samba/smb.conf
-          section: homes
-          option: "read only"
-          value: "no"
-      notify: restart-fileshare
       tags:
          - filesharing
 
