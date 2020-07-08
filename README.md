@@ -53,6 +53,6 @@ This project requires no license.
 * Hat tip to anyone whose code was used
 * Adam Schumacher
 
-https://robinmordasiewicz.github.io/raspi-config/
+https://robinmordasiewicz.github.io/PI-Atem-Companion/
 
 <script src="https://utteranc.es/client.js" repo="robinmordasiewicz/raspi-config" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
