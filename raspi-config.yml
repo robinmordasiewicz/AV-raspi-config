@@ -7,6 +7,16 @@
 
   vars_prompt:
 
+    - name: PIUSER
+      prompt: "Username:                   "
+      private: no
+      default: "{{ lookup('env','USER', errors='ignore') | default('pi')}}"
+
+    - name: PIPASSWORD
+      prompt: "{{ PIUSER }} password:         "
+      private: no
+      default: "raspberry"
+
     - name: HOSTNAME
       prompt: "Hostname:          "
       private: no
@@ -986,11 +996,30 @@
       tags:
          - filesharing
 
+    - name: Configure Samba users.
+      shell: >
+          (pdbedit --user={{ PIUSER }} 2>&1 > /dev/null)
+          || (echo '{{ PIPASSWORD }}'; echo '{{ PIPASSWORD }}')
+          | smbpasswd -s -a {{ PIUSER }}
+      register: smbpasswd
+      changed_when: "'Added user' in smbpasswd.stdout"
+      tags:
+         - filesharing
+
+    - name: Configure Filesharing
+      ini_file:
+          path: /etc/samba/smb.conf
+          section: homes
+          option: "read only"
+          value: "no"
+      notify: restart-fileshare
+      tags:
+         - filesharing
+
     - name: Start Fileshare
       systemd:
         name: smbd
         enabled: yes
-      notify: restart-fileshare
       tags:
          - filesharing
 
@@ -1002,6 +1031,8 @@
         - bash-completion
         - jq
         - speedtest-cli
+        - tmux
+        - screen
       tags:
         - userland
 
