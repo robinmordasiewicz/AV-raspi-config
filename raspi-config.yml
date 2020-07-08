@@ -413,8 +413,8 @@
       lineinfile:
         path: /boot/cmdline.txt
         backrefs: true
-        regexp: '^(.*rootwait)$'
-        line: '\1 logo.nologo vt.global_cursor_default=0 consoleblank=0 disable_splash=1'
+        regexp: '^(.*rootwait.*)'
+        line: '\1 vt.global_cursor_default=0 consoleblank=0'
       notify: reboot
       tags:
         - customizations
