@@ -574,32 +574,20 @@
       tags:
         - music-mpd
 
-    - name: Configure Playlist Folder
+    - name: Configure MPD
       lineinfile:
-        path: /etc/mpd.conf
-        state: present
-        regexp: '^#?group\s+\"(nogroup|audio)\"$'
-        line: 'group "audio"'
-      notify: restartmpd
-      tags:
-        - music-mpd
-
-    - name: Configure MPD network
-      lineinfile:
-        path: /etc/mpd.conf
-        state: present
-        regexp: '^#?bind_to_address\s+\"(any|localhost)\"$'
-        line: 'bind_to_address "any"'
-      notify: restartmpd
-      tags:
-        - music-mpd
-
-    - name: Configure MPD socket
-      lineinfile:
-        path: /etc/mpd.conf
-        state: present
-        regexp: '^#?bind_to_address\s+\"\S*\/run\/mpd\/socket\"$'
-        line: 'bind_to_address "/var/run/mpd/socket"'
+          path: /etc/mpd.conf
+          state: present
+          regexp: "{{ item.regexp }}"
+          line: "{{ item.line }}"
+      with_items:
+          - { regexp: '^#?group\s+\"(nogroup|audio)\"$', line: 'group "audio"' }
+          - { regexp: '^#?bind_to_address\s+\"(any|localhost)\"$', line: 'bind_to_address "any"' }
+          - { regexp: '^#?bind_to_address\s+\"\S*\/run\/mpd\/socket\"$', line: 'bind_to_address "/var/run/mpd/socket"' }
+          - { regexp: '^#?music_directory.+".+"$', line: 'music_directory "/home/pi/Music"' }
+          - { regexp: '^#?restore_paused.+\"(yes|no)\"$', line: 'restore_paused "yes"' }
+          - { regexp: '^#?playlist_directory.+".+"$', line: 'playlist_directory "/home/pi/Music"' }
+          - { regexp: '^#?auto_update\s+"yes"$', line: 'auto_update "yes"' }
       notify: restartmpd
       tags:
         - music-mpd
@@ -620,18 +608,11 @@
       lineinfile:
         path: /etc/mpd.conf
         state: present
-        regexp: '^# An example of an ALSA output:.*'
-        line: '# An example of an ALSA output: ANSIBLE MANAGED BLOCK'
-      tags:
-        - music-mpd
-
-# ROBIN - Sigh.. I can't believe I can't do this better
-    - name: ANSIBLE MANAGED BLOCK after
-      lineinfile:
-        path: /etc/mpd.conf
-        state: present
-        regexp: '^# An example of an OSS output:.*'
-        line: '# An example of an OSS output: ANSIBLE MANAGED BLOCK'
+        regexp: "^# An example of an {{ item.SOUND }} output:.*"
+        line: "# An example of an {{ item.SOUND }} output: ANSIBLE MANAGED BLOCK"
+      with_items:
+          - { SOUND: 'ALSA' }
+          - { SOUND: 'OSS' }
       tags:
         - music-mpd
 
@@ -648,46 +629,6 @@
                 device      "hw:1,0"
                 mixer_type  "software"
             }
-      notify: restartmpd
-      tags:
-        - music-mpd
-
-    - name: Configure Music Folder
-      lineinfile:
-        path: /etc/mpd.conf
-        state: present
-        regexp: '^#?music_directory.+".+"$'
-        line: 'music_directory "/home/pi/Music"'
-      notify: restartmpd
-      tags:
-        - music-mpd
-
-    - name: Auto Start Music
-      lineinfile:
-        path: /etc/mpd.conf
-        state: present
-        regexp: '^#?restore_paused.+\"(yes|no)\"$'
-        line: 'restore_paused "yes"'
-      notify: restartmpd
-      tags:
-        - music-mpd
-
-    - name: Configure Playlist Folder
-      lineinfile:
-        path: /etc/mpd.conf
-        state: present
-        regexp: '^#?playlist_directory.+".+"$'
-        line: 'playlist_directory "/home/pi/Music"'
-      notify: restartmpd
-      tags:
-        - music-mpd
-
-    - name: Configure Playlist autoupdate
-      lineinfile:
-        path: /etc/mpd.conf
-        state: present
-        regexp: '^#?auto_update\s+"yes"$'
-        line: 'auto_update "yes"'
       notify: restartmpd
       tags:
         - music-mpd
@@ -930,7 +871,7 @@
         dest: /etc/avahi/services/samba.service
         group: root
         owner: root
-        mode: 0755
+        mode: 0644
         content: |
             <?xml version="1.0" standalone='no'?><!--*-nxml-*-->
             <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
