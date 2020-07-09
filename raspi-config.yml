@@ -27,11 +27,6 @@
       private: no
       default: "{{ lookup('env','LANG') | default('en_US.UTF-8')}}"
 
-    - name: ATEMIP
-      prompt: "Atem mini IP:    "
-      private: no
-      default: "{{ lookup('pipe','grep atem /etc/hosts | expand -t 1 | cut -f 1 -d \" \"', errors='ignore') | default('192.168.2.240', true)  }}"
-
 # ROBIN - need to add in music player over HDMI option
 #       - for now lets just comment this out and statically assign AUDIOOUT in vars:
 #
@@ -56,7 +51,7 @@
     HDMI_GROUP: 1
     HDMI_MOD: 34
     GITHUBUSERNAME: "robinmordasiewicz"
-    GITHUBPROJECT: "PI-Atem-Companion"
+    GITHUBPROJECT: "AV-raspi-config"
     developer: true
     raspiconfig:
       ssh: 0
@@ -561,28 +556,6 @@
       tags:
         - music-mpd
 
-    - name: Download default song
-      get_url:
-        url: https://raw.githubusercontent.com/{{ GITHUBUSERNAME }}/{{ GITHUBPROJECT }}/master/pi/Music/elysium.wav
-        dest: /home/pi/Music/elysium.wav
-        owner: pi
-        group: pi
-        mode: 0644
-      notify: restartmpd
-      tags:
-        - music-mpd
-
-    - name: Download default playlist
-      get_url:
-        url: https://raw.githubusercontent.com/{{ GITHUBUSERNAME }}/{{ GITHUBPROJECT }}/master/pi/Music/default_playlist.m3u
-        dest: /home/pi/Music/default_playlist.m3u
-        owner: pi
-        group: audio
-        mode: 0664
-      notify: restartmpd
-      tags:
-        - music-mpd
-
     - name: Install Music Player Daemon and Client
       apt:
         install_recommends: yes
@@ -601,32 +574,20 @@
       tags:
         - music-mpd
 
-    - name: Configure Playlist Folder
+    - name: Configure MPD
       lineinfile:
-        path: /etc/mpd.conf
-        state: present
-        regexp: '^#?group\s+\"(nogroup|audio)\"$'
-        line: 'group "audio"'
-      notify: restartmpd
-      tags:
-        - music-mpd
-
-    - name: Configure MPD network
-      lineinfile:
-        path: /etc/mpd.conf
-        state: present
-        regexp: '^#?bind_to_address\s+\"(any|localhost)\"$'
-        line: 'bind_to_address "any"'
-      notify: restartmpd
-      tags:
-        - music-mpd
-
-    - name: Configure MPD socket
-      lineinfile:
-        path: /etc/mpd.conf
-        state: present
-        regexp: '^#?bind_to_address\s+\"\S*\/run\/mpd\/socket\"$'
-        line: 'bind_to_address "/var/run/mpd/socket"'
+          path: /etc/mpd.conf
+          state: present
+          regexp: "{{ item.regexp }}"
+          line: "{{ item.line }}"
+      with_items:
+          - { regexp: '^#?group\s+\"(nogroup|audio)\"$', line: 'group "audio"' }
+          - { regexp: '^#?bind_to_address\s+\"(any|localhost)\"$', line: 'bind_to_address "any"' }
+          - { regexp: '^#?bind_to_address\s+\"\S*\/run\/mpd\/socket\"$', line: 'bind_to_address "/var/run/mpd/socket"' }
+          - { regexp: '^#?music_directory.+".+"$', line: 'music_directory "/home/pi/Music"' }
+          - { regexp: '^#?restore_paused.+\"(yes|no)\"$', line: 'restore_paused "yes"' }
+          - { regexp: '^#?playlist_directory.+".+"$', line: 'playlist_directory "/home/pi/Music"' }
+          - { regexp: '^#?auto_update\s+"yes"$', line: 'auto_update "yes"' }
       notify: restartmpd
       tags:
         - music-mpd
@@ -647,18 +608,11 @@
       lineinfile:
         path: /etc/mpd.conf
         state: present
-        regexp: '^# An example of an ALSA output:.*'
-        line: '# An example of an ALSA output: ANSIBLE MANAGED BLOCK'
-      tags:
-        - music-mpd
-
-# ROBIN - Sigh.. I can't believe I can't do this better
-    - name: ANSIBLE MANAGED BLOCK after
-      lineinfile:
-        path: /etc/mpd.conf
-        state: present
-        regexp: '^# An example of an OSS output:.*'
-        line: '# An example of an OSS output: ANSIBLE MANAGED BLOCK'
+        regexp: "^# An example of an {{ item.SOUND }} output:.*"
+        line: "# An example of an {{ item.SOUND }} output: ANSIBLE MANAGED BLOCK"
+      with_items:
+          - { SOUND: 'ALSA' }
+          - { SOUND: 'OSS' }
       tags:
         - music-mpd
 
@@ -675,46 +629,6 @@
                 device      "hw:1,0"
                 mixer_type  "software"
             }
-      notify: restartmpd
-      tags:
-        - music-mpd
-
-    - name: Configure Music Folder
-      lineinfile:
-        path: /etc/mpd.conf
-        state: present
-        regexp: '^#?music_directory.+".+"$'
-        line: 'music_directory "/home/pi/Music"'
-      notify: restartmpd
-      tags:
-        - music-mpd
-
-    - name: Auto Start Music
-      lineinfile:
-        path: /etc/mpd.conf
-        state: present
-        regexp: '^#?restore_paused.+\"(yes|no)\"$'
-        line: 'restore_paused "yes"'
-      notify: restartmpd
-      tags:
-        - music-mpd
-
-    - name: Configure Playlist Folder
-      lineinfile:
-        path: /etc/mpd.conf
-        state: present
-        regexp: '^#?playlist_directory.+".+"$'
-        line: 'playlist_directory "/home/pi/Music"'
-      notify: restartmpd
-      tags:
-        - music-mpd
-
-    - name: Configure Playlist autoupdate
-      lineinfile:
-        path: /etc/mpd.conf
-        state: present
-        regexp: '^#?auto_update\s+"yes"$'
-        line: 'auto_update "yes"'
       notify: restartmpd
       tags:
         - music-mpd
@@ -736,21 +650,11 @@
 
     - name: Pictures directory
       file:
-       path: /home/pi/Pictures
-       state: directory
-       mode: 0755
-       group: pi
-       owner: pi
-      tags:
-        - background
-
-    - name: Download default background
-      get_url:
-        url: https://github.com/{{ GITHUBUSERNAME }}/{{ GITHUBPROJECT }}/raw/master/pi/Pictures/default_background.png
-        dest: /home/pi/Pictures/default_background.png
-        group: pi
-        owner: pi
-        mode: 0644
+          path: /home/pi/Pictures
+          state: directory
+          mode: 0755
+          group: pi
+          owner: pi
       tags:
         - background
 
@@ -763,25 +667,6 @@
        owner: pi
       tags:
         - background
-
-    - name: Download default video
-      get_url:
-        url: https://github.com/{{ GITHUBUSERNAME }}/{{ GITHUBPROJECT }}/raw/master/pi/Videos/default_video.mp4
-        dest: /home/pi/Videos/default_video.mp4
-        group: pi
-        owner: pi
-        mode: 0644
-      tags:
-        - background
-
-    - name: ATEM mini /etc/hosts
-      lineinfile:
-        dest: /etc/hosts
-        regexp: '^(?:[0-9]{1,3}\.){3}[0-9]{1,3}.*atem$'
-        line: "{{ ATEMIP }}\tatem"
-        state: present
-      tags:
-        - companion
 
     - name: Companion Dependencies
       apt:
@@ -942,29 +827,6 @@
         - companion-db
         - companion
 
-    - name: Download companion DB
-      get_url:
-        url: https://github.com/{{ GITHUBUSERNAME }}/{{ GITHUBPROJECT }}/raw/master/pi/{{ HOSTNAME }}_full-config.companionconfig
-        dest: /var/local/companion/undefined/companion/db
-        mode: 0644
-      notify: restart-companion
-      register: companiondb
-      tags:
-        - companion-db
-        - companion
-
-    - name: Put ATEM IP in companion DB
-      replace:
-        path: /var/local/companion/undefined/companion/db
-        regexp: '"bmd-atem","product":"ATEM","label":"atem","_configIdx":0,"host":"(?:[0-9]{1,3}\.){3}[0-9]{1,3}"'
-        replace: '"bmd-atem","product":"ATEM","label":"atem","_configIdx":0,"host":"{{ ATEMIP }}"'
-        backup: yes
-        mode: 0644
-      notify: restart-companion
-      tags:
-        - companion-db
-        - companion
-
     - name: Check for Companion config
       stat:
         path: /var/local/companion/undefined/companion/config
@@ -1009,7 +871,7 @@
         dest: /etc/avahi/services/samba.service
         group: root
         owner: root
-        mode: 0755
+        mode: 0644
         content: |
             <?xml version="1.0" standalone='no'?><!--*-nxml-*-->
             <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
