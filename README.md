@@ -34,7 +34,7 @@ ansible-playbook raspi-config.yml
 
 ```
 
-![](install_terminal.gif)
+![](AV-raspi-config.gif)
 
 ## Contents
 
