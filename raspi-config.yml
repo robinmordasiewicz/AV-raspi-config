@@ -545,17 +545,6 @@
       tags:
         - music-alsa
 
-    - name: Create Music directory
-      file:
-        path: /home/pi/Music
-        state: directory
-        mode: 0775
-        owner: pi
-        group: audio
-      notify: restartmpd
-      tags:
-        - music-mpd
-
     - name: Install Music Player Daemon and Client
       apt:
         install_recommends: yes
@@ -645,26 +634,6 @@
         install_recommends: yes
         pkg:
         - imagemagick
-      tags:
-        - background
-
-    - name: Pictures directory
-      file:
-          path: /home/pi/Pictures
-          state: directory
-          mode: 0755
-          group: pi
-          owner: pi
-      tags:
-        - background
-
-    - name: Videos directory
-      file:
-       path: /home/pi/Videos
-       state: directory
-       mode: 0755
-       group: pi
-       owner: pi
       tags:
         - background
 
