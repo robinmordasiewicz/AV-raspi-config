@@ -1,9 +1,11 @@
-AV-raspi-config - A/V Scene Automation
-========================================
+AV-raspi-config - A/V Software Installer
+=========================================
 
-### bitfocus.io Companion, Sound Effects, Background Music, and Video Playout
+### bitfocus.io Companion, Video Playout, Background images, Sound Effects and Music players.
 
-Automate the deployment of a raspberry PI4 running software configured to automate the deployment of Companion-2.0, video playout, music and sound effects.  
+Automate the deployment of all the audio and video software for your Raspberry PI4.
+
+This is the software dependency for AV-companion-atem Scene switching.
 
 ## Prerequisites
 
@@ -13,11 +15,6 @@ Automate the deployment of a raspberry PI4 running software configured to automa
 * [32-bit Raspian Lite](https://downloads.raspberrypi.org/raspios_lite_armhf_latest) [installed](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
   * Desktop and Full versions work, but Raspian LITE is preferred. ( haven't tested 64 bit yet )
 * Raspberry Pi4 connected to your network with access to the internet
-
-#### Optional
-
-* HDMI port connected from the PI4 to HDMI input #4 on the ATEM mini
-* 3.5mm stereo cable connected from the PI4 to Aux input #1 on the ATEM mini
 
 ## Installing
 
@@ -45,14 +42,6 @@ ansible-playbook raspi-config.yml
 * mpd
 * mpc
 
-## License
-
-This project requires no license.
-
-## Acknowledgments
-
-* Hat tip to anyone whose code was used
-* Yourname Here
 
 https://robinmordasiewicz.github.io/AV-raspi-config/
 
