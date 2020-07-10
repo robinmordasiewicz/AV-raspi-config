@@ -69,6 +69,9 @@
   
   handlers:
         
+    - name: reboot
+      command: "shutdown -r now +1"
+
     - name: Restart mpd
       systemd:
         name: mpd
@@ -76,15 +79,6 @@
       listen: restartmpd
       tags:
         - music-mpd
-
-    - name: Update mpd
-      command: mpc update
-      listen: restartmpd
-      tags:
-        - music-mpd
-
-    - name: reboot
-      command: "shutdown -r now +1"
 
     - name: restart-companion
       systemd:
@@ -637,6 +631,91 @@
       tags:
         - background
 
+    - name: Companion DB directory
+      file:
+        path: /var/local/companion/undefined/companion/
+        state: directory
+        mode: 0755
+        group: root
+        owner: root
+      tags:
+        - companion-db
+        - companion
+
+    - name: Check for Companion config
+      stat:
+        path: /var/local/companion/undefined/companion/config
+      register: companionconfig
+      changed_when: False
+      tags:
+        - companion-config
+        - companion
+
+    - name: Companion config
+      copy:
+        dest: /var/local/companion/undefined/companion/config
+        mode: '0644'
+        content: |
+          {"http_port":8000,"bind_ip":"0.0.0.0","start_minimised":false}
+      when: not companionconfig.stat.exists
+      tags:
+        - companion-config
+        - companion
+
+    - name: Gather facts on listening ports
+      listen_ports_facts:
+      tags:
+        - companion-process
+        - companion
+
+    - name: Check Companion TCP port 8000
+      set_fact:
+          companionIP: "{{ ansible_facts.tcp_listen | selectattr('port', 'match', '8000' ) | map(attribute='address') | list }}"
+      tags:
+          - companion-process
+    
+    - name: Check if companion is running
+      wait_for:
+          port: 8000
+          host: "{{ ansible_facts.tcp_listen | selectattr('port', 'match', '8000' ) | map(attribute='address') | list | first }}"
+          delay: 0
+          timeout: 3
+      register: port_check
+      when: companionIP|length > 0
+      ignore_errors: yes
+      tags:
+        - companion-process
+        - companion
+
+    - name: Companion Backup
+      become: False
+      uri:
+        url: http://{{ ansible_facts.tcp_listen | selectattr('port', 'match', '8000' ) | map(attribute='address') | list | first }}:8000/int/full_export
+        body_format: json
+        method: GET
+        dest: "/home/pi/{{ansible_hostname}}_full-config_{{ansible_date_time.year}}{{ansible_date_time.month}}{{ansible_date_time.day}}-{{ansible_date_time.hour}}{{ansible_date_time.minute}}.companionconfig"
+        headers:
+          Content-Type: application/json
+          Accept: application/json
+      register: backup
+      when: port_check.state == "started"
+      tags:
+        - companion-process
+        - companion
+
+    - name: Companion Backup
+      get_url:
+          url: "http://{{ ansible_facts.tcp_listen | selectattr('port', 'match', '8000' ) | map(attribute='address') | list | first }}:8000/int/full_export"
+          dest: /var/local/companion/undefined/companion/db
+          backup: yes
+          force: yes
+          headers:
+              Content-Type: application/json
+              Accept: application/json
+      tags:
+        - companion-process
+        - companion
+
     - name: Companion Dependencies
       apt:
         install_recommends: yes
@@ -785,37 +864,6 @@
         - companion-unitfile
         - companion
 
-    - name: Companion DB directory
-      file:
-        path: /var/local/companion/undefined/companion/
-        state: directory
-        mode: 0755
-        group: root
-        owner: root
-      tags:
-        - companion-db
-        - companion
-
-    - name: Check for Companion config
-      stat:
-        path: /var/local/companion/undefined/companion/config
-      register: companionconfig
-      changed_when: False
-      tags:
-        - companion-config
-        - companion
-
-    - name: Companion config
-      copy:
-        dest: /var/local/companion/undefined/companion/config
-        mode: '0644'
-        content: |
-          {"http_port":8000,"bind_ip":"0.0.0.0","start_minimised":false}
-      when: not companionconfig.stat.exists
-      tags:
-        - companion-config
-        - companion
-
     - name: Autostart Companion
       systemd:
         name: companion
@@ -915,6 +963,10 @@
         - bash-completion
         - jq
         - speedtest-cli
+        - telnet
+        - netcat
+        - nmap
+        - tcpdump
         - tmux
         - screen
       tags:
