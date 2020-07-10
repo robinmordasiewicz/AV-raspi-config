@@ -31,6 +31,17 @@ ansible-playbook raspi-config.yml
 
 ```
 
+https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
+sudo apt -y remove ansible
+echo "deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main" | sudo tee -a /etc/apt/sources.list
+sudo apt -y install dirmngr
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
+sudo apt update
+sudo apt install -y ansible
+sudo apt install python-jmespath
+
+
+
 ![](https://github.com/robinmordasiewicz/terminalizer/raw/master/AV-raspi-config.gif)
 
 ## Contents
