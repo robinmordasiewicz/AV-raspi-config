@@ -5,7 +5,7 @@ AV-raspi-config - A/V Software Installer
 
 Automate the deployment of all the audio and video software for your Raspberry PI4.
 
-This is the software dependency for AV-companion-atem Scene switching.
+This is the software dependency for AV-companion-atem Scene switching content repo.
 
 ## Prerequisites
 
