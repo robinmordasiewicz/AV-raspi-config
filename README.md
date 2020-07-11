@@ -11,10 +11,16 @@ This is the software dependency for AV-companion-atem Scene switching content re
 
 #### Required
 
-* Raspberry Pi4 with 4GB or 8GB of RAM
-* [32-bit Raspian Lite](https://downloads.raspberrypi.org/raspios_lite_armhf_latest) [installed](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
-  * Desktop and Full versions work, but Raspian LITE is preferred. ( haven't tested 64 bit yet )
-* Raspberry Pi4 connected to your network with access to the internet
+* Raspberry Pi4 with 4GB or 8GB of RAM connected to a network with access to the internet
+* Operating System [installed](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
+* [32-bit Raspian Lite](https://downloads.raspberrypi.org/raspios_lite_armhf_latest)
+** Tested Working
+*** 32 bit Raspbian LITE and Full
+*** 64 Bit Raspbian Buster
+*** Ubuntu 20.04
+*** Ubuntu-Mate 18.0.4
+** Not Working
+*** LibreElec
 
 ## Installing
 
