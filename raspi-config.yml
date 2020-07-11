@@ -994,6 +994,7 @@
         - tcpdump
         - tmux
         - screen
+        - timidity
       tags:
         - userland
 
