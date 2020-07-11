@@ -405,14 +405,42 @@
       tags:
         - optimizations
 
-    - name: Tweaking Console
-      lineinfile:
-        path: /boot/cmdline.txt
-        backrefs: true
-        regexp: '^(.*rootwait.*)'
-        line: '\1 vt.global_cursor_default=0 consoleblank=0'
-      notify: reboot
+    - name: Get Disable Console Blanking
+      shell: cat /boot/cmdline.txt | grep -c 'consoleblank' || true
+      register: pi_blank_notfound
+      changed_when: false
       tags:
+        - customizations-console
+        - customizations
+
+    - name: Set Disable Console Blanking
+      replace:
+          dest: /boot/cmdline.txt
+          regexp: '(\s+)$'
+          replace: ' consoleblank=0 '
+      notify: reboot
+      when: pi_blank_notfound.stdout == "0"
+      tags:
+        - customizations-console
+        - customizations
+
+    - name: Get Disable Console Cursor
+      shell: cat /boot/cmdline.txt | grep -c 'vt.global_cursor_default' || true
+      register: pi_cursor_notfound
+      changed_when: false
+      tags:
+        - customizations-console
+        - customizations
+
+    - name: Set Disable Console Cursor 
+      replace:
+          dest: /boot/cmdline.txt
+          regexp: '(\s+)$'
+          replace: ' vt.global_cursor_default=0 '
+      notify: reboot
+      when: pi_cursor_notfound.stdout == "0"
+      tags:
+        - customizations-console
         - customizations
 
     - name: Disable dmesg console messages
@@ -639,15 +667,8 @@
         group: root
         owner: root
       tags:
+        - companion-backup
         - companion-db
-        - companion
-
-    - name: Check for Companion config
-      stat:
-        path: /var/local/companion/undefined/companion/config
-      register: companionconfig
-      changed_when: False
-      tags:
         - companion-config
         - companion
 
@@ -657,63 +678,67 @@
         mode: '0644'
         content: |
           {"http_port":8000,"bind_ip":"0.0.0.0","start_minimised":false}
-      when: not companionconfig.stat.exists
       tags:
         - companion-config
         - companion
 
-    - name: Gather facts on listening ports
-      listen_ports_facts:
+    - name: Get IP addresses
+      set_fact:
+          companionIP: "{{ ansible_all_ipv4_addresses | list | first }}"
       tags:
-        - companion-process
+        - companion-backup
         - companion
 
-    - name: Check Companion TCP port 8000
-      set_fact:
-          companionIP: "{{ ansible_facts.tcp_listen | selectattr('port', 'match', '8000' ) | map(attribute='address') | list }}"
-      tags:
-          - companion-process
-    
     - name: Check if companion is running
       wait_for:
           port: 8000
-          host: "{{ ansible_facts.tcp_listen | selectattr('port', 'match', '8000' ) | map(attribute='address') | list | first }}"
+          host: "{{ companionIP }}"
           delay: 0
           timeout: 3
       register: port_check
-      when: companionIP|length > 0
+      when: companionIP is defined and companionIP|length > 0
       ignore_errors: yes
       tags:
-        - companion-process
+        - companion-backup
         - companion
 
-    - name: Companion Backup
-      become: False
-      uri:
-        url: http://{{ ansible_facts.tcp_listen | selectattr('port', 'match', '8000' ) | map(attribute='address') | list | first }}:8000/int/full_export
-        body_format: json
-        method: GET
-        dest: "/home/pi/{{ansible_hostname}}_full-config_{{ansible_date_time.year}}{{ansible_date_time.month}}{{ansible_date_time.day}}-{{ansible_date_time.hour}}{{ansible_date_time.minute}}.companionconfig"
-        headers:
-          Content-Type: application/json
-          Accept: application/json
-      register: backup
-      when: port_check.state == "started"
-      tags:
-        - companion-process
-        - companion
-
-    - name: Companion Backup
+    - name: Companion Network Backup
+      become: false
       get_url:
-          url: "http://{{ ansible_facts.tcp_listen | selectattr('port', 'match', '8000' ) | map(attribute='address') | list | first }}:8000/int/full_export"
-          dest: /var/local/companion/undefined/companion/db
-          backup: yes
-          force: yes
+          url: "http://{{ companionIP }}:8000/int/full_export"
+          dest: "/home/pi/{{ansible_hostname}}_full-config_{{ansible_date_time.year}}{{ansible_date_time.month}}{{ansible_date_time.day}}-{{ansible_date_time.hour}}{{ansible_date_time.minute}}.companionconfig"
           headers:
               Content-Type: application/json
               Accept: application/json
+      changed_when: False
+      when: not port_check.failed
       tags:
-        - companion-process
+        - companion-backup
+        - companion
+
+    - name: Check for companion unit file
+      stat:
+          path: /etc/systemd/system/companion.service
+      register: companionunitfile
+      tags:
+        - companion-backup
+        - companion
+
+    - name: Companion Old WorkingDirectory
+      set_fact: 
+          oldWorkingDirectory: "{{ lookup('ini', 'WorkingDirectory section=Service file=/etc/systemd/system/companion.service') }}"
+      when: not companionunitfile.failed
+      tags:
+        - companion-backup
+        - companion
+
+    - name: Copy DB file to new location
+      copy:
+          src: "{{ oldWorkingDirectory }}/undefined/companion/db"
+          dest: /var/local/companion/undefined/companion/db
+      when: oldWorkingDirectory != "/var/local/companion"
+      tags:
+        - companion-backup
         - companion
 
     - name: Companion Dependencies
