@@ -672,16 +672,6 @@
         - companion-config
         - companion
 
-    - name: Companion config
-      copy:
-        dest: /var/local/companion/undefined/companion/config
-        mode: '0644'
-        content: |
-          {"http_port":8000,"bind_ip":"0.0.0.0","start_minimised":false}
-      tags:
-        - companion-config
-        - companion
-
     - name: Get IP addresses
       set_fact:
           companionIP: "{{ ansible_all_ipv4_addresses | list | first }}"
@@ -727,7 +717,7 @@
     - name: Companion Old WorkingDirectory
       set_fact: 
           oldWorkingDirectory: "{{ lookup('ini', 'WorkingDirectory section=Service file=/etc/systemd/system/companion.service') }}"
-      when: not companionunitfile.failed
+      when: companionunitfile.stat.exists|bool
       tags:
         - companion-backup
         - companion
@@ -736,7 +726,7 @@
       copy:
           src: "{{ oldWorkingDirectory }}/undefined/companion/db"
           dest: /var/local/companion/undefined/companion/db
-      when: oldWorkingDirectory != "/var/local/companion"
+      when: oldWorkingDirectorys is defined and oldWorkingDirectory != "/var/local/companion" and not companionunitfile.failed
       tags:
         - companion-backup
         - companion
