@@ -20,7 +20,7 @@ Run the following three commands on your raspberry PI4 and follow prompts.
  
 ```console
 
-sudo apt-get -y install ansible
+sudo apt -y install ansible
 
 curl -O https://raw.githubusercontent.com/robinmordasiewicz/AV-raspi-config/master/raspi-config.yml
 
