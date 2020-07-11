@@ -14,7 +14,8 @@ This is the software dependency for AV-companion-atem Scene switching content re
 #### Tested Working
 * 32 bit Raspbian LITE and Full
 * 64 Bit Raspbian Buster
-* Ubuntu 20.04
+* 32 bit Ubuntu 20.04
+* 64 bit Ubuntu 20.0.4
 * Ubuntu-Mate 18.0.4
 #### Not Working
 * LibreElec
