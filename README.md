@@ -11,9 +11,8 @@ This is the software dependency for AV-companion-atem Scene switching content re
 
 #### Raspberry Pi4 with 4GB or 8GB of RAM connected to a network with access to the internet
 #### Operating System [installed](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
-#### Tested Working
-* 32 bit Raspbian LITE and Full
-* 64 bit Raspbian Buster
+* 32 bit Raspbian LITE and Full both work.
+* 64 bit Raspbian Buster IS NOT WORKING YET !
 
 ## Installing
 
