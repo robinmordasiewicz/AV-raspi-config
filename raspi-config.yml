@@ -165,9 +165,22 @@
       apt:
         pkg:
           - git
-          - realvnc-vnc-server
       tags:
         - update
+
+    - name: GUI
+      apt:
+        install_recommends: no
+        pkg:
+        - openbox
+        - feh
+        - lightdm
+        - xserver-xorg-legacy
+        - xinit
+        - xrdp
+        - realvnc-vnc-server
+      tags:
+        - window-manager
 
     - name: raspi-config defaults
       command: "raspi-config nonint do_{{ item.key }} {{ item.value }}"
@@ -1041,19 +1054,6 @@
       tags:
         - userland-vim
         - userland
-
-    - name: GUI
-      apt:
-        install_recommends: no
-        pkg:
-        - openbox
-        - feh
-        - lightdm
-        - xserver-xorg-legacy
-        - xinit
-        - xrdp
-      tags:
-        - window-manager
 
     - name: .xnit
       become: False
