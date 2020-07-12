@@ -177,7 +177,6 @@
         - lightdm
         - xserver-xorg-legacy
         - xinit
-        - xrdp
         - realvnc-vnc-server
       tags:
         - window-manager
