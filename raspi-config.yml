@@ -52,7 +52,6 @@
     HDMI_MOD: 34
     GITHUBUSERNAME: "robinmordasiewicz"
     GITHUBPROJECT: "AV-raspi-config"
-    developer: true
     raspiconfig:
       ssh: 0
       vnc: 0
@@ -124,12 +123,6 @@
 
   tasks:
 
-    - name: Remove libpam-chksshpwd
-      apt:
-        pkg: libpam-chksshpwd
-        state: absent
-      when: developer
-
     - name: Add the user 'pi'
       user:
         name: pi
@@ -195,10 +188,10 @@
         - raspi-config
 
     - name: Set Boot behaviour
-      command: "raspi-config nonint do_boot_behaviour B1"
+      command: "raspi-config nonint do_boot_behaviour B4"
       notify: reboot
-      when: ( lookup('pipe','raspi-config nonint get_boot_cli') != "0" ) or
-            ( lookup('pipe','raspi-config nonint get_autologin') != "1" )
+      when: ( lookup('pipe','raspi-config nonint get_boot_cli') != "1" ) or
+            ( lookup('pipe','raspi-config nonint get_autologin') != "0" )
       tags:
         - raspi-config
 
@@ -420,25 +413,6 @@
           replace: ' consoleblank=0 '
       notify: reboot
       when: pi_blank_notfound.stdout == "0"
-      tags:
-        - customizations-console
-        - customizations
-
-    - name: Get Disable Console Cursor
-      shell: cat /boot/cmdline.txt | grep -c 'vt.global_cursor_default' || true
-      register: pi_cursor_notfound
-      changed_when: false
-      tags:
-        - customizations-console
-        - customizations
-
-    - name: Set Disable Console Cursor 
-      replace:
-          dest: /boot/cmdline.txt
-          regexp: '(\s+)$'
-          replace: ' vt.global_cursor_default=0 '
-      notify: reboot
-      when: pi_cursor_notfound.stdout == "0"
       tags:
         - customizations-console
         - customizations
