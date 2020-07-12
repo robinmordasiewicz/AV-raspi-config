@@ -127,7 +127,7 @@
       user:
         name: pi
         group: pi
-        groups: sudo
+        groups: sudo,audio
         append: yes
       tags:
         - piuser
@@ -165,6 +165,7 @@
       apt:
         pkg:
           - git
+          - realvnc-vnc-server
       tags:
         - update
 
