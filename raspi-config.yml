@@ -1067,3 +1067,33 @@
         - userland-vim
         - userland
 
+    - name: GUI
+      apt:
+        install_recommends: no
+        pkg:
+        - openbox
+        - feh
+        - lightdm
+        - xserver-xorg-legacy
+        - xinit
+        - xrdp
+      tags:
+        - window-manager
+
+    - name: .xnit
+      become: False
+      copy:
+        dest: .xinitrc
+        mode: 0644
+        content: |
+          exec openbox
+      tags:
+        - window-manager
+
+    - name: Add the user xrdp to ssl-cert group
+      user:
+        name: xrdp
+        groups: ssl-cert
+        append: yes
+      tags:
+        - window-manager
