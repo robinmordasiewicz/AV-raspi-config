@@ -45,4 +45,6 @@ ansible-playbook raspi-config.yml
 
 https://robinmordasiewicz.github.io/AV-raspi-config/
 
+https://github.com/nmcclain/raspberian-firstboot
+
 <script src="https://utteranc.es/client.js" repo="robinmordasiewicz/AV-raspi-config" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
