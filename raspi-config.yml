@@ -45,6 +45,11 @@
       private: no
       default: "{{ 'no' if (lookup('pipe','cat /boot/config.txt | grep \"^dtoverlay=disable-bt$\"', errors='ignore')) else 'yes' }}"
 
+    - name: GUISOFTWARE
+      prompt: "Enable Desktop Manager:    "
+      private: no
+      default: "no"
+
   vars:
     MEMSPLIT: "320"
     AUDIOOUT: "Headphone"
@@ -168,7 +173,7 @@
       tags:
         - update
 
-    - name: GUI
+    - name: GUI Software
       apt:
         install_recommends: no
         pkg:
@@ -178,6 +183,7 @@
         - xserver-xorg-legacy
         - xinit
         - realvnc-vnc-server
+      when: GUISOFTWARE != "no"
       tags:
         - window-manager
 
@@ -200,11 +206,27 @@
       tags:
         - raspi-config
 
-    - name: Set Boot behaviour
+# Robin - TODO
+# add section in here to do either B1 or B4 based on GUISOFTWARE
+
+    - name: Window Manager Playout
       command: "raspi-config nonint do_boot_behaviour B4"
       notify: reboot
       when: ( lookup('pipe','raspi-config nonint get_boot_cli') != "1" ) or
             ( lookup('pipe','raspi-config nonint get_autologin') != "0" )
+      when: GUISOFTWARE != "no"
+      tags:
+        - raspi-config
+
+# Robin - TODO
+# add section in here to do either B1 or B4 based on GUISOFTWARE
+
+    - name: Console Playout
+      command: "raspi-config nonint do_boot_behaviour B1"
+      notify: reboot
+      when: ( lookup('pipe','raspi-config nonint get_boot_cli') != "0" ) or
+            ( lookup('pipe','raspi-config nonint get_autologin') != "1" )
+      when: GUISOFTWARE == "no"
       tags:
         - raspi-config
 
@@ -1061,13 +1083,7 @@
         mode: 0644
         content: |
           exec openbox
+      when: GUISOFTWARE != "no"
       tags:
         - window-manager
 
-    - name: Add the user xrdp to ssl-cert group
-      user:
-        name: xrdp
-        groups: ssl-cert
-        append: yes
-      tags:
-        - window-manager
