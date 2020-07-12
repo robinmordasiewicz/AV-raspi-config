@@ -212,9 +212,7 @@
     - name: Window Manager Playout
       command: "raspi-config nonint do_boot_behaviour B4"
       notify: reboot
-      when: ( lookup('pipe','raspi-config nonint get_boot_cli') != "1" ) or
-            ( lookup('pipe','raspi-config nonint get_autologin') != "0" )
-      when: GUISOFTWARE != "no"
+      when: GUISOFTWARE != "no" and ( lookup('pipe','raspi-config nonint get_boot_cli') != "1" or lookup('pipe','raspi-config nonint get_autologin') != "0" )
       tags:
         - raspi-config
 
@@ -224,9 +222,7 @@
     - name: Console Playout
       command: "raspi-config nonint do_boot_behaviour B1"
       notify: reboot
-      when: ( lookup('pipe','raspi-config nonint get_boot_cli') != "0" ) or
-            ( lookup('pipe','raspi-config nonint get_autologin') != "1" )
-      when: GUISOFTWARE == "no"
+      when: GUISOFTWARE == "no" and ( lookup('pipe','raspi-config nonint get_boot_cli') != "0" or lookup('pipe','raspi-config nonint get_autologin') != "1" )
       tags:
         - raspi-config
 
