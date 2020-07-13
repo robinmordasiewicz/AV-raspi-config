@@ -14,7 +14,7 @@ Raspberry Pi4 with 4GB or 8GB of RAM connected to a network with access to the i
 Operating System [installed](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
 
 * [32 bit Raspbian Lite, Desktop, and Desktop with Extras](https://www.raspberrypi.org/downloads/raspberry-pi-os/) all work.
-* [CompanionPI-2020-07-02-SHRINK](https://github.com/bitfocus/companion/wiki/CompanionPi-Documentation) works.
+* [CompanionPI-2020-07-02](https://github.com/bitfocus/companion/wiki/CompanionPi-Documentation) works.
 * 64 bit Raspbian Buster IS NOT WORKING YET !
 
 ## Installing
