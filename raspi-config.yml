@@ -52,7 +52,6 @@
     HDMI_MOD: 34
     GITHUBUSERNAME: "robinmordasiewicz"
     GITHUBPROJECT: "AV-raspi-config"
-    developer: true
     raspiconfig:
       ssh: 0
       vnc: 1
@@ -123,12 +122,6 @@
          - filesharing
 
   tasks:
-
-    - name: Remove libpam-chksshpwd
-      apt:
-        pkg: libpam-chksshpwd
-        state: absent
-      when: developer
 
     - name: Add the user 'pi'
       user:
