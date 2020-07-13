@@ -181,8 +181,11 @@
         - feh
         - lightdm
         - xserver-xorg-legacy
+        - xserver-xorg
+        - vlc
         - xinit
         - realvnc-vnc-server
+        - plymouth
       when: GUISOFTWARE != "no"
       tags:
         - window-manager
