@@ -142,29 +142,38 @@
       tags:
         - piuser
 
+    - name: Multimedi repo Keyring
+      apt:
+        deb: https://www.deb-multimedia.org/pool/main/d/deb-multimedia-keyring/deb-multimedia-keyring_2016.8.1_all.deb
+      tags:
+        - multimedia
+
+    - name: Multimedia APT Source
+      copy:
+        dest: /etc/apt/sources.list.d/multimedia.list
+        content: |
+          deb https://www.deb-multimedia.org buster main non-free
+      tags:
+        - multimedia
+
     - name: Update apt-get repo and cache
       apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
       tags:
         - update
+        - multimedia
 
     - name: Upgrade apt packages
       apt: upgrade=dist force_apt_get=yes
       tags:
         - update
-
-    - name: Firmware
-      apt:
-        install_recommends: yes
-        pkg:
-        - rpi-eeprom
-        - rpi-eeprom-images
-      tags:
-        - update
+        - multimedia
 
     - name: Required Software
       apt:
         pkg:
           - git
+          - rpi-eeprom
+          - rpi-eeprom-images
       tags:
         - update
 
@@ -562,7 +571,6 @@
 
     - name: Install Music Player Daemon and Client
       apt:
-        install_recommends: yes
         pkg:
           - mpd
           - mpc
@@ -646,7 +654,6 @@
           
     - name: Install Imagemagick for backgrounds
       apt:
-        install_recommends: yes
         pkg:
         - imagemagick
       tags:
@@ -726,7 +733,6 @@
 
     - name: Companion Dependencies
       apt:
-        install_recommends: yes
         pkg:
         - libgusb-dev
         - nodejs
@@ -883,7 +889,6 @@
 
     - name: Install Fileshare
       apt:
-        install_recommends: yes
         pkg:
         - samba
         - samba-common-bin
@@ -965,7 +970,6 @@
 
     - name: Convenient Tools
       apt:
-        install_recommends: yes
         pkg:
         - vim
         - bash-completion
@@ -1042,7 +1046,6 @@
 
     - name: Vim Python tools
       apt:
-        install_recommends: yes
         pkg:
         - python-requests
       tags:
@@ -1060,33 +1063,15 @@
         - userland-vim
         - userland
 
-    - name: GUI
+    - name: Multimedia Repo Tools
       apt:
-        install_recommends: no
         pkg:
-        - openbox
-        - feh
-        - lightdm
-        - xserver-xorg-legacy
-        - xinit
-        - xrdp
+        - ffmpeg
+        - ffmpegthumbnailer
+        - ffmulticonverter
+        - ffplay
+        - youtube-dl
+        - melt
       tags:
-        - window-manager
+        - multimedia
 
-    - name: .xnit
-      become: False
-      copy:
-        dest: .xinitrc
-        mode: 0644
-        content: |
-          exec openbox
-      tags:
-        - window-manager
-
-    - name: Add the user xrdp to ssl-cert group
-      user:
-        name: xrdp
-        groups: ssl-cert
-        append: yes
-      tags:
-        - window-manager
