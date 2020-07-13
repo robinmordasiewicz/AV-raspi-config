@@ -1072,6 +1072,7 @@
         - ffplay
         - youtube-dl
         - melt
+        - handbrake-cli
       tags:
         - multimedia
 
