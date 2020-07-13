@@ -54,7 +54,7 @@
     GITHUBPROJECT: "AV-raspi-config"
     raspiconfig:
       ssh: 0
-      vnc: 0
+      vnc: 1
       i2c: 1
       serial: 1
       onewire: 1
