@@ -534,6 +534,7 @@
       systemd:
         name: alsa-utils
         enabled: yes
+        state: started
       tags:
         - music-alsa
 
