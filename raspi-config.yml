@@ -1017,8 +1017,6 @@
         repo: https://github.com/amix/vimrc.git
         dest: /home/pi/.vim_runtime
         force: yes
-        owner: pi
-        group: pi
       register: vimrcgit
       changed_when: ( vimrcgit.remote_url_changed is not defined or vimrcgit.remote_url_changed ) 
       tags:
@@ -1040,10 +1038,6 @@
       git:
         repo: https://github.com/pearofducks/ansible-vim.git
         dest: /home/pi/.vim_runtime/my_plugins/ansible-vim
-        update: yes
-        version: master
-        owner: pi
-        group: pi
       register: vimymlgit
       tags:
         - userland-vim
