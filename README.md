@@ -42,7 +42,7 @@ ansible-playbook raspi-config.yml
 * imagemagick
 * mpd
 * mpc
-
+* handbrake
 
 https://robinmordasiewicz.github.io/AV-raspi-config/
 

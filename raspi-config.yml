@@ -52,6 +52,7 @@
     HDMI_MOD: 34
     GITHUBUSERNAME: "robinmordasiewicz"
     GITHUBPROJECT: "AV-raspi-config"
+    PLAYBOOKUSER: "{{ lookup('env','USER') }}"
     raspiconfig:
       ssh: 0
       vnc: 1
@@ -142,29 +143,38 @@
       tags:
         - piuser
 
+    - name: Multimedi repo Keyring
+      apt:
+        deb: https://www.deb-multimedia.org/pool/main/d/deb-multimedia-keyring/deb-multimedia-keyring_2016.8.1_all.deb
+      tags:
+        - multimedia
+
+    - name: Multimedia APT Source
+      copy:
+        dest: /etc/apt/sources.list.d/multimedia.list
+        content: |
+          deb https://www.deb-multimedia.org buster main non-free
+      tags:
+        - multimedia
+
     - name: Update apt-get repo and cache
       apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
       tags:
         - update
+        - multimedia
 
     - name: Upgrade apt packages
       apt: upgrade=dist force_apt_get=yes
       tags:
         - update
-
-    - name: Firmware
-      apt:
-        install_recommends: yes
-        pkg:
-        - rpi-eeprom
-        - rpi-eeprom-images
-      tags:
-        - update
+        - multimedia
 
     - name: Required Software
       apt:
         pkg:
           - git
+          - rpi-eeprom
+          - rpi-eeprom-images
       tags:
         - update
 
@@ -321,10 +331,11 @@
         - raspi-config
 
     - name: Get audio output
-      command: amixer contents
       become_user: pi
+      command: amixer contents
       register: audiooutput
       changed_when: False
+      when: PLAYBOOKUSER != "root"
       tags:
         - raspi-config-audio
         - raspi-config
@@ -335,14 +346,22 @@
         executable: /bin/bash
       register: AUDIOOUTNUM
       changed_when: False
-      when: not audiooutput.stdout is search(AUDIOOUT)
+      #      when: 
+      #  audiooutput.stdout is defined and
+      #  not audiooutput.stdout is search(AUDIOOUT)
       tags:
         - raspi-config-audio
         - raspi-config
 
+# ROBIN - There is a raspi-config bug which prevents root from running do_audio 1
     - name: Set audio out
-      command: "raspi-config nonint do_audio {{ AUDIOOUTNUM.stdout }}"
-      when: not audiooutput.stdout is search(AUDIOOUT)
+      shell: "raspi-config nonint do_audio {{ AUDIOOUTNUM.stdout }}"
+      args:
+        executable: /bin/bash
+      when:
+        audiooutput.stdout is defined and
+        not audiooutput.stdout is search(AUDIOOUT) and
+        PLAYBOOKUSER != "root"
       tags:
         - raspi-config-audio
         - raspi-config
@@ -530,39 +549,53 @@
       tags:
         - omx
 
-    - name: Autostart alsa-utils
-      systemd:
-        name: alsa-utils
-        enabled: yes
-      tags:
-        - music-alsa
-
-    - name: Get Headphone volume settings
+    - name: Get Volume settings
       become_user: pi
       shell: amixer scontents | grep -Po \\[-?\\d+\\.\\d+dB\\]\\s+\\[o\(n\|f\)
       args:
         executable: /bin/bash
       register: amixervolume
       changed_when: false
+      when: PLAYBOOKUSER != "root"
       tags:
         - music-alsa
 
-    - name: Set Headphones output
+    - name: Get Device Name
       become_user: pi
-      command: amixer set Headphone,0 0dB unmute
-      when: amixervolume.stdout != '[0.00dB] [on'
+      shell: amixer scontents | grep -Po "'[a-zA-Z]*',0"
+      args:
+        executable: /bin/bash
+      register: devicename
+      changed_when: false
+      when:
+        ( amixervolume.stdout is defined ) and
+        ( amixervolume.stdout != '[0.00dB] [on' ) and
+        ( PLAYBOOKUSER != "root" )
+      tags:
+        - music-alsa
+
+    - name: Set Volume to 0DB
+      become_user: pi
+      command: "amixer set {{ devicename.stdout }} 0dB unmute"
+      ignore_errors: yes
+      when: 
+        ( amixervolume.stdout is defined ) and
+        ( amixervolume.stdout != '[0.00dB] [on' ) and
+        ( PLAYBOOKUSER != "root" )
       tags:
         - music-alsa
 
     - name: Save Alsa state
       command: alsactl store
-      when: amixervolume.stdout != '[0.00dB] [on'
+      when:
+        ( amixervolume.stdout is defined ) and
+        ( amixervolume.stdout != '[0.00dB] [on' ) and
+        ( PLAYBOOKUSER != "root" )
       tags:
         - music-alsa
 
     - name: Install Music Player Daemon and Client
       apt:
-        install_recommends: yes
         pkg:
           - mpd
           - mpc
@@ -646,7 +679,6 @@
           
     - name: Install Imagemagick for backgrounds
       apt:
-        install_recommends: yes
         pkg:
         - imagemagick
       tags:
@@ -686,7 +718,7 @@
         - companion
 
     - name: Companion Network Backup
-      become: false
+      become_user: pi
       get_url:
           url: "http://{{ companionIP }}:8000/int/full_export"
           dest: "/home/pi/{{ansible_hostname}}_full-config_{{ansible_date_time.year}}{{ansible_date_time.month}}{{ansible_date_time.day}}-{{ansible_date_time.hour}}{{ansible_date_time.minute}}.companionconfig"
@@ -726,7 +758,6 @@
 
     - name: Companion Dependencies
       apt:
-        install_recommends: yes
         pkg:
         - libgusb-dev
         - nodejs
@@ -883,7 +914,6 @@
 
     - name: Install Fileshare
       apt:
-        install_recommends: yes
         pkg:
         - samba
         - samba-common-bin
@@ -965,7 +995,6 @@
 
     - name: Convenient Tools
       apt:
-        install_recommends: yes
         pkg:
         - vim
         - bash-completion
@@ -982,13 +1011,13 @@
         - userland
 
     - name: .hushlogin
-      become: False
+      become_user: pi
       copy:
         content: ""
         dest: /home/pi/.hushlogin
         force: no
-        group: pi
         owner: pi
+        group: pi
         mode: 0644
       tags:
         - userland-hush
@@ -1007,7 +1036,7 @@
         - userland
 
     - name: pull vimrc from git
-      become: False
+      become_user: pi
       git:
         repo: https://github.com/amix/vimrc.git
         dest: /home/pi/.vim_runtime
@@ -1019,7 +1048,7 @@
         - userland
 
     - name: activate vimrc
-      become: False
+      become_user: pi
       command:
         chdir: /home/pi
         cmd: /home/pi/.vim_runtime/install_awesome_vimrc.sh
@@ -1029,12 +1058,10 @@
         - userland
 
     - name: pull vim plugin for yml
-      become: False
+      become_user: pi
       git:
         repo: https://github.com/pearofducks/ansible-vim.git
         dest: /home/pi/.vim_runtime/my_plugins/ansible-vim
-        update: yes
-        version: master
       register: vimymlgit
       tags:
         - userland-vim
@@ -1042,7 +1069,6 @@
 
     - name: Vim Python tools
       apt:
-        install_recommends: yes
         pkg:
         - python-requests
       tags:
@@ -1050,7 +1076,7 @@
         - userland
 
     - name: update vim plugins
-      become: False
+      become_user: pi
       command:
         cmd: python update_plugins.py
         chdir: /home/pi/.vim_runtime
@@ -1059,4 +1085,17 @@
       tags:
         - userland-vim
         - userland
+
+    - name: Multimedia Repo Tools
+      apt:
+        pkg:
+        - ffmpeg
+        - ffmpegthumbnailer
+        - ffmulticonverter
+        - ffplay
+        - youtube-dl
+        - melt
+        - handbrake-cli
+      tags:
+        - multimedia
 
