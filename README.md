@@ -43,6 +43,13 @@ ansible-playbook raspi-config.yml
 * mpd
 * mpc
 * handbrake
+* ffmpeg
+* ffmpegthumbnailer
+* ffmulticonverter
+* ffplay
+* youtube-dl
+* melt
+* handbrake-cli
 
 https://robinmordasiewicz.github.io/AV-raspi-config/
 
