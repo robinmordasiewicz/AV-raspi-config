@@ -321,8 +321,8 @@
         - raspi-config
 
     - name: Get audio output
-      command: amixer contents
       become_user: pi
+      command: amixer contents
       register: audiooutput
       changed_when: False
       tags:
@@ -1000,8 +1000,8 @@
         content: ""
         dest: /home/pi/.hushlogin
         force: no
-        group: pi
         owner: pi
+        group: pi
         mode: 0644
       tags:
         - userland-hush
@@ -1025,6 +1025,8 @@
         repo: https://github.com/amix/vimrc.git
         dest: /home/pi/.vim_runtime
         force: yes
+        owner: pi
+        group: pi
       register: vimrcgit
       changed_when: ( vimrcgit.remote_url_changed is not defined or vimrcgit.remote_url_changed ) 
       tags:
@@ -1048,6 +1050,8 @@
         dest: /home/pi/.vim_runtime/my_plugins/ansible-vim
         update: yes
         version: master
+        owner: pi
+        group: pi
       register: vimymlgit
       tags:
         - userland-vim
