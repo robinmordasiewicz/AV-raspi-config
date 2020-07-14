@@ -322,7 +322,6 @@
         - raspi-config
 
     - name: Get audio output
-      #become_user: pi
       command: amixer contents
       register: audiooutput
       changed_when: False
