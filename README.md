@@ -40,13 +40,10 @@ ansible-playbook raspi-config.yml
 * omxplayer
 * omxd
 * imagemagick
+* fbi
 * mpd
 * mpc
-* handbrake
 * ffmpeg
-* ffmpegthumbnailer
-* ffmulticonverter
-* ffplay
 * youtube-dl
 * melt
 * handbrake-cli

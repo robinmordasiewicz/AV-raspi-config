@@ -1007,6 +1007,7 @@
         - tmux
         - screen
         - timidity
+        - fbi
       tags:
         - userland
 
@@ -1090,9 +1091,6 @@
       apt:
         pkg:
         - ffmpeg
-        - ffmpegthumbnailer
-        - ffmulticonverter
-        - ffplay
         - youtube-dl
         - melt
         - handbrake-cli
