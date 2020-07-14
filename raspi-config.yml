@@ -52,6 +52,7 @@
     HDMI_MOD: 34
     GITHUBUSERNAME: "robinmordasiewicz"
     GITHUBPROJECT: "AV-raspi-config"
+    PLAYBOOKUSER: "{{ lookup('env','USER') }}"
     raspiconfig:
       ssh: 0
       vnc: 1
@@ -322,9 +323,9 @@
 
     - name: Get audio output
       command: amixer contents
-      become_user: pi
       register: audiooutput
       changed_when: False
+      when: PLAYBOOKUSER != "root"
       tags:
         - raspi-config-audio
         - raspi-config
@@ -335,14 +336,22 @@
         executable: /bin/bash
       register: AUDIOOUTNUM
       changed_when: False
-      when: not audiooutput.stdout is search(AUDIOOUT)
+      when: 
+        audiooutput.stdout is defined and
+        not audiooutput.stdout is search(AUDIOOUT)
       tags:
         - raspi-config-audio
         - raspi-config
 
+# ROBIN - There is a raspi-config bug which prevents root from running do_audio 1
     - name: Set audio out
-      command: "raspi-config nonint do_audio {{ AUDIOOUTNUM.stdout }}"
-      when: not audiooutput.stdout is search(AUDIOOUT)
+      shell: "raspi-config nonint do_audio {{ AUDIOOUTNUM.stdout }}"
+      args:
+        executable: /bin/bash
+      when:
+        audiooutput.stdout is defined and
+        not audiooutput.stdout is search(AUDIOOUT) and
+        PLAYBOOKUSER != "root"
       tags:
         - raspi-config-audio
         - raspi-config
@@ -530,33 +539,48 @@
       tags:
         - omx
 
-    - name: Autostart alsa-utils
-      systemd:
-        name: alsa-utils
-        enabled: yes
-      tags:
-        - music-alsa
-
-    - name: Get Headphone volume settings
+    - name: Get Volume settings
       become_user: pi
       shell: amixer scontents | grep -Po \\[-?\\d+\\.\\d+dB\\]\\s+\\[o\(n\|f\)
       args:
         executable: /bin/bash
       register: amixervolume
       changed_when: false
+      when: PLAYBOOKUSER != "root"
       tags:
         - music-alsa
 
-    - name: Set Headphones output
+    - name: Get Device Name
       become_user: pi
-      command: amixer set Headphone,0 0dB unmute
-      when: amixervolume.stdout != '[0.00dB] [on'
+      shell: amixer scontents | grep -Po "'[a-zA-Z]*',0"
+      args:
+        executable: /bin/bash
+      register: devicename
+      changed_when: false
+      when:
+        ( amixervolume.stdout is defined ) and
+        ( amixervolume.stdout != '[0.00dB] [on' ) and
+        ( PLAYBOOKUSER != "root" )
+      tags:
+        - music-alsa
+
+    - name: Set Volume to 0DB
+      become_user: pi
+      command: "amixer set {{ devicename.stdout }} 0dB unmute"
+      ignore_errors: yes
+      when: 
+        ( amixervolume.stdout is defined ) and
+        ( amixervolume.stdout != '[0.00dB] [on' ) and
+        ( PLAYBOOKUSER != "root" )
       tags:
         - music-alsa
 
     - name: Save Alsa state
       command: alsactl store
-      when: amixervolume.stdout != '[0.00dB] [on'
+      when:
+        ( amixervolume.stdout is defined ) and
+        ( amixervolume.stdout != '[0.00dB] [on' ) and
+        ( PLAYBOOKUSER != "root" )
       tags:
         - music-alsa
 
@@ -982,13 +1006,13 @@
         - userland
 
     - name: .hushlogin
-      become: False
+      become_user: pi
       copy:
         content: ""
         dest: /home/pi/.hushlogin
         force: no
-        group: pi
         owner: pi
+        group: pi
         mode: 0644
       tags:
         - userland-hush
@@ -1007,7 +1031,7 @@
         - userland
 
     - name: pull vimrc from git
-      become: False
+      become_user: pi
       git:
         repo: https://github.com/amix/vimrc.git
         dest: /home/pi/.vim_runtime
@@ -1019,7 +1043,7 @@
         - userland
 
     - name: activate vimrc
-      become: False
+      become_user: pi
       command:
         chdir: /home/pi
         cmd: /home/pi/.vim_runtime/install_awesome_vimrc.sh
@@ -1029,12 +1053,10 @@
         - userland
 
     - name: pull vim plugin for yml
-      become: False
+      become_user: pi
       git:
         repo: https://github.com/pearofducks/ansible-vim.git
         dest: /home/pi/.vim_runtime/my_plugins/ansible-vim
-        update: yes
-        version: master
       register: vimymlgit
       tags:
         - userland-vim
@@ -1050,7 +1072,7 @@
         - userland
 
     - name: update vim plugins
-      become: False
+      become_user: pi
       command:
         cmd: python update_plugins.py
         chdir: /home/pi/.vim_runtime
