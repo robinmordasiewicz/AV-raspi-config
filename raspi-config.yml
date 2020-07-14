@@ -52,6 +52,7 @@
     HDMI_MOD: 34
     GITHUBUSERNAME: "robinmordasiewicz"
     GITHUBPROJECT: "AV-raspi-config"
+    PLAYBOOKUSER: "{{ lookup('env','USER') }}"
     raspiconfig:
       ssh: 0
       vnc: 1
@@ -321,10 +322,11 @@
         - raspi-config
 
     - name: Get audio output
-      become_user: pi
+      #become_user: pi
       command: amixer contents
       register: audiooutput
       changed_when: False
+      when: PLAYBOOKUSER != "root"
       tags:
         - raspi-config-audio
         - raspi-config
@@ -335,14 +337,21 @@
         executable: /bin/bash
       register: AUDIOOUTNUM
       changed_when: False
-      when: not audiooutput.stdout is search(AUDIOOUT)
+      when: 
+        audiooutput.stdout is defined and
+        not audiooutput.stdout is search(AUDIOOUT)
       tags:
         - raspi-config-audio
         - raspi-config
 
     - name: Set audio out
-      command: "raspi-config nonint do_audio {{ AUDIOOUTNUM.stdout }}"
-      when: not audiooutput.stdout is search(AUDIOOUT)
+      shell: "raspi-config nonint do_audio {{ AUDIOOUTNUM.stdout }}"
+      args:
+        executable: /bin/bash
+      when:
+        audiooutput.stdout is defined and
+        not audiooutput.stdout is search(AUDIOOUT) and
+        PLAYBOOKUSER != "root"
       tags:
         - raspi-config-audio
         - raspi-config
