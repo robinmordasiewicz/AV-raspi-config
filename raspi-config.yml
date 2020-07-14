@@ -537,7 +537,7 @@
       tags:
         - music-alsa
 
-    - name: Get Headphone volume settings
+    - name: Get Volume settings
       become_user: pi
       shell: amixer scontents | grep -Po \\[-?\\d+\\.\\d+dB\\]\\s+\\[o\(n\|f\)
       args:
@@ -547,9 +547,21 @@
       tags:
         - music-alsa
 
-    - name: Set Headphones output
+    - name: Get Device Name
       become_user: pi
-      command: amixer set Headphone,0 0dB unmute
+      shell: amixer scontents | grep -Po "'[a-zA-Z]*',0"
+      args:
+        executable: /bin/bash
+      register: devicename
+      changed_when: false
+      when: amixervolume.stdout != '[0.00dB] [on'
+      tags:
+        - music-alsa
+
+    - name: Set Volume to 0DB
+      become_user: pi
+      command: "amixer set {{ devicename.stdout }} 0dB unmute"
+      ignore_errors: yes
       when: amixervolume.stdout != '[0.00dB] [on'
       tags:
         - music-alsa
