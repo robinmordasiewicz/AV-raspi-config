@@ -344,6 +344,7 @@
         - raspi-config-audio
         - raspi-config
 
+# ROBIN - There is a raspi-config bug which prevents root from running do_audio 1
     - name: Set audio out
       shell: "raspi-config nonint do_audio {{ AUDIOOUTNUM.stdout }}"
       args:
@@ -546,6 +547,7 @@
         executable: /bin/bash
       register: amixervolume
       changed_when: false
+      when: PLAYBOOKUSER != "root"
       tags:
         - music-alsa
 
@@ -556,7 +558,10 @@
         executable: /bin/bash
       register: devicename
       changed_when: false
-      when: amixervolume.stdout != '[0.00dB] [on'
+      when:
+        ( amixervolume.stdout is defined ) and
+        ( amixervolume.stdout != '[0.00dB] [on' ) and
+        ( PLAYBOOKUSER != "root" )
       tags:
         - music-alsa
 
@@ -564,13 +569,19 @@
       become_user: pi
       command: "amixer set {{ devicename.stdout }} 0dB unmute"
       ignore_errors: yes
-      when: amixervolume.stdout != '[0.00dB] [on'
+      when: 
+        ( amixervolume.stdout is defined ) and
+        ( amixervolume.stdout != '[0.00dB] [on' ) and
+        ( PLAYBOOKUSER != "root" )
       tags:
         - music-alsa
 
     - name: Save Alsa state
       command: alsactl store
-      when: amixervolume.stdout != '[0.00dB] [on'
+      when:
+        ( amixervolume.stdout is defined ) and
+        ( amixervolume.stdout != '[0.00dB] [on' ) and
+        ( PLAYBOOKUSER != "root" )
       tags:
         - music-alsa
 
