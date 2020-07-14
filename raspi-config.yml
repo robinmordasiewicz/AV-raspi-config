@@ -530,14 +530,6 @@
       tags:
         - omx
 
-    - name: Autostart alsa-utils
-      systemd:
-        name: alsa-utils
-        enabled: yes
-        state: started
-      tags:
-        - music-alsa
-
     - name: Get Volume settings
       become_user: pi
       shell: amixer scontents | grep -Po \\[-?\\d+\\.\\d+dB\\]\\s+\\[o\(n\|f\)
