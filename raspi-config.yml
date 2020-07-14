@@ -994,7 +994,7 @@
         - userland
 
     - name: .hushlogin
-      become: False
+      become_user: pi
       copy:
         content: ""
         dest: /home/pi/.hushlogin
@@ -1019,7 +1019,7 @@
         - userland
 
     - name: pull vimrc from git
-      become: False
+      become_user: pi
       git:
         repo: https://github.com/amix/vimrc.git
         dest: /home/pi/.vim_runtime
@@ -1031,7 +1031,7 @@
         - userland
 
     - name: activate vimrc
-      become: False
+      become_user: pi
       command:
         chdir: /home/pi
         cmd: /home/pi/.vim_runtime/install_awesome_vimrc.sh
@@ -1041,7 +1041,7 @@
         - userland
 
     - name: pull vim plugin for yml
-      become: False
+      become_user: pi
       git:
         repo: https://github.com/pearofducks/ansible-vim.git
         dest: /home/pi/.vim_runtime/my_plugins/ansible-vim
@@ -1062,7 +1062,7 @@
         - userland
 
     - name: update vim plugins
-      become: False
+      become_user: pi
       command:
         cmd: python update_plugins.py
         chdir: /home/pi/.vim_runtime
