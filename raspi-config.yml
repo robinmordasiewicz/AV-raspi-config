@@ -331,6 +331,7 @@
         - raspi-config
 
     - name: Get audio output
+      become_user: pi
       command: amixer contents
       register: audiooutput
       changed_when: False
@@ -345,9 +346,9 @@
         executable: /bin/bash
       register: AUDIOOUTNUM
       changed_when: False
-      when: 
-        audiooutput.stdout is defined and
-        not audiooutput.stdout is search(AUDIOOUT)
+      #      when: 
+      #  audiooutput.stdout is defined and
+      #  not audiooutput.stdout is search(AUDIOOUT)
       tags:
         - raspi-config-audio
         - raspi-config
