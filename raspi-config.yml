@@ -143,7 +143,7 @@
       tags:
         - piuser
 
-    - name: Multimedi repo Keyring
+    - name: Multimedia repo Keyring
       apt:
         deb: https://www.deb-multimedia.org/pool/main/d/deb-multimedia-keyring/deb-multimedia-keyring_2016.8.1_all.deb
       tags:
@@ -997,6 +997,7 @@
       apt:
         pkg:
         - vim
+        - bc
         - bash-completion
         - jq
         - speedtest-cli
