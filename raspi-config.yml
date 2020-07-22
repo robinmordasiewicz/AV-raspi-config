@@ -1013,19 +1013,6 @@
       tags:
         - userland
 
-    - name: .hushlogin
-      become_user: pi
-      copy:
-        content: ""
-        dest: /home/pi/.hushlogin
-        force: no
-        owner: pi
-        group: pi
-        mode: 0644
-      tags:
-        - userland-hush
-        - userland
-
     - name: Alias vi to vim
       copy:
         dest: /etc/profile.d/vim.sh
@@ -1038,53 +1025,10 @@
         - userland-vim
         - userland
 
-    - name: pull vimrc from git
-      become_user: pi
-      git:
-        repo: https://github.com/amix/vimrc.git
-        dest: /home/pi/.vim_runtime
-        force: yes
-      register: vimrcgit
-      changed_when: ( vimrcgit.remote_url_changed is not defined or vimrcgit.remote_url_changed ) 
-      tags:
-        - userland-vim
-        - userland
-
-    - name: activate vimrc
-      become_user: pi
-      command:
-        chdir: /home/pi
-        cmd: /home/pi/.vim_runtime/install_awesome_vimrc.sh
-        creates: /home/pi/.vimrc
-      tags:
-        - userland-vim
-        - userland
-
-    - name: pull vim plugin for yml
-      become_user: pi
-      git:
-        repo: https://github.com/pearofducks/ansible-vim.git
-        dest: /home/pi/.vim_runtime/my_plugins/ansible-vim
-      register: vimymlgit
-      tags:
-        - userland-vim
-        - userland
-
     - name: Vim Python tools
       apt:
         pkg:
         - python-requests
-      tags:
-        - userland-vim
-        - userland
-
-    - name: update vim plugins
-      become_user: pi
-      command:
-        cmd: python update_plugins.py
-        chdir: /home/pi/.vim_runtime
-      when: ( vimrcgit.remote_url_changed is not defined or vimrcgit.remote_url_changed ) or
-            ( vimymlgit.remote_url_changed is not defined or vimymlgit.remote_url_changed )
       tags:
         - userland-vim
         - userland
