@@ -998,6 +998,7 @@
         pkg:
         - vim
         - bc
+        - git-flow
         - bash-completion
         - jq
         - speedtest-cli
