@@ -48,6 +48,12 @@ ansible-playbook raspi-config.yml
 * melt
 * handbrake-cli
 * vsftpd
+* qrencode
+* vim
+* git-flow
+* jq
+* speedtest-cli
+* qrencode
 
 https://robinmordasiewicz.github.io/AV-raspi-config/
 
