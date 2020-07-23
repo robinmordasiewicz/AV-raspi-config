@@ -72,6 +72,15 @@
     - name: reboot
       command: "shutdown -r now +1"
 
+    - name: Restart vsftpd
+      systemd:
+        name: vsftpd
+        state: restarted
+      listen: restartvsftpd
+      tags:
+        - filesharing
+        - vsftpd
+
     - name: Restart mpd
       systemd:
         name: mpd
@@ -1043,3 +1052,34 @@
       tags:
         - multimedia
 
+    - name: VSFTPD
+      apt:
+        pkg:
+        - vsftpd
+      tags:
+        - filesharing
+        - vsftpd
+
+    - name: Configure VSFTP
+      lineinfile:
+          path: /etc/vsftpd.conf
+          state: present
+          regexp: "{{ item.regexp }}"
+          line: "{{ item.line }}"
+      with_items:
+          - { regexp: '^#?anonymous_enable=.*$', line: 'anonymous_enable=NO' }
+          - { regexp: '^#?local_enable=.*$', line: 'local_enable=YES' }
+          - { regexp: '^#?write_enable=.*$', line: 'write_enable=YES' }
+          - { regexp: '^#?local_umask=.*$', line: 'local_umask=022' }
+      notify: restartvsftpd
+      tags:
+        - filesharing
+        - vsftpd
+
+    - name: Enable VSFTPD
+      systemd:
+        name: vsftpd
+        enabled: yes
+      tags:
+        - filesharing
+        - vsftpd
