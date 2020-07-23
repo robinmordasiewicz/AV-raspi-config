@@ -47,6 +47,7 @@ ansible-playbook raspi-config.yml
 * youtube-dl
 * melt
 * handbrake-cli
+* vsftpd
 
 https://robinmordasiewicz.github.io/AV-raspi-config/
 
