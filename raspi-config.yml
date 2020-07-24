@@ -339,6 +339,16 @@
       tags:
         - raspi-config
 
+    - name: Remove Pulse Audio
+      apt:
+        pkg:
+        - pulseaudio-utils
+        - pulseaudio
+        state: absent
+      tags:
+        - raspi-config-audio
+        - music-alsa
+
     - name: Get audio output
       become_user: pi
       command: amixer contents
@@ -1084,3 +1094,17 @@
       tags:
         - filesharing
         - vsftpd
+
+    - name: Perl Modules
+      apt:
+        pkg:
+        - cpanminus
+        - libgd-perl
+      tags:
+        - perl-modules
+
+    - name: Text vCard Precisely ... ( takes time )
+      cpanm: name=Text::vCard::Precisely
+      tags:
+        - perl-modules
+
