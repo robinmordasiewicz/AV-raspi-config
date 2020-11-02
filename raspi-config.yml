@@ -674,7 +674,7 @@
 
     - name: bashrc
       lineinfile:
-        path: ~/.bashrc
+        path: '~/.bashrc'
         line: 'LS_COLORS=$LS_COLORS:'di=0;36' ; export LS_COLORS'
 
 # ROBIN - Sigh.. I can't believe I can't do this better
