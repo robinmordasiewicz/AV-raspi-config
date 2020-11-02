@@ -676,7 +676,7 @@
       become_user: pi
       lineinfile:
         path: '~/.bashrc'
-        line: 'LS_COLORS=$LS_COLORS:di=0;36 ; export LS_COLORS'
+        line: "LS_COLORS=$LS_COLORS:'di=0;36' ; export LS_COLORS"
 
 # ROBIN - Sigh.. I can't believe I can't do this better
     - name: Software controlled Volume
