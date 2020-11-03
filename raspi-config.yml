@@ -721,13 +721,14 @@
         enabled: yes
       tags:
         - music-mpd
-          
-    - name: Install Imagemagick for backgrounds
-      apt:
-        pkg:
-        - imagemagick
-      tags:
-        - background
+ 
+# ROBIN - lets try version 7 from source 
+#    - name: Install Imagemagick for backgrounds
+#      apt:
+#        pkg:
+#        - imagemagick
+#      tags:
+#        - background
 
     - name: Companion DB directory
       file:
