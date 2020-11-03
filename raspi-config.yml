@@ -137,7 +137,7 @@
       user:
         name: pi
         group: pi
-        groups: sudo
+        groups: sudo,video
         append: yes
       tags:
         - piuser
