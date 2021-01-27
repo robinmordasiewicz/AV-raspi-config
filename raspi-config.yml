@@ -855,26 +855,26 @@
         - companion-n
         - companion
 
-    - name: Checking n version 8.17.0
+    - name: Checking n version 12.20.0
       command: "n list"
       register: nodeversion
       changed_when: False
       tags:
         - companion-n
         - companion
-
+ 
     - name: Remove incompatible n version
       command: "n rm {{ item }}"
       with_items:
         - "{{ nodeversion.stdout_lines }}"
-      when: nodeversion.stdout != 'node/8.17.0'
+      when: nodeversion.stdout != 'node/12.20.0'
       tags:
         - companion-n
         - companion
-
-    - name: Install node 8.17.0
-      command: n 8.17.0
-      when: nodeversion.stdout != 'node/8.17.0'
+ 
+    - name: Install node 12.20.0
+      command: n 12.20.0
+      when: nodeversion.stdout != 'node/12.20.0'
       tags:
         - companion
         - companion-n
