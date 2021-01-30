@@ -914,6 +914,7 @@
         force: yes
         recursive: no
         track_submodules: no
+        version: v2.1.2
       register: companiongit
       changed_when: ( companiongit.remote_url_changed is not defined or companiongit.remote_url_changed ) 
       tags:
