@@ -100,6 +100,15 @@
         - companion-config
         - companion
 
+    - name: restart-homebridge
+      systemd:
+        name: homebridge
+        enabled: yes
+        daemon_reload: yes
+        state: restarted
+      tags:
+        - homebridge
+
     - name: restart-cpufreq
       systemd:
         name: cpufrequtils
@@ -132,6 +141,17 @@
          - filesharing
 
   tasks:
+
+    - name: run rpi-update
+      shell: "yes | rpi-update"
+      args:
+        executable: /bin/bash
+      ignore_errors: yes
+      notify: reboot
+      register: returnvalue
+      changed_when: "returnvalue"
+      tags:
+        - kernel-update
 
     - name: Add the user 'pi'
       user:
@@ -169,8 +189,8 @@
     - name: Enable apt source build-deps
       lineinfile:
         path: /etc/apt/sources.list
-        line: '^#deb-src http://raspbian.raspberrypi.org/raspbian/ buster main contrib non-free rpi'
-        regexp: "deb-src http://raspbian.raspberrypi.org/raspbian/ buster main contrib non-free rpi"
+        line: "deb-src http://raspbian.raspberrypi.org/raspbian/ buster main contrib non-free rpi"
+        regexp: "^#deb-src http://raspbian.raspberrypi.org/raspbian/ buster main contrib non-free rpi"
       tags:
         - update
 
@@ -846,7 +866,7 @@
       when: companionusb.changed
       tags:
         - companion-usb
-     
+    
     - name: n node.js package
       npm:
         name: n
@@ -862,7 +882,7 @@
       tags:
         - companion-n
         - companion
- 
+
     - name: Remove incompatible n version
       command: "n rm {{ item }}"
       with_items:
@@ -871,7 +891,7 @@
       tags:
         - companion-n
         - companion
- 
+
     - name: Install node 12.20.0
       command: n 12.20.0
       when: nodeversion.stdout != 'node/12.20.0'
@@ -1135,4 +1155,144 @@
       cpanm: name=Text::vCard::Precisely
       tags:
         - perl-modules
+
+    - name: Docker
+      apt:
+        pkg:
+        - libffi-dev
+        - libssl-dev
+        - python3
+        - python3-pip
+        - docker
+      tags:
+        - docker
+
+    - name: Docker
+      apt:
+        pkg:
+        - python-configparser
+        state: absent
+      tags:
+        - docker
+
+    - name: Docker Compose
+      pip:
+        name: docker-compose
+      tags:
+        - docker
+
+          #    - name: Add the pi user to docker group
+          #      user:
+          #        name: pi
+          #        group: pi
+          #        groups: docker
+          #        append: yes
+          #      tags:
+          #        - docker
+
+    - name: Homebridge Dependencies
+      apt:
+        pkg:
+        - libavahi-compat-libdnssd-dev
+      tags:
+        - homebridge
+
+    - name: Install follow-redirects using npm
+      npm:
+        global: yes
+        name: follow-redirects
+      tags:
+        - homebridge
+
+    - name: Install axios using npm
+      npm:
+        global: yes
+        name: axios
+      tags:
+        - homebridge
+
+    - name: bugs
+      file:
+        path: /usr/local/lib/node_modules
+        owner: nobody
+        group: nogroup
+        recurse: yes
+        state: directory
+      tags:
+        - homebridge
+
+    - name: Install homebridge using npm
+      npm:
+        global: yes
+        name: homebridge
+      tags:
+        - homebridge
+
+    - name: Install homebridge UI
+      npm:
+        global: yes
+        name: homebridge-config-ui-x
+      tags:
+        - homebridge
+
+          #    - name: Install homebridge ffmpeg
+          #      npm:
+          #        global: yes
+          #        name: homebridge-camera-ffmpeg
+          #      tags:
+          #        - homebridge
+
+    - name: Install homebridge ffmpeg
+      unarchive: src=https://github.com/homebridge/ffmpeg-for-homebridge/releases/latest/download/ffmpeg-raspbian-armv6l.tar.gz dest=/ remote_src=true
+      tags:
+        - homebridge
+
+    - name: Install homebridge Unifi
+      npm:
+        global: yes
+        name: homebridge-unifi-protect
+      tags:
+        - homebridge
+
+    - name: Homebridge UNIT file
+      copy:
+        dest: /etc/systemd/system/homebridge.service
+        group: root
+        owner: root
+        mode: '0644'
+        content: |
+          [Unit]
+          Description=Homebridge
+          Wants=network-online.target
+          After=syslog.target network-online.target
+ 
+          [Service]
+          Type=simple
+          User=homebridge
+          PermissionsStartOnly=true
+          WorkingDirectory=/var/lib/homebridge
+          EnvironmentFile=/etc/default/homebridge
+          ExecStartPre=-run-parts /etc/hb-service/homebridge/prestart.d
+          ExecStartPre=-/usr/local/lib/node_modules/homebridge-config-ui-x/dist/bin/hb-service.js before-start $HOMEBRIDGE_OPTS
+          ExecStart=/usr/local/lib/node_modules/homebridge-config-ui-x/dist/bin/hb-service.js run $HOMEBRIDGE_OPTS
+          Restart=always
+          RestartSec=3
+          KillMode=process
+          CapabilityBoundingSet=CAP_IPC_LOCK CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_NET_RAW CAP_SETGID CAP_SETUID CAP_SYS_CHROOT CAP_CHOWN     CAP_FOWNER CAP_DAC_OVERRIDE CAP_AUDIT_WRITE CAP_SYS_ADMIN
+          AmbientCapabilities=CAP_NET_RAW CAP_NET_BIND_SERVICE
+ 
+          [Install]
+          WantedBy=multi-user.target
+      notify: restart-homebridge
+      tags:
+        - homebridge-unitfile
+        - homebridge
+
+    - name: start homebridge
+      service:
+        name: homebridge
+        state: started
+        enabled: yes
+      tags:
+        - homebridge
 
