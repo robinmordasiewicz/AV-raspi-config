@@ -1245,12 +1245,12 @@
         - homebridge
         
     - name: Install Homebridge service
-       command: "hb-service install --user homebridge"
-       ignore_errors: yes
-       register: homebridge_returnvalue
-       changed_when: "homebridge_returnvalue"
-       tags:
-         - homebridge
+      command: "hb-service install --user homebridge"
+      ignore_errors: yes
+      register: homebridge_returnvalue
+      changed_when: "homebridge_returnvalue"
+      tags:
+        - homebridge
 
     - name: start homebridge
       service:
