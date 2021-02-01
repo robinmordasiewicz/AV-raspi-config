@@ -148,13 +148,13 @@
       when: ( ansible_distribution_version != "5.10" ) and
             ( lookup('file', '/boot/.firmware_revision') == "43998c82a7e88df284b7aa30221b2d0d21b2b86a" )
       tags:
-        - kernel-updater
+        - kernel-update
 
     - name: Update Kernel
       shell: "yes | rpi-update 43998c82a7e88df284b7aa30221b2d0d21b2b86a"
       args:
         executable: /bin/bash
-      notify: reboot
+        #notify: reboot
       when: ansible_distribution_version != '5.10'
       tags:
         - kernel-update
