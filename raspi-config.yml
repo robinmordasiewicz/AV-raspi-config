@@ -142,11 +142,32 @@
 
   tasks:
 
-    - name: make rpi-update work
+    - name: make rpi-update work - is there a firmware_revision file
+      stat:
+        path: /boot/.firmware_revision
+      register: firmware_revision
+      tags:
+        - kernel-update
+
+    - name: make rpi-update work - read kernel hash in /boot/.firmware_revision
+      set_fact:
+        firmware_revision_hash: "{{lookup('file', '/boot/.firmware_revision') }}"
+      when: firmware_revision.stat.exists|bool
+      tags:
+        - kernel-update
+
+    - name: Get kernel version
+      set_fact:
+        kernel_version: "{{ ansible_kernel.split('-') }}"
+      tags:
+        - kernel-update
+
+    - name: make rpi-update work - rm /boot/.firmware_revision if kernel does not match
       file:
         path: /boot/.firmware_revision
         state: absent
-      when: ( ansible_distribution_version != "5.10" ) and
+      when: firmware_revision.stat.exists|bool and
+            ( kernel_version.0 is version('5.10.11', 'lt') ) and
             ( lookup('file', '/boot/.firmware_revision', errors='ignore') == "43998c82a7e88df284b7aa30221b2d0d21b2b86a" )
       tags:
         - kernel-update
@@ -156,7 +177,7 @@
       args:
         executable: /bin/bash
       notify: reboot
-      when: ansible_distribution_version != '5.10'
+      when: kernel_version.0 != '5.10.11'
       tags:
         - kernel-update
 
