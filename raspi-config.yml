@@ -143,9 +143,9 @@
   tasks:
 
     - name: make rpi-update work
-      ansible.builtin.file:
-      path: /boot/.firmware_revision
-      state: absent
+      file:
+        path: /boot/.firmware_revision
+        state: absent
       when: ( ansible_distribution_version != "5.10" ) and
             ( lookup('file', '/boot/.firmware_revision', errors='ignore') == "43998c82a7e88df284b7aa30221b2d0d21b2b86a" )
       tags:
