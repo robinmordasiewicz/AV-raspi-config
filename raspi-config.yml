@@ -1196,7 +1196,7 @@
       tags:
         - docker
 
-    - name: Docker
+    - name: Docker - remove incompatible pythonm-configparser
       apt:
         pkg:
         - python-configparser
