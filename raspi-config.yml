@@ -718,6 +718,7 @@
           - { regexp: '^#?restore_paused.+\"(yes|no)\"$', line: 'restore_paused "yes"' }
           - { regexp: '^#?playlist_directory.+".+"$', line: 'playlist_directory "/home/pi/Music"' }
           - { regexp: '^#?auto_update\s+"yes"$', line: 'auto_update "yes"' }
+          - { regexp: '^#?id3v1_encoding\s+"UTF-8"$', line: '#id3v1_encoding         "UTF-8"' }
       notify: restartmpd
       tags:
         - music-mpd
@@ -733,7 +734,7 @@
 #      tags:
 #        - music
 
-# ROBIN - Sigh.. I can't believe I can't do this better
+# ROBIN - Sigh.. I can't believe I can't do this better either
     - name: ANSIBLE MANAGED BLOCK before
       lineinfile:
         path: /etc/mpd.conf
@@ -760,6 +761,16 @@
                 mixer_type  "software"
             }
       notify: restartmpd
+      tags:
+        - music-mpd
+
+    - name: MPD run directory
+      file:
+        path: /run/mpd
+        state: directory
+        mode: 0755
+        group: root
+        owner: mpd
       tags:
         - music-mpd
 
