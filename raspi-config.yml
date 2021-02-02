@@ -692,6 +692,7 @@
         pkg:
           - mpd
           - mpc
+      notify: restartmpd
       tags:
         - music-mpd
 
@@ -744,6 +745,7 @@
       with_items:
           - { SOUND: 'ALSA' }
           - { SOUND: 'OSS' }
+      notify: restartmpd
       tags:
         - music-mpd      
 
@@ -771,6 +773,7 @@
         mode: 0755
         group: root
         owner: mpd
+      notify: restartmpd
       tags:
         - music-mpd
 
